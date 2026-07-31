@@ -1,5 +1,9 @@
 # Knowledge Retriever — Project Context
 
+## Git workflow
+
+Always commit and push directly to `main`. Do not create feature branches. This is a solo personal project.
+
 ## On every new session: read context first
 
 Before doing anything else, read `system/session-log.md` (most recent entry only).
