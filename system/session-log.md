@@ -38,6 +38,35 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 4 — 2026-08-02
+
+**Phase/step completed:** Phase 4 — Bulk knowledge base population. Added 34 notes from key PM/design books and frameworks. Knowledge base now at 37 total notes.
+
+**Where to pick up next:** Test the chat system with expanded knowledge base, then upgrade to semantic search with Chroma + embeddings for better retrieval (the planned next phase).
+
+**What worked:**
+- Batching notes (10–13 at a time) is vastly more efficient than one-by-one
+- Lazy annotation strategy confirmed: don't force "Why this matters" upfront; let it fill in through use
+- Clear taxonomy structure makes it easy to organize diverse content
+- Sourcing is flexible — can handle exact sources or "unknown" and update later
+- Claude can quickly organize unstructured quotes into structured notes with frontmatter
+
+**What didn't work / got stuck on:**
+- None — straightforward session
+
+**Learnings:**
+- Batch operations compound time savings dramatically. 34 notes in one session vs. 34 sessions.
+- Note quality doesn't suffer from speed; frontmatter discipline (YAML structure) enforces consistency automatically
+- Source tracking can be lazy too — users naturally remember or find sources later when notes matter
+- The keyword search system is ready to test; no need to wait for semantic search to validate the concept
+
+**Open questions to come back to:**
+- When you test the chat, which queries surface the most relevant notes? Which miss?
+- Should we implement topic-folder filtering in the chat interface?
+- What's the exact failure mode of keyword search vs. semantic search? (Will inform whether the upgrade is needed)
+- Shall we refactor the chat.py to add response logging?
+
+---
 ### Session 3 — 2026-07-31
 
 **Phase/step completed:** Phase 1 complete (all setup steps). Phase 2 complete (system prompt written). Phase 3 complete (chat.py built and tested).
