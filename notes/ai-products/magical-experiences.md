@@ -3,7 +3,7 @@ type: article
 source: "Building AI products right"
 url:
 date: 2026-08-02
-tags: []
+tags: [job-application]
 ---
 
 Instead of asking "How can we add AI to this feature?" the question becomes "How can AI make this experience feel magical?"

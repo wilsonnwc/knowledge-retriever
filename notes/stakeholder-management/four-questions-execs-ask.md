@@ -3,7 +3,7 @@ type: article
 source: "4 Questions Execs Use to Judge Your Product Roadmap"
 url:
 date: 2026-08-02
-tags: [foundational-knowledge, favourite]
+tags: [foundational-knowledge, favourite, job-application]
 ---
 
 Four questions executives use to evaluate your roadmap:
