@@ -35,42 +35,60 @@ with open(SYSTEM_PROMPT_PATH, "r") as f:
 
 def search_notes(query: str) -> str:
     """
-    Simple keyword search across all notes.
-    Returns relevant note excerpts.
+    Keyword search across all notes with section-aware preview.
+    Respects ## section boundaries for consolidated files.
     """
     if not NOTES_DIR.exists():
         return "[No notes directory found]"
-    
+
     relevant_items = []
     query_words = query.lower().split()
-    
+
     for note_file in NOTES_DIR.rglob("*.md"):
         with open(note_file, "r", encoding="utf-8") as f:
             content = f.read()
-        
+
         # Count keyword matches
         matches = sum(1 for word in query_words if word in content.lower())
         if matches > 0:
-            # Extract a preview
+            # Extract a section-aware preview: frontmatter + intro + first section
             lines = content.split("\n")
+            preview_lines = []
+            section_count = 0
+
+            # Pull content: frontmatter (---), intro text, and first full section
+            for i, line in enumerate(lines):
+                preview_lines.append(line)
+
+                # Count section headers (##)
+                if line.startswith("## "):
+                    section_count += 1
+                    # Stop after capturing the first section
+                    if section_count > 1:
+                        break
+
+                # Safety limit: don't pull entire file even if no second header
+                if i > 120:
+                    break
+
             relevant_items.append({
                 "file": note_file.name,
                 "path": note_file.relative_to(NOTES_DIR),
                 "matches": matches,
-                "preview": "\n".join(lines[:15])  # First 15 lines
+                "preview": "\n".join(preview_lines)
             })
-    
+
     # Sort by match count
     relevant_items.sort(key=lambda x: x["matches"], reverse=True)
-    
+
     if not relevant_items:
         return "[No matching notes found]"
-    
+
     # Build context
     context_parts = []
     for item in relevant_items[:5]:  # Top 5 matches
         context_parts.append(f"=== {item['path']} ===\n{item['preview']}\n")
-    
+
     return "\n".join(context_parts)
 
 
@@ -120,7 +138,7 @@ Please respond based on the retrieved notes above. If no relevant notes exist, s
         # Call Claude
         try:
             response = client.messages.create(
-                model="claude-opus-4-1-latest",
+                model="claude-haiku-4-5-20251001",
                 max_tokens=1024,
                 system=SYSTEM_PROMPT,
                 messages=conversation_history
