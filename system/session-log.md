@@ -38,6 +38,35 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 6 — 2026-08-02 (continued from Session 5)
+
+**Phase/step completed:** Phase 3.5 — evaluated keyword search baseline. Expanded test set to 28 queries (14 specific + 14 vague pairs). Ran evaluation, found and fixed 3 stacked bugs (eval scoring logic, test data errors, tokenization), corrected the baseline from a raw 18% to a trustworthy 82% precision@5. Wrote full diagnosis of the 5 remaining genuine failures. Test set is now locked ahead of Phase 4.
+
+**Where to pick up next:** Phase 4 — implement semantic search (embeddings), re-run the same locked 28-query test set, compare precision@5 before/after.
+
+**What worked:**
+- Walking backwards through the eval process one step at a time (review test set → run → analyze → diagnose) instead of batch-producing results caught problems that would have been missed otherwise
+- Treating a suspiciously bad number (18%) as a prompt to debug the measurement itself, not just the system — this uncovered 3 real bugs, not retrieval failures
+- Grepping actual file content to verify expected_source values against ground truth, instead of trusting what was written when the test set was first drafted
+
+**What didn't work / got stuck on:**
+- Eval script's match check treated `"X or Y"` expected_source values as one literal substring — could never match any filename (affected 16/23 original failures)
+- Several `expected_source` values referenced folder names (`stakeholder-management`, `product-strategy`) or files that didn't exist (`good-strategy-bad-strategy`) instead of real filenames
+- `search_notes()` tokenizer didn't strip punctuation — `"goals?"` never matched `"goals"` in content, silently discarding the most meaningful word in several queries
+- A few dead placeholder options (leftover folder names, `"any"`) remained in the test set after the first cleanup pass and needed a second audit to catch
+
+**Learnings:**
+- **A bad eval number is a prompt to debug the measurement, not just the system.** 18% looked like proof keyword search didn't work; the true, bug-free baseline was 82%. Trusting the first number would have produced the wrong conclusion.
+- **Design choice vs. method limitation is worth distinguishing precisely.** Keyword search *can* use metadata (Google, Elasticsearch, email search all do) — this implementation just didn't, as a deliberate simplicity choice for a clean baseline.
+- **Test set correctness is itself a design decision.** `expected_source` values must reference real filenames (not folders, not imagined files), and fixing them only after seeing failures needs to be done transparently (grounded in file content, not adjusted to make numbers look better) and the set explicitly locked before the next comparison.
+- Full bug-by-bug detail lives in `system/interview-prep/03-three-bugs-that-hid-the-baseline.md`; compressed cross-project version in `/Users/wilsonnwc/Tech/AI/learnings.md`.
+
+**Open questions to come back to:**
+- Phase 4: does semantic search close the 5 remaining gaps (Q4, Q5, Q6, Q9, Q9b) — all synonymy/phrasing gaps in nature?
+- Should MRR be added as a second metric alongside precision@5 before comparing keyword vs. semantic, since ranking position (not just top-5 presence) matters for some of the near-miss queries (e.g. Q10 found at rank 5)?
+- Worth doing a personal teach-back (explaining the 3 bugs unprompted, without notes) before using this as an interview story — deferred until closer to actual interview prep.
+
+---
 ### Session 5 — 2026-08-02 (continued from Session 4)
 
 **Phase/step completed:** Consolidated Design of Everyday Things into single file; defined precise tagging rules; planned semantic search chunking strategy; fixed critical retrieval bug; tested system end-to-end.

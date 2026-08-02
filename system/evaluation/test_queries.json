@@ -1,4 +1,7 @@
 {
+  "locked": true,
+  "locked_date": "2026-08-02",
+  "locked_note": "Corrected keyword search baseline: 82% precision@5 (23/28). Do not edit expected_source or add/remove queries without also re-running the keyword baseline for comparison. Use this exact set, unchanged, for Phase 4 semantic search comparison.",
   "test_queries": [
     {
       "id": 1,
@@ -30,7 +33,7 @@
     {
       "id": "2b",
       "query": "Tell me about customer research",
-      "expected_source": "the-mom-test or discovery-related",
+      "expected_source": "the-mom-test or analytics-framework or accepting-negative-findings",
       "expected_concept": "any customer research methodology",
       "specificity": "vague",
       "difficulty": "hard",
@@ -48,7 +51,7 @@
     {
       "id": "3b",
       "query": "What's important in product design?",
-      "expected_source": "design-of-everyday-things or design-related",
+      "expected_source": "design-of-everyday-things",
       "expected_concept": "any design principle",
       "specificity": "vague",
       "difficulty": "hard",
@@ -66,7 +69,7 @@
     {
       "id": "4b",
       "query": "How should I organize things?",
-      "expected_source": "design-of-everyday-things or organization-related",
+      "expected_source": "design-of-everyday-things",
       "expected_concept": "any organization/structure principle",
       "specificity": "vague",
       "difficulty": "hard",
@@ -102,7 +105,7 @@
     {
       "id": "6b",
       "query": "What should I focus on as a product manager?",
-      "expected_source": "pm-managing-time or product-strategy or any",
+      "expected_source": "pm-managing-time or Product Management in Practice (Strategy)",
       "expected_concept": "any PM priority/focus advice",
       "specificity": "vague",
       "difficulty": "hard",
@@ -120,7 +123,7 @@
     {
       "id": "7b",
       "query": "What's important about errors?",
-      "expected_source": "design-of-everyday-things or error-related",
+      "expected_source": "design-of-everyday-things",
       "expected_concept": "any error/mistake handling principle",
       "specificity": "vague",
       "difficulty": "medium",
@@ -156,7 +159,7 @@
     {
       "id": "9b",
       "query": "What makes good teamwork?",
-      "expected_source": "communication or leadership or any",
+      "expected_source": "Product Management in Practice (Communication) or Product Management in Practice (general)",
       "expected_concept": "any team-related principle",
       "specificity": "vague",
       "difficulty": "hard",
@@ -228,7 +231,7 @@
     {
       "id": "13b",
       "query": "How do I communicate better?",
-      "expected_source": "communication or stakeholder-management",
+      "expected_source": "Product Management in Practice (Communication) or Product Management in Practice (Stakeholder)",
       "expected_concept": "any communication or clarity principle",
       "specificity": "vague",
       "difficulty": "hard",
@@ -246,7 +249,7 @@
     {
       "id": "14b",
       "query": "Which problems should I focus on?",
-      "expected_source": "the-mom-test or stakeholder-management",
+      "expected_source": "the-mom-test or Product Management in Practice (Stakeholder)",
       "expected_concept": "any prioritization or validation principle",
       "specificity": "vague",
       "difficulty": "hard",

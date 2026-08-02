@@ -65,7 +65,7 @@
     {
       "query_id": "2b",
       "query": "Tell me about customer research",
-      "expected": "the-mom-test or discovery-related",
+      "expected": "the-mom-test or analytics-framework or accepting-negative-findings",
       "retrieved": [
         "the-mom-test",
         "pm-playbook-shipping-ai-features",
@@ -95,7 +95,7 @@
     {
       "query_id": "3b",
       "query": "What's important in product design?",
-      "expected": "design-of-everyday-things or design-related",
+      "expected": "design-of-everyday-things",
       "retrieved": [
         "design-of-everyday-things",
         "pm-playbook-shipping-ai-features",
@@ -125,7 +125,7 @@
     {
       "query_id": "4b",
       "query": "How should I organize things?",
-      "expected": "design-of-everyday-things or organization-related",
+      "expected": "design-of-everyday-things",
       "retrieved": [
         "pm-playbook-shipping-ai-features",
         "design-of-everyday-things",
@@ -185,7 +185,7 @@
     {
       "query_id": "6b",
       "query": "What should I focus on as a product manager?",
-      "expected": "pm-managing-time or product-strategy or any",
+      "expected": "pm-managing-time or Product Management in Practice (Strategy)",
       "retrieved": [
         "Product Management in Practice (Strategy)",
         "design-of-everyday-things",
@@ -194,7 +194,7 @@
         "pm-managing-time"
       ],
       "found_in_top5": true,
-      "rank": 5,
+      "rank": 1,
       "difficulty": "hard"
     },
     {
@@ -215,7 +215,7 @@
     {
       "query_id": "7b",
       "query": "What's important about errors?",
-      "expected": "design-of-everyday-things or error-related",
+      "expected": "design-of-everyday-things",
       "retrieved": [
         "design-of-everyday-things",
         "the-mom-test",
@@ -275,7 +275,7 @@
     {
       "query_id": "9b",
       "query": "What makes good teamwork?",
-      "expected": "communication or leadership or any",
+      "expected": "Product Management in Practice (Communication) or Product Management in Practice (general)",
       "retrieved": [
         "pm-playbook-shipping-ai-features",
         "design-of-everyday-things",
@@ -395,7 +395,7 @@
     {
       "query_id": "13b",
       "query": "How do I communicate better?",
-      "expected": "communication or stakeholder-management",
+      "expected": "Product Management in Practice (Communication) or Product Management in Practice (Stakeholder)",
       "retrieved": [
         "design-of-everyday-things",
         "Product Management in Practice (Communication)",
@@ -425,7 +425,7 @@
     {
       "query_id": "14b",
       "query": "Which problems should I focus on?",
-      "expected": "the-mom-test or stakeholder-management",
+      "expected": "the-mom-test or Product Management in Practice (Stakeholder)",
       "retrieved": [
         "design-of-everyday-things",
         "the-mom-test",
