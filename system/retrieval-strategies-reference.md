@@ -307,15 +307,19 @@ final_score = (
 
 **What to say:**
 
-> "It depends on the stage and constraints. For a new product:
+> "It depends on constraints. For a startup with limited engineering:
 >
 > **Phase 1 (Now):** Start with hybrid header + content density. It's simple, improves on naive keyword search, works for formal documents, and researchers understand headers. You can implement it in a week.
 >
-> **Phase 2 (Prove value):** Add section-type hinting for formal papers. Manually tag 10-20 exemplar papers; use that to classify others. This targets researcher behavior better (different queries → different sections).
+> **Phase 2 (Prove value):** Add section-type hinting for formal papers. Manually tag 10-20 exemplar papers; use that to classify others. This targets researcher behavior better.
 >
-> **Phase 3 (Scale):** Semantic search with embeddings. Build on Phase 1 foundation; rerank semantic results using structural signals (headers, types). This handles synonymy and is your long-term quality floor.
+> **Phase 3 (Scale):** Semantic search with embeddings. Build on Phase 1 foundation; rerank semantic results using structural signals (headers, types).
 >
-> **Key principle:** Start simple, measure what works, add complexity only when data justifies it. Each signal has a cost (implementation, maintenance, debugging). Don't add until the benefit is proven."
+> **But — important context:** LeapSpace (Elsevier's research tool) skipped the early phases and went straight to semantic search because they have the resources (18M+ papers, enterprise ML team). The lesson: context matters.
+>
+> **Key principle:** Start simple, measure what works, add complexity only when data justifies it—unless you have the resources and scale to do it right upfront."
+
+**Real example:** LeapSpace uses deep semantic analysis and RAG parsing of full-text papers. That's Phase 3+ immediately. A startup would start at Phase 1.
 
 ---
 

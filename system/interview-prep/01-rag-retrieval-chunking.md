@@ -78,12 +78,27 @@ I built the fix but didn't measure the improvement yet. That's next — can't cl
 
 ---
 
+## What LeapSpace Actually Built (Updated)
+
+**Important context for interviews:** LeapSpace isn't using hybrid header + content density (my initial prediction). They've built:
+- **Semantic search with RAG** — using embeddings, not keyword matching
+- **Daily-updated KB** of 18M+ research papers
+- **Multi-agent reasoning** across papers (Deep Research Mode)
+- **Trust Cards** — every AI sentence is cited with explanation
+
+This means they jumped straight to Phase 5 (semantic search), not Phase 1. Why? **Scale + resources.** Elsevier can afford semantic search from day 1; a startup can't.
+
+**Interview angle:** "I predicted they'd start simple, but LeapSpace's constraints are different. They have the engineering team, the data, and the need for precision. So semantic search from day 1 makes sense for them. The lesson: context matters. Choose the approach that fits your constraints."
+
+This shows: you understand both keyword search AND semantic search, and you can reason about when to use each.
+
 ## Related Topics
 
 - **Semantic search (Phase 5)** — Chunking strategy evolves when you add embeddings
 - **Knowledge base organization** — Taxonomy, consolidation vs. fragmentation
 - **Evaluation discipline** — How to measure whether retrieval actually works
 - **LeapSpace-specific retrieval** — How to handle research papers specifically
+- **RAG in production** — Moving from keyword → semantic search with proper evaluation
 
 ---
 
