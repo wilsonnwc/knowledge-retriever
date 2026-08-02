@@ -43,19 +43,39 @@ Did we get the RELEVANT documents? Or just documents with matching words?
 
 **Formula:** (Relevant documents in top K) / K
 
-**Example:**
+**What is K?** K is just a number representing how many results you show. **Top K** = the first K results, ranked by relevance.
+
+**Real-world example — Google Search:**
+```
+Query: "best coffee shops in Seattle"
+
+Google retrieves 10,000 matching pages, but shows:
+Top 1: SeattleCoffee Guide (article) ← rank 1
+Top 3: Seattle Best Coffee | Starbucks | Local Roasters
+Top 10: ← full first page
+
+User behavior:
+- Most click in top 3 (precision@3 matters most)
+- Few go past top 10 (precision@10 is ceiling)
+- Almost nobody looks at page 2
+
+Google's precision@3 is probably 70%+ 
+(most top-3 results are actually good coffee shops)
+```
+
+**Your project example:**
 ```
 Query: "How do I handle user mistakes?"
 Expected: design-of-everyday-things section on error handling
-Top 5 retrieved:
-  1. pm-playbook (not relevant)
-  2. design-of-everything-things → ERROR HANDLING section ✓
-  3. mom-test (not relevant)
-  4. communication (not relevant)
-  5. leadership (not relevant)
+Your retrieval system returns:
+Top 1: pm-playbook (not relevant) ✗
+Top 2: design-of-everyday-things → ERROR HANDLING section ✓
+Top 3: mom-test (not relevant) ✗
+Top 4: communication (not relevant) ✗
+Top 5: leadership (not relevant) ✗
 
-Precision@5 = 1 / 5 = 20%
-Precision@1 = 0 / 1 = 0% (first result was wrong)
+Precision@1 = 0/1 = 0% (first result was wrong)
+Precision@5 = 1/5 = 20% (only 1 of top 5 was right)
 ```
 
 **When to use:** You want to know "if I show the user top K results, how many will be useful?"
@@ -64,6 +84,12 @@ Precision@1 = 0 / 1 = 0% (first result was wrong)
 - 70%+ = good (user usually finds what they need in top 5)
 - 50% = baseline (half the results are useful)
 - 30% = poor (most results are noise)
+
+**Why different K values matter:**
+- **Precision@1** — mobile/chat interface (show 1 result)
+- **Precision@3** — search UI (users skim top 3)
+- **Precision@5** — your project (show 5 sections in chat)
+- **Precision@10** — web search (full page of results)
 
 ### **Recall** (less common for personal KBs, more for large systems)
 
@@ -106,6 +132,41 @@ MRR = (0.5 + 1.0 + 0) / 3 = 0.5
 **Formula:** Complex (involves relevance grades + position discounting)
 
 **When to use:** Production systems where you have graded relevance (very relevant / somewhat / not). Too complex for your project.
+
+---
+
+## Real-World Comparison: Three Systems at Different Scales
+
+Understanding how retrieval works across systems helps you see where your project fits:
+
+### **Google Search (billions of documents)**
+```
+Query: "best coffee shops in Seattle"
+→ 10,000,000+ matching pages
+→ Show top 10 (precision@10 is all that matters)
+→ Metric: Precision@10 = 80%+ (most of top 10 are legit coffee shops)
+→ Why? Users rarely go past top 10
+```
+
+### **LeapSpace (18M scientific papers + personal KB)**
+```
+Query: "How does CRISPR affect cell viability?"
+→ Search across 18M papers + researcher's saved papers
+→ Show top 5 (chat interface, ranked by relevance)
+→ Metrics: Precision@5, MRR (ranking matters — right paper should be #1)
+→ Why? Researchers need high-quality top results + correct ranking
+```
+
+### **Your Knowledge Retriever (24-40 notes)**
+```
+Query: "How do I handle user mistakes?"
+→ Search across 20-40 notes
+→ Show top 5 (chat interface)
+→ Metrics: Precision@5 (is the right note in top 5?)
+→ Why? Small KB, but same interface as LeapSpace
+```
+
+**Key insight:** The metric you measure depends on scale and use case, but the principle is the same across all three: *Did the user get useful results in the top positions shown?*
 
 ---
 
@@ -225,20 +286,38 @@ One successful retrieval isn't data; it's anecdote.
 
 ## When to Measure What
 
-**Personal KB (this project):**
-- Measure: Precision@1 + Precision@5
-- Size: 10-20 test queries
-- Acceptable: 60%+ precision@5
+**Personal KB (this project) — 24-40 notes:**
+```
+Query: "What's the best way to organize something?"
+Retrieval: Show top 5 in chat
+Measure: Precision@5 (are most top 5 results useful?)
+Test set: 10-20 queries (enough to spot patterns)
+Target: 60%+ precision@5 (user usually finds answer in top 5)
+Example: "keyword got 30%, semantic got 80%"
+```
 
 **Team KB (50-200 docs):**
-- Measure: Precision@1, Precision@5, MRR
-- Size: 20-50 test queries
-- Add: graded relevance (very/somewhat/not)
+```
+Example: internal company knowledge base
+Measure: Precision@1, Precision@5, MRR (ranking matters)
+Test set: 20-50 queries
+Add: graded relevance (very helpful / somewhat / not helpful)
+Target: 70%+ precision@5, 0.7+ MRR
+```
 
-**Production system (LeapSpace, 1M+ docs):**
-- Measure: NDCG, Recall, Precision@1 through @100
-- Size: 500+ test queries
-- Human grading: sample of results
+**Production system (LeapSpace, 18M+ papers + researcher KB):**
+```
+Query: research question from scientist
+Retrieval: Show top 5 papers + personal notes
+Measure: NDCG (ranking quality), Recall (did we miss relevant papers?)
+Test set: 500+ queries
+Human grading: sample of results (every result graded by domain expert)
+Target: 0.8+ NDCG, 80%+ recall
+Why different: researchers need high-quality ranking + comprehensive coverage
+```
+
+**In interviews, name your tier:**
+> "I measured retrieval on a personal KB (24 notes, 20 test queries, precision@5). Keyword search got 30%; semantic search got 80%. This is the right metric for this scale — at LeapSpace's scale, they'd also measure MRR and NDCG to handle ranking over millions of documents."
 
 ---
 
