@@ -38,6 +38,30 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 7 — 2026-08-02 (continued from Session 6)
+
+**Phase/step completed:** Started Phase 4 (semantic search) properly. Caught that the earlier `semantic-search-chunking-plan.md` "Decision" had been written up in a prior session without being genuinely reviewed and agreed — so we're treating all of Phase 4 as undiscussed and starting over, step by step. Decided: embedding model = OpenAI `text-embedding-3-small`; vector store = Chroma (confirmed free/local, no API key). Gave a from-scratch concept briefing (embeddings, who/how they're learned via model training, cosine similarity, why Chroma is free but embedding calls cost a little, semantic dilution) — saved to `system/interview-prep/04-semantic-search-concepts-briefing.md`.
+
+**Where to pick up next:** Chunking strategy has *not* been decided yet — this is the next thing to discuss properly, together, before any code is written. Specifically: should we chunk by `##` header (as the old undiscussed doc assumed), and are the existing notes actually structured that way today, or would they need rework first? After chunking strategy is agreed, then: write the embedding generation script, set up Chroma, re-run the locked 28-query test set through semantic search, and compare precision@5 against the keyword baseline (82%).
+
+**What worked:**
+- Pausing to question whether "the chunking approach has been approved" was a good catch by the user — checked git history, confirmed the doc was written in a single session without clear evidence of genuine back-and-forth, and explicitly un-approved it rather than defending it
+- Going concept-first (embeddings → cosine similarity → vector DB → chunking problem) before any design decision, given the user is new to RAG — checked understanding before moving on
+- Answering "who decides the embedding of a word" concretely (model training, not manual rules) surfaced a genuinely useful clarification worth keeping
+
+**What didn't work / got stuck on:**
+- Nothing broken this session — this was planning/concept-building only, no code written yet
+
+**Learnings:**
+- **A documented "Decision" isn't necessarily an agreed decision.** A doc can look settled (clean "Decision:" heading, confident tone) while actually being one person's (the AI's) synthesis that was never genuinely pressure-tested with the user. Worth periodically asking "did we actually agree on this, or did I just write it down?" — especially for anything written in a single fast session.
+- **Embeddings vs. vector databases sit on different cost axes.** The vector database (Chroma) is free/local infrastructure; the embedding model (OpenAI API) is the part that costs money because it's a hosted model call. Conflating "vector search" as one single cost line is a common simplification worth avoiding.
+
+**Open questions to come back to:**
+- Chunking strategy: by `##` header, fixed-size, or something else — and do current notes already fit that structure or need rework first?
+- Once chunking is settled: overlap between chunks or clean breaks only?
+- How to re-run the locked 28-query test set against semantic search for a fair before/after comparison (mechanically — same script, or a new one)?
+
+---
 ### Session 6 — 2026-08-02 (continued from Session 5)
 
 **Phase/step completed:** Phase 3.5 — evaluated keyword search baseline. Expanded test set to 28 queries (14 specific + 14 vague pairs). Ran evaluation, found and fixed 3 stacked bugs (eval scoring logic, test data errors, tokenization), corrected the baseline from a raw 18% to a trustworthy 82% precision@5. Wrote full diagnosis of the 5 remaining genuine failures. Test set is now locked ahead of Phase 4.
