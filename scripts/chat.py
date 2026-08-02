@@ -5,6 +5,7 @@ Loads your notes and talks with you about them.
 """
 
 import os
+import re
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
@@ -42,7 +43,8 @@ def search_notes(query: str) -> str:
         return "[No notes directory found]"
 
     relevant_items = []
-    query_words = query.lower().split()
+    # Strip punctuation so "goals?" matches "goals" in content
+    query_words = re.findall(r"[a-z0-9']+", query.lower())
 
     for note_file in NOTES_DIR.rglob("*.md"):
         with open(note_file, "r", encoding="utf-8") as f:

@@ -3,16 +3,16 @@
     {
       "id": 1,
       "query": "What makes good strategy vs bad strategy?",
-      "expected_source": "good-strategy-bad-strategy",
+      "expected_source": "bad-strategy or three-parts-of-good-strategy",
       "expected_concept": "three parts of strategy or anti-patterns",
       "specificity": "specific",
       "difficulty": "easy",
-      "reason": "Exact phrase match likely"
+      "reason": "Exact phrase match likely; content on both good and bad strategy is split across two files from the same book"
     },
     {
       "id": "1b",
       "query": "What should my strategy be?",
-      "expected_source": "good-strategy-bad-strategy or product-strategy",
+      "expected_source": "bad-strategy or three-parts-of-good-strategy or Product Management in Practice (Strategy)",
       "expected_concept": "any content on strategy",
       "specificity": "vague",
       "difficulty": "hard",
@@ -57,11 +57,11 @@
     {
       "id": 4,
       "query": "What's the best way to organize a knowledge base?",
-      "expected_source": "information-architecture (ai-general)",
+      "expected_source": "Information architecture",
       "expected_concept": "IA principles, taxonomy, structure",
       "specificity": "specific",
       "difficulty": "hard",
-      "reason": "Domain-specific; may not have matching content"
+      "reason": "Domain-specific; file is 'Information architecture is the foundation AI is starving for.md' in ai-general"
     },
     {
       "id": "4b",
@@ -75,20 +75,20 @@
     {
       "id": 5,
       "query": "How do I know what will matter to my stakeholders?",
-      "expected_source": "stakeholder-management",
+      "expected_source": "identifying-key-stakeholders or stakeholder-communication-approach",
       "expected_concept": "understanding stakeholder incentives",
       "specificity": "specific",
       "difficulty": "hard",
-      "reason": "Requires inference about stakeholder needs"
+      "reason": "Requires inference about stakeholder needs; 'stakeholder-management' is a folder, not a file, so use actual filenames"
     },
     {
       "id": "5b",
       "query": "Tell me about stakeholders",
-      "expected_source": "stakeholder-management or related",
+      "expected_source": "identifying-key-stakeholders or stakeholder-communication-approach or human-relational-intelligence or Product Management in Practice (Stakeholder) or four-questions-execs-ask",
       "expected_concept": "any stakeholder-related content",
       "specificity": "vague",
       "difficulty": "medium",
-      "reason": "Broad but with clear topic anchor"
+      "reason": "Broad but with clear topic anchor; any file in stakeholder-management folder is acceptable"
     },
     {
       "id": 6,
@@ -129,16 +129,16 @@
     {
       "id": 8,
       "query": "What's the difference between strategy and goals?",
-      "expected_source": "good-strategy-bad-strategy",
+      "expected_source": "bad-strategy",
       "expected_concept": "strategy vs goals distinction",
       "specificity": "specific",
       "difficulty": "medium",
-      "reason": "Requires understanding of relationship between concepts"
+      "reason": "bad-strategy.md explicitly covers 'mistaking goals for strategy'"
     },
     {
       "id": "8b",
       "query": "Explain strategy",
-      "expected_source": "good-strategy-bad-strategy or product-strategy",
+      "expected_source": "bad-strategy or three-parts-of-good-strategy or Product Management in Practice (Strategy)",
       "expected_concept": "any strategy definition or framework",
       "specificity": "vague",
       "difficulty": "easy",
@@ -165,20 +165,92 @@
     {
       "id": 10,
       "query": "What should a product roadmap show?",
-      "expected_source": "stakeholder-management",
+      "expected_source": "four-questions-execs-ask",
       "expected_concept": "roadmap as communication tool",
       "specificity": "specific",
       "difficulty": "medium",
-      "reason": "Requires section title matching + content understanding"
+      "reason": "File is literally sourced from '4 Questions Execs Use to Judge Your Product Roadmap'"
     },
     {
       "id": "10b",
       "query": "Tell me about roadmaps",
-      "expected_source": "stakeholder-management or product-strategy",
+      "expected_source": "four-questions-execs-ask or Product Management in Practice (Stakeholder)",
       "expected_concept": "any roadmap-related content",
       "specificity": "vague",
       "difficulty": "medium",
       "reason": "Clear topic but broad interpretation"
+    },
+    {
+      "id": 11,
+      "query": "How should I run A/B tests for AI features?",
+      "expected_source": "pm-playbook-shipping-ai-features",
+      "expected_concept": "testing and validation for AI products",
+      "specificity": "specific",
+      "difficulty": "medium",
+      "reason": "Direct match to shipping AI playbook content"
+    },
+    {
+      "id": "11b",
+      "query": "How do I test if an AI feature works?",
+      "expected_source": "pm-playbook-shipping-ai-features or the-mom-test",
+      "expected_concept": "any validation or testing methodology",
+      "specificity": "vague",
+      "difficulty": "hard",
+      "reason": "Broad testing question; multiple valid answers"
+    },
+    {
+      "id": 12,
+      "query": "What's different about building AI products versus traditional software?",
+      "expected_source": "pm-playbook-shipping-ai-features or magical-experiences",
+      "expected_concept": "AI product-specific considerations",
+      "specificity": "specific",
+      "difficulty": "hard",
+      "reason": "Requires synthesis across AI-specific content"
+    },
+    {
+      "id": "12b",
+      "query": "Tell me about AI products",
+      "expected_source": "pm-playbook-shipping-ai-features or magical-experiences or product-sense-definition",
+      "expected_concept": "any AI product principle",
+      "specificity": "vague",
+      "difficulty": "hard",
+      "reason": "Very broad; many valid interpretations; any file in ai-products folder is acceptable"
+    },
+    {
+      "id": 13,
+      "query": "What communication skills should a product manager develop?",
+      "expected_source": "Product Management in Practice (Communication) or creating-clarity",
+      "expected_concept": "PM communication best practices",
+      "specificity": "specific",
+      "difficulty": "medium",
+      "reason": "Clear expected content; may require matching concept not exact phrase"
+    },
+    {
+      "id": "13b",
+      "query": "How do I communicate better?",
+      "expected_source": "communication or stakeholder-management",
+      "expected_concept": "any communication or clarity principle",
+      "specificity": "vague",
+      "difficulty": "hard",
+      "reason": "Very open-ended; could match many sections"
+    },
+    {
+      "id": 14,
+      "query": "How do I know if a problem is worth solving?",
+      "expected_source": "the-mom-test",
+      "expected_concept": "validation or customer discovery",
+      "specificity": "specific",
+      "difficulty": "medium",
+      "reason": "Requires inference about problem validation"
+    },
+    {
+      "id": "14b",
+      "query": "Which problems should I focus on?",
+      "expected_source": "the-mom-test or stakeholder-management",
+      "expected_concept": "any prioritization or validation principle",
+      "specificity": "vague",
+      "difficulty": "hard",
+      "reason": "Ambiguous intent; multiple valid answers"
     }
   ]
 }

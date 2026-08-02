@@ -47,12 +47,20 @@ def evaluate():
                     filename = parts[-1].replace(".md", "")
                     retrieved_files.append(filename)
 
-        # Score: did expected file appear in top 5?
-        found_in_top5 = any(expected in f for f in retrieved_files[:5])
+        # expected_source can list multiple acceptable answers separated by " or "
+        # (e.g. "the-mom-test or discovery-related"). Split into candidates and
+        # match case-insensitively so "communication" matches "...(Communication)".
+        expected_options = [e.strip() for e in expected.split(" or ")]
+
+        def matches(filename):
+            return any(opt.lower() in filename.lower() for opt in expected_options)
+
+        # Score: did any expected option appear in top 5?
+        found_in_top5 = any(matches(f) for f in retrieved_files[:5])
         found_rank = None
         if found_in_top5:
             for rank, f in enumerate(retrieved_files[:5]):
-                if expected in f:
+                if matches(f):
                     found_rank = rank + 1
                     break
 

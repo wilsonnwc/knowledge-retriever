@@ -1,36 +1,51 @@
 {
-  "test_set_size": 10,
-  "precision_at_5": 0.3,
-  "queries_correct": 3,
+  "test_set_size": 28,
+  "precision_at_5": 0.8214285714285714,
+  "queries_correct": 23,
   "by_difficulty": {
     "easy": {
-      "total": 2,
-      "found": 1
+      "total": 3,
+      "found": 3
     },
     "hard": {
-      "total": 6,
-      "found": 2
+      "total": 16,
+      "found": 12
     },
     "medium": {
-      "total": 2,
-      "found": 0
+      "total": 9,
+      "found": 8
     }
   },
   "results": [
     {
       "query_id": 1,
       "query": "What makes good strategy vs bad strategy?",
-      "expected": "good-strategy-bad-strategy",
+      "expected": "bad-strategy or three-parts-of-good-strategy",
       "retrieved": [
         "bad-strategy",
-        "design-of-everyday-things",
         "Product Management in Practice (Strategy)",
         "three-parts-of-good-strategy",
-        "pm-playbook-shipping-ai-features"
+        "design-of-everyday-things",
+        "leverage-points"
       ],
-      "found_in_top5": false,
-      "rank": null,
+      "found_in_top5": true,
+      "rank": 1,
       "difficulty": "easy"
+    },
+    {
+      "query_id": "1b",
+      "query": "What should my strategy be?",
+      "expected": "bad-strategy or three-parts-of-good-strategy or Product Management in Practice (Strategy)",
+      "retrieved": [
+        "Product Management in Practice (Strategy)",
+        "pm-playbook-shipping-ai-features",
+        "design-of-everyday-things",
+        "Product Management in Practice (Stakeholder)",
+        "the-mom-test"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "hard"
     },
     {
       "query_id": 2,
@@ -38,14 +53,29 @@
       "expected": "the-mom-test",
       "retrieved": [
         "the-mom-test",
-        "Product Management in Practice (Strategy)",
-        "generalists-comeback",
         "pm-playbook-shipping-ai-features",
-        "product-sense-definition"
+        "product-sense-definition",
+        "design-of-everyday-things",
+        "Product Management in Practice (Strategy)"
       ],
       "found_in_top5": true,
       "rank": 1,
       "difficulty": "easy"
+    },
+    {
+      "query_id": "2b",
+      "query": "Tell me about customer research",
+      "expected": "the-mom-test or discovery-related",
+      "retrieved": [
+        "the-mom-test",
+        "pm-playbook-shipping-ai-features",
+        "human-relational-intelligence",
+        "leverage-points",
+        "Product Management in Practice (Communication)"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "hard"
     },
     {
       "query_id": 3,
@@ -55,17 +85,32 @@
         "pm-playbook-shipping-ai-features",
         "design-of-everyday-things",
         "Product Management in Practice (Stakeholder)",
-        "the-mom-test",
-        "Product Management in Practice (Strategy)"
+        "stakeholder-communication-approach",
+        "the-mom-test"
       ],
       "found_in_top5": true,
       "rank": 2,
       "difficulty": "hard"
     },
     {
+      "query_id": "3b",
+      "query": "What's important in product design?",
+      "expected": "design-of-everyday-things or design-related",
+      "retrieved": [
+        "design-of-everyday-things",
+        "pm-playbook-shipping-ai-features",
+        "product-sense-definition",
+        "stakeholder-communication-approach",
+        "the-mom-test"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
       "query_id": 4,
       "query": "What's the best way to organize a knowledge base?",
-      "expected": "information-architecture (if exists)",
+      "expected": "Information architecture",
       "retrieved": [
         "Product Management in Practice (general)",
         "design-of-everyday-things",
@@ -78,33 +123,78 @@
       "difficulty": "hard"
     },
     {
-      "query_id": 5,
-      "query": "How do I know what will matter to my stakeholders?",
-      "expected": "stakeholder-management",
+      "query_id": "4b",
+      "query": "How should I organize things?",
+      "expected": "design-of-everyday-things or organization-related",
       "retrieved": [
         "pm-playbook-shipping-ai-features",
         "design-of-everyday-things",
+        "the-mom-test",
+        "Product Management in Practice (Stakeholder)",
+        "stakeholder-communication-approach"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 5,
+      "query": "How do I know what will matter to my stakeholders?",
+      "expected": "identifying-key-stakeholders or stakeholder-communication-approach",
+      "retrieved": [
         "Product Management in Practice (Communication)",
-        "product-sense-definition",
-        "Product Management in Practice (Stakeholder)"
+        "pm-playbook-shipping-ai-features",
+        "design-of-everyday-things",
+        "Product Management in Practice (Stakeholder)",
+        "generalists-comeback"
       ],
       "found_in_top5": false,
       "rank": null,
       "difficulty": "hard"
     },
     {
+      "query_id": "5b",
+      "query": "Tell me about stakeholders",
+      "expected": "identifying-key-stakeholders or stakeholder-communication-approach or human-relational-intelligence or Product Management in Practice (Stakeholder) or four-questions-execs-ask",
+      "retrieved": [
+        "Product Management in Practice (Communication)",
+        "human-relational-intelligence",
+        "Product Management in Practice (Stakeholder)",
+        "stakeholder-communication-approach",
+        "the-mom-test"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "medium"
+    },
+    {
       "query_id": 6,
-      "query": "What should I focus on as a product manager?",
-      "expected": "pm-managing-time or product-strategy",
+      "query": "How should I spend my time as a PM?",
+      "expected": "pm-managing-time",
       "retrieved": [
         "design-of-everyday-things",
-        "the-mom-test",
-        "Product Management in Practice (Strategy)",
         "pm-playbook-shipping-ai-features",
-        "Product Management in Practice (Stakeholder)"
+        "the-mom-test",
+        "Product Management in Practice (Stakeholder)",
+        "four-questions-execs-ask"
       ],
       "found_in_top5": false,
       "rank": null,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": "6b",
+      "query": "What should I focus on as a product manager?",
+      "expected": "pm-managing-time or product-strategy or any",
+      "retrieved": [
+        "Product Management in Practice (Strategy)",
+        "design-of-everyday-things",
+        "Product Management in Practice (Stakeholder)",
+        "the-mom-test",
+        "pm-managing-time"
+      ],
+      "found_in_top5": true,
+      "rank": 5,
       "difficulty": "hard"
     },
     {
@@ -123,30 +213,75 @@
       "difficulty": "hard"
     },
     {
+      "query_id": "7b",
+      "query": "What's important about errors?",
+      "expected": "design-of-everyday-things or error-related",
+      "retrieved": [
+        "design-of-everyday-things",
+        "the-mom-test",
+        "generalists-comeback",
+        "Product Management in Practice (Communication)",
+        "pm-playbook-shipping-ai-features"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
       "query_id": 8,
       "query": "What's the difference between strategy and goals?",
-      "expected": "good-strategy-bad-strategy",
+      "expected": "bad-strategy",
       "retrieved": [
-        "pm-playbook-shipping-ai-features",
         "design-of-everyday-things",
-        "three-parts-of-good-strategy",
-        "product-sense-definition",
-        "analytics-framework"
+        "pm-playbook-shipping-ai-features",
+        "Product Management in Practice (Strategy)",
+        "bad-strategy",
+        "three-parts-of-good-strategy"
       ],
-      "found_in_top5": false,
-      "rank": null,
+      "found_in_top5": true,
+      "rank": 4,
       "difficulty": "medium"
+    },
+    {
+      "query_id": "8b",
+      "query": "Explain strategy",
+      "expected": "bad-strategy or three-parts-of-good-strategy or Product Management in Practice (Strategy)",
+      "retrieved": [
+        "analytics-framework",
+        "leverage-points",
+        "Product Management in Practice (Strategy)",
+        "bad-strategy",
+        "three-parts-of-good-strategy"
+      ],
+      "found_in_top5": true,
+      "rank": 3,
+      "difficulty": "easy"
     },
     {
       "query_id": 9,
       "query": "How should teams make decisions together?",
-      "expected": "pm-managing-time or communication",
+      "expected": "communication or pm-managing-time",
       "retrieved": [
+        "design-of-everyday-things",
         "Product Management in Practice (Stakeholder)",
+        "Product Management in Practice (Strategy)",
+        "pm-playbook-shipping-ai-features",
+        "the-mom-test"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": "9b",
+      "query": "What makes good teamwork?",
+      "expected": "communication or leadership or any",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
         "design-of-everyday-things",
         "Product Management in Practice (Strategy)",
-        "Product Management in Practice (Communication)",
-        "pm-playbook-shipping-ai-features"
+        "bad-strategy",
+        "product-sense-definition"
       ],
       "found_in_top5": false,
       "rank": null,
@@ -155,17 +290,152 @@
     {
       "query_id": 10,
       "query": "What should a product roadmap show?",
-      "expected": "stakeholder-management",
+      "expected": "four-questions-execs-ask",
       "retrieved": [
-        "Product Management in Practice (Stakeholder)",
         "pm-playbook-shipping-ai-features",
         "design-of-everyday-things",
+        "Product Management in Practice (Stakeholder)",
         "human-relational-intelligence",
         "four-questions-execs-ask"
       ],
-      "found_in_top5": false,
-      "rank": null,
+      "found_in_top5": true,
+      "rank": 5,
       "difficulty": "medium"
+    },
+    {
+      "query_id": "10b",
+      "query": "Tell me about roadmaps",
+      "expected": "four-questions-execs-ask or Product Management in Practice (Stakeholder)",
+      "retrieved": [
+        "human-relational-intelligence",
+        "Product Management in Practice (Stakeholder)",
+        "the-mom-test",
+        "leverage-points",
+        "Product Management in Practice (Communication)"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": 11,
+      "query": "How should I run A/B tests for AI features?",
+      "expected": "pm-playbook-shipping-ai-features",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "design-of-everyday-things",
+        "the-mom-test",
+        "four-questions-execs-ask",
+        "magical-experiences"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": "11b",
+      "query": "How do I test if an AI feature works?",
+      "expected": "pm-playbook-shipping-ai-features or the-mom-test",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "design-of-everyday-things",
+        "four-questions-execs-ask",
+        "the-mom-test",
+        "analytics-framework"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 12,
+      "query": "What's different about building AI products versus traditional software?",
+      "expected": "pm-playbook-shipping-ai-features or magical-experiences",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "product-sense-definition",
+        "design-of-everyday-things",
+        "generalists-comeback",
+        "magical-experiences"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": "12b",
+      "query": "Tell me about AI products",
+      "expected": "pm-playbook-shipping-ai-features or magical-experiences or product-sense-definition",
+      "retrieved": [
+        "the-mom-test",
+        "Product Management in Practice (Communication)",
+        "pm-playbook-shipping-ai-features",
+        "magical-experiences",
+        "product-sense-definition"
+      ],
+      "found_in_top5": true,
+      "rank": 3,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 13,
+      "query": "What communication skills should a product manager develop?",
+      "expected": "Product Management in Practice (Communication) or creating-clarity",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "design-of-everyday-things",
+        "human-relational-intelligence",
+        "Product Management in Practice (Stakeholder)",
+        "Product Management in Practice (Communication)"
+      ],
+      "found_in_top5": true,
+      "rank": 5,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": "13b",
+      "query": "How do I communicate better?",
+      "expected": "communication or stakeholder-management",
+      "retrieved": [
+        "design-of-everyday-things",
+        "Product Management in Practice (Communication)",
+        "the-mom-test",
+        "Product Management in Practice (Strategy)",
+        "pm-playbook-shipping-ai-features"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 14,
+      "query": "How do I know if a problem is worth solving?",
+      "expected": "the-mom-test",
+      "retrieved": [
+        "Product Management in Practice (Strategy)",
+        "pm-playbook-shipping-ai-features",
+        "product-sense-definition",
+        "design-of-everyday-things",
+        "the-mom-test"
+      ],
+      "found_in_top5": true,
+      "rank": 5,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": "14b",
+      "query": "Which problems should I focus on?",
+      "expected": "the-mom-test or stakeholder-management",
+      "retrieved": [
+        "design-of-everyday-things",
+        "the-mom-test",
+        "pm-playbook-shipping-ai-features",
+        "Product Management in Practice (Stakeholder)",
+        "pm-managing-time"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "hard"
     }
   ]
 }
