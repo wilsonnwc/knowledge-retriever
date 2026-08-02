@@ -38,6 +38,35 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 5 — 2026-08-02 (continued from Session 4)
+
+**Phase/step completed:** Consolidated Design of Everyday Things into single file; defined precise tagging rules; planned semantic search chunking strategy; fixed critical retrieval bug; tested system end-to-end.
+
+**Where to pick up next:** Knowledge base is now live and functional with 24 consolidated notes. Ready for: (1) ongoing bulk imports using new agent instructions, (2) semantic search implementation (Phase 5), (3) evaluation/measurement against the LeapSpace job requirements.
+
+**What worked:**
+- Section-aware retrieval fix works — consolidated files now surface their actual content, not just YAML frontmatter
+- Haiku model is fast and capable enough for this use case
+- System synthesizes well across multiple notes (e.g., combining Mom Test + Product Sense insights)
+- Testing revealed a critical bug (good timing before deployment)
+- Job ad context (LeapSpace) directly maps to this project's RAG challenges
+
+**What didn't work / got stuck on:**
+- Initial 15-line preview truncation was breaking retrieval for large consolidated files — caught by testing, not by design review
+- Model name in script was outdated (claude-opus-4-1-latest doesn't exist)
+
+**Learnings:**
+- **Testing catches what design doesn't.** Spent entire session optimizing file structure and taxonomy *without* running a single query. As soon as we tested, a critical bug surfaced (truncated previews). This is exactly the trap the project's own principle warns against: "evaluation must be measured and scored, not qualitative."
+- **The chunking strategy works bidirectionally.** Section-aware retrieval for keyword search is exactly the prep work semantic search needs. We're not building two separate systems; the section discipline serves both.
+- **Tagging precision prevents drift.** Moving from vague definitions ("foundational = important stuff") to testable rules ("foundational = what a senior PM aspiring to principal should know and execute daily") makes multi-session consistency possible.
+- **Job context sharpens decisions.** LeapSpace's job requirements (RAG, chunking, researcher knowledge bases, evaluation of AI reasoning) directly validated which problems in this project matter most. The retrieval bug we just fixed is the exact class of problem LeapSpace solves.
+
+**Open questions to come back to:**
+- When implementing semantic search (Phase 5), should we chunk exactly at `##` boundaries, or with overlap? (overlapping chunks provide continuity but increase embedding volume)
+- What's the target retrieval quality for this system — precision (few false positives), recall (find all relevant content), or a balance? Needs measurement before/after semantic search.
+- Should we add response logging to track which queries work well and which fail? (This data would be valuable for Phase 5 evaluation)
+
+---
 ### Session 4 — 2026-08-02
 
 **Phase/step completed:** Phase 4 — Bulk knowledge base population. Added 34 notes from key PM/design books and frameworks. Knowledge base now at 37 total notes.
