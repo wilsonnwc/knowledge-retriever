@@ -298,6 +298,41 @@ print(by_difficulty)  # easy: 33%, medium: 22%, hard: 12%
 
 ---
 
+## Design Choices vs. Fundamental Limitations
+
+**Important distinction for interviews:**
+
+When you discovered keyword search got 18% precision, you need to distinguish:
+
+**What's a fundamental limitation of keyword search (the method)?**
+- Doesn't understand synonymy ("incentives" ≠ "priorities" in meaning)
+- Doesn't understand phrase meaning ("what will matter" ≠ word matching)
+- Doesn't understand query intent (user wants BOTH good and bad strategies, not either/or)
+
+**What's a design choice (how you implemented it)?**
+- We searched content only; we didn't use metadata (the `source:` field, tags, etc.)
+- We ranked by keyword count; we didn't weight by document quality/source
+
+**Why this matters:**
+Your implementation is "pure keyword search" (baseline). A more complete keyword search would include metadata signals, like:
+- Google Search: queries title, headers, URL, metadata, content
+- Elasticsearch: allows weighted field search
+- Email: search by sender, subject, date, content
+
+**Interview framing:**
+> "I implemented pure keyword search as a baseline — just content matching, no metadata. This kept it simple and gave me a fair baseline to measure against. During evaluation, I discovered it doesn't use the `source:` field (which groups excerpts from the same book). That's not a limitation of keyword search as a method; it's a design choice I made for simplicity. A production system would weight metadata as an additional signal."
+
+**This shows:**
+- You understand what you measured (pure keyword search)
+- You know how to make it better (add metadata signals)
+- You deliberately chose simplicity over completeness
+- You can distinguish method limitations from implementation choices
+
+**For Phase 4:**
+When you add semantic search, you could also add metadata boosting (hybrid: semantic similarity + source signal). This would show you understand layering signals for better retrieval.
+
+---
+
 ## Next Steps
 
 After explaining evaluation methodology, they'll ask: "So what did you do to fix it?"
@@ -306,6 +341,6 @@ Answer: "Phase 4: Implement semantic search with embeddings, re-run the same 28 
 
 This shows:
 - You understand the problem (from evaluation data)
-- You chose a targeted solution
+- You chose a targeted solution (addresses synonymy + phrase meaning)
 - You'll measure improvement rigorously (same test set)
 - You think about learning loops (measure → fix → measure)
