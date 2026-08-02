@@ -16,6 +16,17 @@ Do not ask the user to explain the project. Lead with context, then ask how they
 
 ---
 
+## Where to Find Learnings & Deeper Analysis
+
+- **Cross-project learnings (short, interview-ready bullets):** `/Users/wilsonnwc/Tech/AI/learnings.md` — see the "Knowledge Retriever" section. This is the fastest way to recall what was learned without re-reading full write-ups.
+- **Deeper technical write-ups (this project only):** `system/interview-prep/*.md` — one file per topic, written to be read cold before an interview. Includes the full story of the 18%→82% keyword search debugging journey (`03-three-bugs-that-hid-the-baseline.md`).
+- **Raw evaluation data and full diagnosis:** `system/evaluation/DIAGNOSIS.md` — the complete technical detail behind any evaluation number quoted elsewhere (test set, script, root causes).
+- **Session-by-session history:** `system/session-log.md`.
+
+When starting a new session or resuming after a break, check `learnings.md` first for a quick recall, then go to `system/interview-prep/` or `system/evaluation/DIAGNOSIS.md` if more depth is needed.
+
+---
+
 ## What This Is
 
 A RAG system over personal saved articles, notes, and reading.
@@ -24,11 +35,11 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
 
 ## Current Status
 
-- **Phase 1–3:** Complete. System is live and working.
-- **Notes:** 3 real notes indexed (the-mom-test.md, lean-start-up.md, pm-playbook-shipping-ai-features.md)
+- **Phase 1–3:** Complete. ~26 real notes indexed across 10 topic folders.
+- **Phase 3.5:** Complete. Keyword search evaluated against 28 test queries — corrected baseline is **82% precision@5** (see "Where to Find Learnings" below for why the first raw result was 18%, and what that taught us).
 - **Retrieval:** Keyword-only search (no semantic/embedding search yet)
 - **Interface:** CLI chat via `scripts/chat.py`
-- **Next:** Add more notes (target 20+), then upgrade to semantic search with Chroma + embeddings, then add evaluation/scoring
+- **Next:** Implement semantic search (embeddings), re-run the same 28 test queries, compare precision@5 before/after
 
 ## End Goal
 
@@ -61,7 +72,16 @@ knowledge-retriever/
 ├── system/
 │   ├── session-log.md            ← progress and learnings log (append each session)
 │   ├── project-context.md        ← full session briefing document
-│   └── taxonomy.md               ← controlled vocabulary and note format rules
+│   ├── taxonomy.md               ← controlled vocabulary and note format rules
+│   ├── evaluation/                ← test set, eval script, results, and root-cause diagnosis
+│   │   ├── test_queries.json      ← 28 test queries (specific + vague pairs)
+│   │   ├── run_evaluation.py      ← scores precision@5 against search_notes()
+│   │   ├── keyword_results.json   ← latest run's raw output
+│   │   └── DIAGNOSIS.md           ← full technical write-up of the 82% baseline and remaining failures
+│   └── interview-prep/            ← condensed, interview-ready explanations — read these before an interview
+│       ├── 01-rag-retrieval-chunking.md
+│       ├── 02-evaluation-methodology-explained.md
+│       └── 03-three-bugs-that-hid-the-baseline.md
 ├── .env                          ← API key (NOT in git)
 ├── .gitignore
 └── requirements.txt
