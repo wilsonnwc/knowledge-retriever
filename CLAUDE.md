@@ -150,19 +150,38 @@ Requires `.env` with `ANTHROPIC_API_KEY=...`
 - Keep it simple — real enough to discuss in an interview, not production quality
 - If something fails, diagnose the root cause — do not just patch it
 
-## Logging Requirements (every session)
+## Documentation Autopilot (Claude does this without being asked)
 
-At the end of each working step, append to `system/session-log.md`:
+Do not wait for the user to say "update the session log" or "add this to learnings." Update automatically, inline, at these trigger points:
+
+| Trigger | Update |
+|---|---|
+| A phase/step is completed or a significant bug is found+fixed | Append a new entry to `system/session-log.md` (see format below) |
+| A surprising, non-obvious, or interview-worthy insight comes up | Append a compressed bullet to `/Users/wilsonnwc/Tech/AI/learnings.md` under the Knowledge Retriever section (match the existing bullet length/format there — do not paste full write-ups) |
+| A finding is deep/technical enough to need a full write-up | Create or update a file in `system/interview-prep/` |
+| A test set, baseline number, or key project fact changes | Update `CLAUDE.md`'s "Current Status" section so it never goes stale |
+
+After making these updates, mention it briefly in the same response ("Updated the session log and learnings file") — do not ask permission first. Documentation updates are record-keeping, not decisions; only pause to ask when there's an actual design tradeoff (chunking strategy, model choice, etc. — see Key Design Principles above).
+
+**Session log entry format** (append to `system/session-log.md`, most recent at top):
 
 ```
-PROGRESS LOG
-Step completed: [what was just built or changed]
-Status: [working / partially working / broken]
-Next step: [what comes next]
+---
+### Session [N] — [Date]
 
-LEARNINGS LOG
-New concept learned: [e.g. "chunk size affects retrieval precision"]
-Failure encountered: [what broke and why]
-How I fixed it: [what change resolved it]
-Interview note: [one sentence on how to describe this in an interview]
+**Phase/step completed:**
+**Where to pick up next:**
+
+**What worked:**
+-
+
+**What didn't work / got stuck on:**
+-
+
+**Learnings:**
+-
+
+**Open questions to come back to:**
+-
+---
 ```
