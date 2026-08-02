@@ -1,0 +1,171 @@
+{
+  "test_set_size": 10,
+  "precision_at_5": 0.3,
+  "queries_correct": 3,
+  "by_difficulty": {
+    "easy": {
+      "total": 2,
+      "found": 1
+    },
+    "hard": {
+      "total": 6,
+      "found": 2
+    },
+    "medium": {
+      "total": 2,
+      "found": 0
+    }
+  },
+  "results": [
+    {
+      "query_id": 1,
+      "query": "What makes good strategy vs bad strategy?",
+      "expected": "good-strategy-bad-strategy",
+      "retrieved": [
+        "bad-strategy",
+        "design-of-everyday-things",
+        "Product Management in Practice (Strategy)",
+        "three-parts-of-good-strategy",
+        "pm-playbook-shipping-ai-features"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "easy"
+    },
+    {
+      "query_id": 2,
+      "query": "How do I talk to customers about their problems?",
+      "expected": "the-mom-test",
+      "retrieved": [
+        "the-mom-test",
+        "Product Management in Practice (Strategy)",
+        "generalists-comeback",
+        "pm-playbook-shipping-ai-features",
+        "product-sense-definition"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "easy"
+    },
+    {
+      "query_id": 3,
+      "query": "How should I handle user mistakes in design?",
+      "expected": "design-of-everyday-things",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "design-of-everyday-things",
+        "Product Management in Practice (Stakeholder)",
+        "the-mom-test",
+        "Product Management in Practice (Strategy)"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 4,
+      "query": "What's the best way to organize a knowledge base?",
+      "expected": "information-architecture (if exists)",
+      "retrieved": [
+        "Product Management in Practice (general)",
+        "design-of-everyday-things",
+        "analytics-framework",
+        "Product Management in Practice (Communication)",
+        "pm-playbook-shipping-ai-features"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 5,
+      "query": "How do I know what will matter to my stakeholders?",
+      "expected": "stakeholder-management",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "design-of-everyday-things",
+        "Product Management in Practice (Communication)",
+        "product-sense-definition",
+        "Product Management in Practice (Stakeholder)"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 6,
+      "query": "What should I focus on as a product manager?",
+      "expected": "pm-managing-time or product-strategy",
+      "retrieved": [
+        "design-of-everyday-things",
+        "the-mom-test",
+        "Product Management in Practice (Strategy)",
+        "pm-playbook-shipping-ai-features",
+        "Product Management in Practice (Stakeholder)"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 7,
+      "query": "How do I stop users from making mistakes?",
+      "expected": "design-of-everyday-things",
+      "retrieved": [
+        "design-of-everyday-things",
+        "Product Management in Practice (Strategy)",
+        "generalists-comeback",
+        "pm-playbook-shipping-ai-features",
+        "product-sense-definition"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 8,
+      "query": "What's the difference between strategy and goals?",
+      "expected": "good-strategy-bad-strategy",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "design-of-everyday-things",
+        "three-parts-of-good-strategy",
+        "product-sense-definition",
+        "analytics-framework"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": 9,
+      "query": "How should teams make decisions together?",
+      "expected": "pm-managing-time or communication",
+      "retrieved": [
+        "Product Management in Practice (Stakeholder)",
+        "design-of-everyday-things",
+        "Product Management in Practice (Strategy)",
+        "Product Management in Practice (Communication)",
+        "pm-playbook-shipping-ai-features"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 10,
+      "query": "What should a product roadmap show?",
+      "expected": "stakeholder-management",
+      "retrieved": [
+        "Product Management in Practice (Stakeholder)",
+        "pm-playbook-shipping-ai-features",
+        "design-of-everyday-things",
+        "human-relational-intelligence",
+        "four-questions-execs-ask"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "medium"
+    }
+  ]
+}

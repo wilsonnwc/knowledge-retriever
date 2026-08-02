@@ -1,0 +1,84 @@
+{
+  "test_queries": [
+    {
+      "id": 1,
+      "query": "What makes good strategy vs bad strategy?",
+      "expected_source": "good-strategy-bad-strategy",
+      "expected_concept": "three parts of strategy or anti-patterns",
+      "difficulty": "easy",
+      "reason": "Exact phrase match likely"
+    },
+    {
+      "id": 2,
+      "query": "How do I talk to customers about their problems?",
+      "expected_source": "the-mom-test",
+      "expected_concept": "customer discovery methodology",
+      "difficulty": "easy",
+      "reason": "Direct match to Mom Test content"
+    },
+    {
+      "id": 3,
+      "query": "How should I handle user mistakes in design?",
+      "expected_source": "design-of-everyday-things",
+      "expected_concept": "error handling or human error reframe",
+      "difficulty": "hard",
+      "reason": "Requires synonymy (mistakes ≠ errors, but related)"
+    },
+    {
+      "id": 4,
+      "query": "What's the best way to organize a knowledge base?",
+      "expected_source": "information-architecture (if exists)",
+      "expected_concept": "IA principles, taxonomy, structure",
+      "difficulty": "hard",
+      "reason": "Conceptual match, not exact words"
+    },
+    {
+      "id": 5,
+      "query": "How do I know what will matter to my stakeholders?",
+      "expected_source": "stakeholder-management",
+      "expected_concept": "understanding stakeholder incentives",
+      "difficulty": "hard",
+      "reason": "Requires inference about stakeholder needs"
+    },
+    {
+      "id": 6,
+      "query": "What should I focus on as a product manager?",
+      "expected_source": "pm-managing-time or product-strategy",
+      "expected_concept": "PM priorities or time allocation",
+      "difficulty": "hard",
+      "reason": "Vague; could match multiple sections"
+    },
+    {
+      "id": 7,
+      "query": "How do I stop users from making mistakes?",
+      "expected_source": "design-of-everyday-things",
+      "expected_concept": "error prevention or affordances",
+      "difficulty": "hard",
+      "reason": "Synonymy + phrase meaning (mistakes/errors/failures)"
+    },
+    {
+      "id": 8,
+      "query": "What's the difference between strategy and goals?",
+      "expected_source": "good-strategy-bad-strategy",
+      "expected_concept": "strategy vs goals distinction",
+      "difficulty": "medium",
+      "reason": "Requires understanding of relationship between concepts"
+    },
+    {
+      "id": 9,
+      "query": "How should teams make decisions together?",
+      "expected_source": "pm-managing-time or communication",
+      "expected_concept": "team alignment or disagree and commit",
+      "difficulty": "hard",
+      "reason": "Conceptual; many possible matches"
+    },
+    {
+      "id": 10,
+      "query": "What should a product roadmap show?",
+      "expected_source": "stakeholder-management",
+      "expected_concept": "roadmap as communication tool",
+      "difficulty": "medium",
+      "reason": "Requires section title matching + content understanding"
+    }
+  ]
+}
