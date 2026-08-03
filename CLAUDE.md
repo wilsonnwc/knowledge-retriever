@@ -41,12 +41,23 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
 - **Interface:** CLI chat via `scripts/chat.py`
 - **Next:** Implement semantic search (embeddings), re-run the same 28 test queries, compare precision@5 before/after
 
+## Roadmap (updated 2026-08-03, after re-reading full job ad)
+
+1. **Finish semantic search** — chunking strategy decision → embeddings → Chroma → re-run 28-query test set → compare precision@5 vs. 82% keyword baseline (current phase)
+2. **Project-scoped organization** — explore a "project" concept alongside the existing topic taxonomy. This is the most direct match to the actual squad this role would join (LeapSpace's "project spaces" — see `system/job-ad-reference.md`). Sequenced after semantic search because it depends on the retrieval approach being stable first (a "project" boundary likely affects chunk metadata/scoping).
+3. **Evaluation-as-practice writeup** — reframe the existing 18%→82% debugging work as ongoing evaluation *practice* (define → commission → act on results), matching the ad's "commission the evaluations, read the results, turn them into prioritised improvements" language. Mostly narrative/documentation work on what's already built, not new build work — can slot in anytime.
+
+**Explicitly out of scope:** building a Notion/Obsidian connector. The role partners with (doesn't own) upload/storage, and the ad's tool-fluency requirement is about being a *user* with informed opinions, not an integration builder. If tool fluency is wanted, that's a "go use Notion/Obsidian and form opinions" activity, not a build task.
+
+See `system/job-ad-reference.md` for the full reasoning behind this roadmap.
+
 ## End Goal
 
 - 50+ real articles indexed and queryable
 - Semantic (embedding-based) retrieval working
 - At least one failure diagnosed and fixed
 - Honest evaluation: scored, measurable retrieval quality — not just "it seems to work"
+- A working project-scoped organization concept, tied to the actual role's squad ownership area
 - A log of what was tried, what broke, and what changed — ready to discuss in a PM interview
 
 ## Project Structure

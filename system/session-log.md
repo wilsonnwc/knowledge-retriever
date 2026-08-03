@@ -38,6 +38,38 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 8 — 2026-08-03/04 (continued from Session 7)
+
+**Phase/step completed:** Decided the chunking strategy for Phase 4 (semantic search), and separately re-grounded the whole project against the full LeapSpace job ad text and product demo videos.
+
+**Where to pick up next:** Build the chunking function per the rule below, then embedding generation + Chroma setup, then re-run the locked 28-query test set and compare precision@5 against the 82% keyword baseline.
+
+**Chunking rule decided:**
+1. Notes ≤ 40 lines: keep as one chunk (no split)
+2. Notes with real `##` headers: split at `##` boundaries
+3. Notes > 40 lines without `##` headers: split at bold-label lines (e.g. `**Re: Topic**`, `Latency:`)
+4. No overlap between chunks — boundaries are real content divisions, not arbitrary cuts
+5. The 40-line threshold is a reasonable starting default, not precision-tuned — real teams pick a sensible default fast and only grid-search/tune further once an eval pipeline exists to measure against; we're deferring threshold tuning until the semantic search pipeline is built and can be scored against the locked 28-query test set
+
+**What worked:**
+- Scanning all 25 notes for structure (line count, `##` count, bold-label count) before deciding, instead of guessing — this immediately falsified the original un-approved plan (only 1/25 notes actually has `##` headers)
+- Stress-testing the "bold label = split point" heuristic against real borderline notes (17, 20, 25, 52 lines) caught that inline bold emphasis (e.g. numbered steps of one framework) reads very differently from bold labels marking genuinely independent ideas (e.g. 7 unrelated book quotes in one file) — a purely mechanical regex can't fully distinguish these, so the rule leans on note length + label count as a proxy
+- Full job ad re-read (candidate provided complete text) surfaced a stronger, more specific reading than the earlier partial-ad guess: role partners on retrieval/upload rather than owning it, and explicitly asks the PM to "anticipate...richer integrations" as a future roadmap item, not a shipped one
+- Watching the actual LeapSpace demo videos and summarizing them (saved to `system/leapspace-product-reference.md`) corrected an assumption: today's shipped product only supports session-scoped uploads (max 5 PDFs), not a persistent Notion/Obsidian-style personal knowledge base — that gap *is* the strategic problem this role exists to close
+
+**What didn't work / got stuck on:**
+- Initial grep-based "bold label" detector over-matched — flagged inline emphasis within a single coherent argument as if it were a section divider; caught by manually reading borderline notes before committing to the rule in code
+
+**Learnings:**
+- **Chunking thresholds are an empirical question, not a reasoning question, in real teams.** Product/ML teams don't debate their way to "the right" chunk size — they pick a few candidate values, run the same held-out eval set against each, and let the metric (here, precision@5) decide. The PM's role is often ensuring that discipline happens at all under time pressure, not personally finding the number.
+- **A documented "requirement" in a job ad can be about the candidate, not the product.** The Zotero/Obsidian/Notion line reads as a personal-fluency bar ("you understand this tool category"), not a confirmed integration target — separate from the "richer integrations" line elsewhere in Responsibilities, which *is* a real (if still vague) roadmap signal. Worth reading job ad lines for which section they're in, not just their content.
+- **A chunk needs to be self-contained, not just short.** Length alone doesn't determine whether a section should be split — a 25-line note with 2 bold labels can be one indivisible argument (claim → limitation → caveat), while a 52-line note with 7 bold labels can be a compilation of unrelated ideas. The real test is "would this fragment make sense read in isolation," which length + label-count only approximates.
+
+**Open questions to come back to:**
+- Build the actual chunking function against the rule above and spot-check its output against a handful of real notes before moving to embeddings
+- After the pipeline exists: does the 40-line threshold need tuning based on eval results?
+- Project-scoped organization (next roadmap phase after semantic search) — how should a "project" concept coexist with the existing topic taxonomy, and does it change chunk metadata/scoping?
+---
 ### Session 7 — 2026-08-02 (continued from Session 6)
 
 **Phase/step completed:** Started Phase 4 (semantic search) properly. Caught that the earlier `semantic-search-chunking-plan.md` "Decision" had been written up in a prior session without being genuinely reviewed and agreed — so we're treating all of Phase 4 as undiscussed and starting over, step by step. Decided: embedding model = OpenAI `text-embedding-3-small`; vector store = Chroma (confirmed free/local, no API key). Gave a from-scratch concept briefing (embeddings, who/how they're learned via model training, cosine similarity, why Chroma is free but embedding calls cost a little, semantic dilution) — saved to `system/interview-prep/04-semantic-search-concepts-briefing.md`.
