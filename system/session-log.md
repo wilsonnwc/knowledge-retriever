@@ -38,6 +38,31 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 9 — 2026-08-04 (continued from Session 8)
+
+**Phase/step completed:** Built and verified `scripts/chunking.py` implementing the Session 8 decision. Caught a real bug while testing (line-counting mismatch: manual review counted raw file lines, code counted non-blank body lines — recalibrated threshold from 40 to 30 using actual measured values). Then discussed chunking robustness at scale: how commercial RAG systems handle content variety we haven't seen (token-based sizing, recursive/structural splitting with fallback, format-aware parsers per content type, canary-set evaluation). Built the paragraph-break fallback path for long, unstructured notes (no `##`, no bold-labels) — the one real gap our hand-tuned rule had. Verified against synthetic unstructured content and confirmed zero regressions on the real 26-note corpus.
+
+**Where to pick up next:** Embedding generation + Chroma setup (the next Phase 4 step), now that chunking is solid and has a safety net for unknown content shapes.
+
+**What worked:**
+- Testing the chunking code against real notes immediately surfaced a bug the summary output alone would have hidden: the Communication note (which we'd manually confirmed *should* split into 7 sections) stayed as one chunk on the first run, because "40 lines" meant different things in the manual review (raw lines) vs. the code (non-blank body lines)
+- Recalibrating the threshold using actual measured values (5/9/12 non-blank lines for keep-whole cases vs. 35 for the should-split case) instead of re-guessing a new number
+- Testing the new paragraph-break fallback against synthetic content designed to hit the exact gap (long + unstructured), rather than only re-running against the real corpus where that case doesn't naturally occur
+
+**What didn't work / got stuck on:**
+- First synthetic test of the fallback produced a false negative — the fake note was accidentally too short (11, then 21 non-blank lines) to trigger the threshold at all; had to build a genuinely long synthetic note before the fallback path actually exercised
+
+**Learnings:**
+- **A rule tuned against known content is not automatically robust to unknown content.** Our chunking rule works well on the 26 notes it was built and tested against, but had zero handling for "long + no detectable structure" until we deliberately went looking for that gap. Production systems solve this with recursive fallback chains (try header split → try paragraph split → try sentence split → hard token cut) rather than trying to write one rule that anticipates every format upfront.
+- **Fixing data quality at the source is usually cheaper than compensating for it downstream — but only when you control the source.** Discussed two ways to handle content variety long-term: an ingestion-time agent that normalizes structure before saving (high leverage, but requires control over how content is created) vs. read-time chunker robustness (works regardless of source, but harder to get right). Chose read-time robustness first specifically because it's the closer analog to LeapSpace's actual constraint — the product can't control how a third-party PDF or a researcher's own external tool is structured.
+- **A "canary set" is just our existing 28-query eval set, re-run automatically on every pipeline change.** Production systems catch silent retrieval regressions by re-scoring a held-out test set whenever ingestion/chunking changes and comparing to the last known-good score — the retrieval-quality equivalent of a unit test suite. We already have the pieces (`run_evaluation.py`, the locked test set) to build this; just haven't wired it to run automatically yet.
+- **A synthetic test can fail silently if the test data itself doesn't actually exercise the code path being tested.** Two attempts at testing the fallback path produced "passing" results (1 chunk, no crash) before realizing the test note was simply too short to trigger the threshold — a reminder to check *why* a test produced a given result, not just whether it ran without error.
+
+**Open questions to come back to:**
+- Wire `run_evaluation.py` to run automatically whenever chunking or the notes corpus changes, and compare precision@5 against the last recorded score (canary-set pattern)
+- Ingestion agent (structure-nudging at note-creation time) — deferred to a future roadmap item, tracked in `CLAUDE.md`, for once this project is in genuine ongoing personal use
+- Should the fallback's paragraph cap (currently 15 non-blank lines) be tuned once the eval pipeline can score it?
+---
 ### Session 8 — 2026-08-03/04 (continued from Session 7)
 
 **Phase/step completed:** Decided the chunking strategy for Phase 4 (semantic search), and separately re-grounded the whole project against the full LeapSpace job ad text and product demo videos.

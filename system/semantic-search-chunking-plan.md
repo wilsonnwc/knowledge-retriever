@@ -93,4 +93,6 @@ This is a genuinely common real-world RAG problem, not a toy exercise: productio
 ---
 
 ## Status
-This is a planning/learning document. Semantic search has **not yet been implemented** — the project is still on keyword search (Phase 3 complete). This document exists so that when Phase 5 begins, the reasoning behind today's structural decisions (section headers, consolidation) is already documented and doesn't need to be re-derived.
+**Superseded 2026-08-03/04.** This document's "planned chunking approach" (split every note purely by `##` headers) was written and never genuinely pressure-tested with the user — see `system/session-log.md` Session 7, where it was explicitly un-approved. Scanning all 25 real notes afterward showed only 1 actually uses `##` headers, so this plan wouldn't have worked for the other 24.
+
+The actual decided and implemented chunking rule lives in `scripts/chunking.py` and is explained in `system/session-log.md` (Sessions 8–9) and `system/chunking-robustness-learnings.md` (the fallback path and commercial-RAG comparison). The core concepts above (embeddings, semantic search, vector databases, parent-child chunking as a pattern) are still accurate background — only the specific chunking decision in this file is outdated.

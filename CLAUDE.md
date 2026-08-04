@@ -49,6 +49,8 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
 
 **Explicitly out of scope:** building a Notion/Obsidian connector. The role partners with (doesn't own) upload/storage, and the ad's tool-fluency requirement is about being a *user* with informed opinions, not an integration builder. If tool fluency is wanted, that's a "go use Notion/Obsidian and form opinions" activity, not a build task.
 
+**Future roadmap item — ingestion agent (2026-08-04, not yet started):** Since this project is meant for genuine ongoing personal use (not just an interview artifact), the highest-leverage long-term fix for chunking reliability is upfront, not downstream: an AI-assisted ingestion step that normalizes a new note's structure (adds clear `##` headers, or flags "this note has no clear structure, here's a suggested split") *before* it's saved, rather than asking the chunker to infer structure after the fact from messy text. This is deliberately sequenced after the chunker fallback (see `system/chunking-robustness-learnings.md`) — the fallback protects against whatever imperfect content already exists or arrives from elsewhere, while the ingestion agent reduces how often imperfect content gets created in the first place. Both matter for real use; fallback was prioritized first because it's the closer analog to LeapSpace's actual constraint (no control over source content structure).
+
 See `system/job-ad-reference.md` for the full reasoning behind this roadmap.
 
 ## End Goal
