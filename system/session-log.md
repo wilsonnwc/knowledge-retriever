@@ -54,8 +54,11 @@ At the end of each session, copy the template below and fill it in at the top of
 
 **Learnings:**
 - **A locked, reusable test set is what makes a before/after comparison credible.** Because the 28 queries and their expected answers were frozen before either retrieval method was built, the 82% → 96% jump is a real measured improvement, not a number that could have been shaped by hindsight.
+  > **Analogy:** This is like agreeing on the exam questions *before* either student studies, so no one can accuse you of picking easier questions for the student you wanted to win. Locking the test set first means the 82% → 96% jump reflects semantic search actually being better — not the test quietly getting easier.
 - **Semantic search's biggest wins were on "hard" queries requiring synonymy** (e.g. "stop users from making mistakes" → design-of-everyday-things' error-handling content, zero literal keyword overlap) — exactly the retrieval gap semantic search is supposed to close, and exactly the kind of concrete example worth having ready for an interview.
+  > **Plain-English restatement:** The query never says "error handling" or "design," but semantic search still found the right note — because it's comparing *meaning*, not literal words. This is the single clearest before/after example in the whole project: keyword search would have returned nothing useful here, and semantic search nailed it.
 - **A good evaluation should still produce failures.** 96% with one legitimately ambiguous miss is a more credible, interview-ready result than 100% would have been — it shows the eval set isn't rigged and that ambiguous queries are being called out as ambiguous, not silently "fixed."
+  > **Analogy:** A student who gets 100% on every single test, every time, makes you suspicious the test is too easy or the grading is soft — not that the student is a genius. One honest, explainable miss (Q4b's genuinely ambiguous query) is more convincing evidence that the 96% score is real and was earned, not engineered.
 
 **Open questions to come back to:**
 - Should `system/chroma_db/` be `.gitignore`d? It's local, regenerable (via `embed.py`), and somewhat binary — likely yes, but not yet decided
@@ -77,9 +80,13 @@ At the end of each session, copy the template below and fill it in at the top of
 
 **Learnings:**
 - **A rule tuned against known content is not automatically robust to unknown content.** Our chunking rule works well on the 26 notes it was built and tested against, but had zero handling for "long + no detectable structure" until we deliberately went looking for that gap. Production systems solve this with recursive fallback chains (try header split → try paragraph split → try sentence split → hard token cut) rather than trying to write one rule that anticipates every format upfront.
+  > **Analogy:** It's like tailoring a suit to fit exactly the people who showed up for the first fitting, then assuming it will fit anyone who walks in the door. Our chunking rule was "tailored" to the 26 real notes it saw; a genuinely new note shape (long, no headers, no bold labels) needed its own fallback — the equivalent of a suit with an adjustable waistband for people who didn't come to the fitting.
 - **Fixing data quality at the source is usually cheaper than compensating for it downstream — but only when you control the source.** Discussed two ways to handle content variety long-term: an ingestion-time agent that normalizes structure before saving (high leverage, but requires control over how content is created) vs. read-time chunker robustness (works regardless of source, but harder to get right). Chose read-time robustness first specifically because it's the closer analog to LeapSpace's actual constraint — the product can't control how a third-party PDF or a researcher's own external tool is structured.
+  > **Plain-English restatement:** You can either ask everyone to submit clean, well-formatted paperwork upfront (fixing it at the source) or build a system that can make sense of messy paperwork however it arrives (fixing it downstream). The first is easier when you control who submits the paperwork; the second is necessary when you don't — which is exactly LeapSpace's situation with third-party PDFs and researchers' own tools.
 - **A "canary set" is just our existing 28-query eval set, re-run automatically on every pipeline change.** Production systems catch silent retrieval regressions by re-scoring a held-out test set whenever ingestion/chunking changes and comparing to the last known-good score — the retrieval-quality equivalent of a unit test suite. We already have the pieces (`run_evaluation.py`, the locked test set) to build this; just haven't wired it to run automatically yet.
+  > **Analogy:** Coal miners used to carry canaries into mines because the bird would show signs of distress from bad air before a human would notice. A "canary set" of test queries does the same job for a retrieval pipeline — it's the early-warning check that quietly re-runs after every change, so a silent quality drop gets caught immediately instead of being discovered by a frustrated user weeks later.
 - **A synthetic test can fail silently if the test data itself doesn't actually exercise the code path being tested.** Two attempts at testing the fallback path produced "passing" results (1 chunk, no crash) before realizing the test note was simply too short to trigger the threshold — a reminder to check *why* a test produced a given result, not just whether it ran without error.
+  > **Plain-English restatement:** The test "passed" both times — but only because it never actually reached the code it was supposed to be testing, the same way a fire drill "succeeds" if everyone stays seated because the alarm never actually rang. A passing test only means something if you've confirmed it genuinely exercised the risky path, not just that nothing crashed.
 
 **Open questions to come back to:**
 - Wire `run_evaluation.py` to run automatically whenever chunking or the notes corpus changes, and compare precision@5 against the last recorded score (canary-set pattern)
@@ -110,8 +117,11 @@ At the end of each session, copy the template below and fill it in at the top of
 
 **Learnings:**
 - **Chunking thresholds are an empirical question, not a reasoning question, in real teams.** Product/ML teams don't debate their way to "the right" chunk size — they pick a few candidate values, run the same held-out eval set against each, and let the metric (here, precision@5) decide. The PM's role is often ensuring that discipline happens at all under time pressure, not personally finding the number.
+  > **Analogy:** It's like taste-testing a recipe instead of arguing about it in theory. You don't debate in a meeting room whether "a pinch of salt" or "two pinches" is correct — you make both versions, have people taste them, and let the results decide. Chunk-size thresholds work the same way: try 30 lines vs. 40 lines vs. 50 lines, run the eval set against each, and let precision@5 pick the winner.
 - **A documented "requirement" in a job ad can be about the candidate, not the product.** The Zotero/Obsidian/Notion line reads as a personal-fluency bar ("you understand this tool category"), not a confirmed integration target — separate from the "richer integrations" line elsewhere in Responsibilities, which *is* a real (if still vague) roadmap signal. Worth reading job ad lines for which section they're in, not just their content.
+  > **Plain-English restatement:** A job ad line like "familiarity with Zotero/Obsidian/Notion" usually means "we want someone who already speaks this language," not "we are building an integration with these specific tools next quarter." Reading *where* a requirement sits (Qualifications vs. Responsibilities) tells you whether it's describing the candidate or promising a roadmap item — an easy distinction to blur if you only skim for keywords.
 - **A chunk needs to be self-contained, not just short.** Length alone doesn't determine whether a section should be split — a 25-line note with 2 bold labels can be one indivisible argument (claim → limitation → caveat), while a 52-line note with 7 bold labels can be a compilation of unrelated ideas. The real test is "would this fragment make sense read in isolation," which length + label-count only approximates.
+  > **Analogy:** Think of chopping a cake versus chopping a fruit salad. A cake (one connected argument — claim, limitation, caveat) doesn't stay meaningful if you slice it at arbitrary points; every slice needs the whole story to make sense. A fruit salad (a compilation of separate quotes or ideas) can be split apart cleanly because each piece was already independent. Length alone can't tell you which one you're holding — you have to check whether the pieces actually depend on each other.
 
 **Open questions to come back to:**
 - Build the actual chunking function against the rule above and spot-check its output against a handful of real notes before moving to embeddings
@@ -134,7 +144,9 @@ At the end of each session, copy the template below and fill it in at the top of
 
 **Learnings:**
 - **A documented "Decision" isn't necessarily an agreed decision.** A doc can look settled (clean "Decision:" heading, confident tone) while actually being one person's (the AI's) synthesis that was never genuinely pressure-tested with the user. Worth periodically asking "did we actually agree on this, or did I just write it down?" — especially for anything written in a single fast session.
+  > **Plain-English restatement:** Just because meeting notes say "Decision: we're doing X" doesn't mean the room actually debated and agreed to X — sometimes one person just wrote it down confidently and no one pushed back. The formatting (a bold "Decision:" label) can create a false sense that something was settled, when really it was one party's summary that never got tested.
 - **Embeddings vs. vector databases sit on different cost axes.** The vector database (Chroma) is free/local infrastructure; the embedding model (OpenAI API) is the part that costs money because it's a hosted model call. Conflating "vector search" as one single cost line is a common simplification worth avoiding.
+  > **Analogy:** Think of Chroma as the filing cabinet (free — you already own it, it just sits in your office) and the embedding model as the librarian you pay by the hour to convert your documents into the filing system's format in the first place. "Semantic search costs money" is too blunt a statement — the storage is free, the conversion step is what you're paying for.
 
 **Open questions to come back to:**
 - Chunking strategy: by `##` header, fixed-size, or something else — and do current notes already fit that structure or need rework first?
@@ -161,8 +173,11 @@ At the end of each session, copy the template below and fill it in at the top of
 
 **Learnings:**
 - **A bad eval number is a prompt to debug the measurement, not just the system.** 18% looked like proof keyword search didn't work; the true, bug-free baseline was 82%. Trusting the first number would have produced the wrong conclusion.
+  > See `system/evaluation/DIAGNOSIS.md` for the full worked example (broken answer key / vending machine analogies) — this learning is the compressed version of that whole debugging story.
 - **Design choice vs. method limitation is worth distinguishing precisely.** Keyword search *can* use metadata (Google, Elasticsearch, email search all do) — this implementation just didn't, as a deliberate simplicity choice for a clean baseline.
+  > **Plain-English restatement:** "Keyword search is limited" and "*this* keyword search is limited" are different claims. Real production keyword search engines boost results using metadata (recency, popularity, tags) — this project's version deliberately skipped that, to keep the baseline simple and easy to reason about. The gaps we found are gaps in *this implementation's choices*, not proof that keyword search as a category is inherently weak.
 - **Test set correctness is itself a design decision.** `expected_source` values must reference real filenames (not folders, not imagined files), and fixing them only after seeing failures needs to be done transparently (grounded in file content, not adjusted to make numbers look better) and the set explicitly locked before the next comparison.
+  > **Analogy:** Adjusting your answer key *after* seeing which students failed is fine only if you're correcting a genuine mistake (a typo in the key) — not if you're quietly changing answers to make the class look better. The fix here was audited against the real file contents each time, and then the test set was locked, so nobody could keep "improving" it after the fact.
 - Full bug-by-bug detail lives in `system/interview-prep/03-three-bugs-that-hid-the-baseline.md`; compressed cross-project version in `/Users/wilsonnwc/Tech/AI/learnings.md`.
 
 **Open questions to come back to:**
@@ -190,9 +205,13 @@ At the end of each session, copy the template below and fill it in at the top of
 
 **Learnings:**
 - **Testing catches what design doesn't.** Spent entire session optimizing file structure and taxonomy *without* running a single query. As soon as we tested, a critical bug surfaced (truncated previews). This is exactly the trap the project's own principle warns against: "evaluation must be measured and scored, not qualitative."
+  > **Analogy:** You can polish a car's paint job and interior for hours and still not know if the engine starts. All the taxonomy and file-structure work looked great on inspection, but only actually running a query (turning the key) revealed the truncated-preview bug — a reminder that "looks well-organized" and "actually works" are different questions.
 - **The chunking strategy works bidirectionally.** Section-aware retrieval for keyword search is exactly the prep work semantic search needs. We're not building two separate systems; the section discipline serves both.
+  > **Plain-English restatement:** The work of splitting notes into clean, well-labeled sections wasn't wasted effort specific to keyword search — the same section boundaries are exactly what semantic search will later need to create good chunks for embeddings. One piece of foundational work quietly serves two future systems.
 - **Tagging precision prevents drift.** Moving from vague definitions ("foundational = important stuff") to testable rules ("foundational = what a senior PM aspiring to principal should know and execute daily") makes multi-session consistency possible.
+  > **Plain-English restatement:** A vague rule like "tag it foundational if it feels important" will get applied differently every session, because "feels important" depends on mood and memory. A testable rule ("would a senior PM aspiring to principal need to know and use this daily?") gives a yes/no test that produces the same answer whether it's session 3 or session 30.
 - **Job context sharpens decisions.** LeapSpace's job requirements (RAG, chunking, researcher knowledge bases, evaluation of AI reasoning) directly validated which problems in this project matter most. The retrieval bug we just fixed is the exact class of problem LeapSpace solves.
+  > **Why this matters for interviews:** Being able to say "here's a real bug I hit and fixed, and here's exactly how it maps to the job description's requirements" is far stronger than a generic "I'm interested in RAG" — it shows the practice work was deliberately chosen to mirror the target role, not just generic tinkering.
 
 **Open questions to come back to:**
 - When implementing semantic search (Phase 5), should we chunk exactly at `##` boundaries, or with overlap? (overlapping chunks provide continuity but increase embedding volume)
@@ -218,8 +237,11 @@ At the end of each session, copy the template below and fill it in at the top of
 
 **Learnings:**
 - Batch operations compound time savings dramatically. 34 notes in one session vs. 34 sessions.
+  > **Analogy:** Doing laundry once a week in one big load beats doing one item of clothing every single day — not because each wash is faster, but because you avoid paying the "setup cost" (finding the detergent, starting the machine) 34 separate times. Batching 10-13 notes at once meant paying the "get into note-writing mode" cost only a few times instead of 34.
 - Note quality doesn't suffer from speed; frontmatter discipline (YAML structure) enforces consistency automatically
+  > **Plain-English restatement:** Because every note has to fill in the same YAML fields (title, source, tags, etc.) no matter how fast you're writing, the structure itself acts like a form with required fields — it's hard to accidentally skip a piece of information even when moving quickly.
 - Source tracking can be lazy too — users naturally remember or find sources later when notes matter
+  > **Plain-English restatement:** Not every field needs to be filled in perfectly the moment a note is created. If a source is marked "unknown" now, it's easy enough to fill in later once you rediscover it — deferring low-stakes details is fine as long as the important content is captured while it's fresh.
 - The keyword search system is ready to test; no need to wait for semantic search to validate the concept
 
 **Open questions to come back to:**
@@ -249,8 +271,10 @@ At the end of each session, copy the template below and fill it in at the top of
 
 **Learnings:**
 - The keyword search is surprisingly effective for small knowledge bases. Top 5 matches by word frequency are relevant.
+  > **Plain-English restatement:** With only a handful of notes, even a simple "count matching words" approach tends to work, because there isn't much competing content to accidentally outrank the right answer. This effectiveness is somewhat deceptive — the gaps show up later as the knowledge base grows (see the 82% baseline diagnosis in Session 6), but early on, simple methods can look deceptively strong.
 - Claude generates good "thinking partner" responses when you give it the full note context plus the system prompt with skills defined.
 - The "Why this matters" field really does matter for context quality — helps the model understand which items were saved intentionally.
+  > **Plain-English restatement:** A note that's just a raw quote is ambiguous — was it saved because it's useful, or just interesting? The "Why this matters" field tells the model (and future-you) *why* a piece of content was worth keeping, which shapes how it should be used in an answer.
 - API deprecation warnings appear but don't block execution.
 
 **Open questions for next session:**
@@ -281,10 +305,14 @@ At the end of each session, copy the template below and fill it in at the top of
 
 **Learnings:**
 - The `type` field is a single value — cannot be a list. Keep one file per source.
-- Tags format: all inside one bracket `[tag1, tag2]` — not separate brackets per tag
+  > **Plain-English restatement:** A note can be "an article" or "a quote," but not both at once in the `type` field — if one piece of content is genuinely two things, it needs to become two separate note files rather than one file trying to wear two labels.
+- Tags format: all inside one bracket `[tag1, tag2]` — not separate brackets per tag (a small YAML syntax convention, not a design decision — noted here mainly so future notes stay consistent)
 - `quote` cannot be both a content type and a cross-cutting tag — they clash. Removed it from tags.
+  > **Plain-English restatement:** Having "quote" available both as a `type` value and as a `tag` value created ambiguity — should a quote be filed by its `type` or found by its `tag`? Removing it from one list (tags) forces every quote to be found the same way, avoiding notes that are inconsistently labeled depending on which field someone happened to use.
 - Lazy annotation strategy: don't force "Why this matters" on bulk imports — let it fill in through use. Only required on `own-note` and `quote` types.
+  > **Plain-English restatement:** When importing many notes at once, stopping to write a thoughtful "why this matters" for every single one would slow bulk imports to a crawl. The rule instead: leave it blank on bulk-imported content and only require it for your own original notes/quotes, where the reflection is the whole point of saving it.
 - For articles, split source and URL into separate fields so the display label stays clean
+  > **Plain-English restatement:** If the source field had to hold both a name and a link (e.g. "Article Title (https://...)"), every display of that note would show a long, cluttered string. Splitting them means the label shown to a reader can stay short and clean ("Article Title"), while the URL is still stored and available when needed.
 
 **Open questions for next session:**
 - None blocking — ready to move to Phase 1.4 (Python setup)
@@ -307,11 +335,17 @@ At the end of each session, copy the template below and fill it in at the top of
 
 **Learnings (context architecture):**
 - Context architecture is design work, not engineering work — naming, structure, and relationships are decided before any code is written
+  > **Analogy:** This is like an architect designing a building's floor plan before a single brick is laid — deciding where rooms go, how they connect, and what each is called happens on paper first. Context architecture is that floor-plan work for an AI system: deciding your topic folders and naming conventions before any Python code exists.
 - The labelling problem is concrete: `credential-recovery-workflow` vs `reset-password` — system language must match user language or retrieval fails
+  > **Plain-English restatement:** If your system stores something under the formal name "credential-recovery-workflow" but a real user searches "reset password," a literal-match system won't connect the two — even though they mean the same thing to a human. This is the same underlying problem as the "organize" vs. "organising" gap found later in Session 6's evaluation: the label you choose has to match how people actually ask for the thing, not just how you'd formally describe it.
 - More context ≠ better results; models suffer from information overload just like people — structure and prioritisation matter as much as content
+  > **Analogy:** Handing someone a 500-page manual to answer a simple question is worse than handing them the one relevant paragraph — even though the manual technically "contains" the answer somewhere. Dumping everything into a model's context window can bury the relevant part in noise, the same way a human reader gets lost in too much material.
 - The distinction between context engineering (pipelines, plumbing) and context architecture (structure, meaning, behaviour) — engineers build the infrastructure, architects define what lives on top of it
+  > **Analogy:** Plumbers install the pipes that carry water through a building (the infrastructure); architects decide which rooms need a sink and where the bathroom goes (the structure and meaning). Context engineering is the pipes — the code that moves information around; context architecture is deciding what information matters and how it's organized in the first place.
 - Context is never neutral: every naming and structural decision shapes how the system interprets tasks and produces outputs
+  > **Plain-English restatement:** Calling a folder "AI Products" versus "Machine Learning" isn't a cosmetic choice — it changes what kinds of notes naturally get filed there and what queries will successfully find them. Every organizational decision quietly steers the system's behavior, even when it feels like "just naming."
 - Memory needs explicit rules: what to retain, how long, when to surface — without this, systems either forget critical things or surface irrelevant noise
+  > **Analogy:** A filing cabinet with no rules about what to keep, for how long, or when to pull a folder back out eventually becomes useless — either overflowing with irrelevant paper, or missing the one document you actually needed. A knowledge system needs the same explicit rules, or it drifts toward one of those two failure modes.
 
 **Open questions for next session:**
 - What should my taxonomy look like? Start broad (8–10 folders) and resist the urge to go narrow

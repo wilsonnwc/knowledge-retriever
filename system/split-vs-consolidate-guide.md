@@ -12,9 +12,13 @@ When importing books or long articles with multiple topics, should we:
 1. **Consolidate** — one file per authoritative source, organized by theme
 2. **Split** — separate files for each distinct topic/section
 
+> **Analogy:** Think of a book like "Design of Everyday Things" as a single interview you did with an expert. You wouldn't chop the transcript of that interview into 14 separate index cards scattered across different drawers just because the expert talked about several sub-topics — you'd keep the interview together as one document, because that's what lets you say "in my interview with Don Norman, he explained X, then connected it to Y." Splitting the transcript apart destroys the ability to show the *connections* the expert was making.
+
 ## The Answer: Default to Consolidate
 
 **Keep one file per authoritative source** unless the source covers genuinely independent use cases.
+
+> **Why this matters:** This isn't just a filing preference — it directly trades off two things that pull in opposite directions: making content *easy for a search algorithm to match precisely* (which favors small, single-topic files) versus making content *easy for a human to cite and trust* (which favors one coherent file per source). The rest of this guide explains why, for this project's actual goal (interview prep, where you need to *cite* sources credibly), the human-facing need wins by default — and how a separate technique (chunking, not file-splitting) solves the machine-facing need without sacrificing that.
 
 ---
 
@@ -42,6 +46,8 @@ When importing books or long articles with multiple topics, should we:
 **Examples:**
 - Only if a source had "Chapter 1: Sales Strategy" AND "Chapter 2: Machine Learning Basics" with no connection
 
+> **Analogy:** This is the rare case where the "interview transcript" is actually *two unrelated interviews stapled together* — say, one half about sales tactics, the other half about a completely unrelated coding tutorial. In that case, keeping them stapled together doesn't preserve any real narrative connection; it just makes both halves harder to find. That's when splitting is the right call — but notice how rare this actually is for a single-author book or article, which almost always has some connecting thread even across chapters.
+
 ---
 
 ## Why Consolidate Works Better
@@ -52,16 +58,22 @@ When importing books or long articles with multiple topics, should we:
 ✓ One "Why this matters" captures the source's value, not per-section
 ✓ Shows you've deeply engaged with the source, not just cherry-picked quotes
 
+> **Why this matters for interviews:** An interviewer can tell the difference between "I remember a quote about error messages" and "Don Norman's whole argument is that good design anticipates human error — his point about error *messages* is really just one instance of that bigger principle." The second answer only works if you kept the source's throughline intact instead of chopping it into disconnected trivia.
+
 ### For Retrieval:
 - Keyword search: Multiple smaller files are more precise BUT...
 - Semantic search (upcoming): A naive whole-file embedding would dilute retrieval accuracy for multi-topic files — **this is resolved by chunking at the `## Section Header` level at embedding time, not by re-splitting files today.** See `system/semantic-search-chunking-plan.md` for the full reasoning (this is the "parent-child chunking" pattern used in production RAG systems: file = citation unit, section = retrieval unit).
 - Future you: When you need to reference the source, one file is easier to find than 14 scattered files
+
+> **Analogy:** This is the same "citation unit vs. retrieval unit" split as a library book: the *book* is what you cite ("as discussed in Design of Everyday Things"), but a librarian searching for a specific fact still flips to the *right page*, not the whole book. Chunking is how the system flips to the right page internally — it doesn't require the library to shred the book into loose pages first.
 
 ### For Knowledge Base Quality:
 ✓ Reflects the actual structure of the source material
 ✓ Avoids false fragmentation of coherent thinking
 ✓ Easier to maintain (update once, not 14 times)
 ✓ Cleaner citation trail
+
+> **Why this matters:** "Easier to maintain" isn't abstract — if you later realize you mis-transcribed a Don Norman quote, one file means one fix. Under the old 14-file structure, the same fix (if the same idea happened to be repeated across files) could mean hunting through five different topic folders to catch every copy.
 
 ---
 
@@ -100,6 +112,8 @@ When importing books or long articles with multiple topics, should we:
 - One file: "design-of-everyday-things.md" with all concepts organized by theme
 - All concepts from one source in one place
 - Topic folders still organize your KB, but by real topic, not by fragmentation
+
+> **Analogy:** The anti-pattern is like ripping every highlighted sentence out of a book and filing each one under a different subject tag, then throwing away the book itself. You end up with a pile of quotes with no memory of which book they came from or how the author connected them — technically "organized," but you've destroyed the thing that made the source valuable in the first place.
 
 ---
 
@@ -155,3 +169,5 @@ When bulk-importing a book or article:
 - 24 notes instead of 37
 
 **Lesson:** Default to consolidate. Fragment only when truly justified.
+
+> **Big picture:** The recurring mistake here wasn't "bad organizing" — it was solving a retrieval problem (small files match search queries more precisely) using a filing decision (splitting files), when the actual right tool for that problem is chunking at embedding time, not splitting at file-creation time. Keep the human-facing structure (one file per source) and let the machine-facing structure (chunks) live separately underneath it.

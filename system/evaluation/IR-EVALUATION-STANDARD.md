@@ -28,10 +28,14 @@ Retrieve top 5 results
 Did we get the RELEVANT documents? Or just documents with matching words?
 ```
 
+> **Plain-English restatement:** Retrieving *something* is easy — any search system can hand back 5 results for any query. The actual hard problem is retrieving the *right* 5. A system that confidently returns 5 wrong answers looks, on the surface, exactly like one returning 5 right answers — unless you have a way to check. That's what evaluation is for.
+
 **Why Evaluation Matters:**
 - Without measurement, bias is invisible (one success = "it works"; seven failures = you didn't notice)
 - Easy to optimize the wrong thing (more results retrieved ≠ better results)
 - Evaluation forces honest assessment
+
+> **Analogy:** Imagine judging a restaurant by eating there once and liking your meal — you'd have no idea if that was the chef's best dish or a lucky night. Evaluation is ordering the same 20 dishes across 20 visits and tracking a score, so "it's good" becomes "it's good 85% of the time, and here's the pattern in the 15% that failed." Without that discipline, one lucky demo query can convince you a retrieval system works when it actually fails most of the time.
 
 ---
 
@@ -108,6 +112,8 @@ Recall = 3 / 5 = 60%
 
 **When to use:** You want to know "did I miss important documents?" Important for comprehensive search, less important for personal KBs (usually 1-2 correct answers per query).
 
+> **Analogy:** Precision asks "of the fish I caught, how many were the species I wanted?" Recall asks a different question: "of all the fish of that species actually in the lake, how many did I catch?" You could have perfect precision (every fish you caught was the right species) while still having terrible recall (you only caught 2 of the 20 that were actually swimming around). For a personal knowledge base with usually one right answer per query, precision matters far more than recall — there's rarely a "lake full of correct answers" to worry about missing.
+
 ### **Mean Reciprocal Rank (MRR)**
 
 **Question:** Where was the first relevant result?
@@ -125,6 +131,8 @@ MRR = (0.5 + 1.0 + 0) / 3 = 0.5
 
 **When to use:** You want to know "does the system rank the right answer first?" Useful for measuring ranking quality, not just coverage.
 
+> **Why this matters:** Precision@5 alone can hide a real problem — a system that always buries the right answer at rank 5 (barely visible, easy to miss while skimming) scores exactly the same on precision@5 as a system that always nails it at rank 1. MRR punishes that difference: 1/5 = 0.2 is a much weaker score than 1/1 = 1.0, even though both technically "got the answer in the top 5." This is why the "Common Pitfalls" section below flags measuring precision alone as a mistake — it can't tell you whether ranking quality is actually good.
+
 ### **NDCG (Normalized Discounted Cumulative Gain)**
 
 **Question:** How good is the ranking, considering relevance grades?
@@ -132,6 +140,8 @@ MRR = (0.5 + 1.0 + 0) / 3 = 0.5
 **Formula:** Complex (involves relevance grades + position discounting)
 
 **When to use:** Production systems where you have graded relevance (very relevant / somewhat / not). Too complex for your project.
+
+> **Plain-English restatement:** Precision and MRR treat every result as simply "right" or "wrong." NDCG allows for shades of gray — a document can be "very relevant," "somewhat relevant," or "not relevant" instead of a strict yes/no, and it also cares about *where* the best documents land (a "very relevant" doc at rank 1 counts for more than the same doc at rank 5). It's the metric you'd reach for once you have humans grading results on a scale rather than just marking them correct/incorrect — overkill for a 24-40 note personal KB with usually one clear right answer, but standard at LeapSpace's scale.
 
 ---
 
@@ -255,20 +265,28 @@ You'll think the system works 100% of the time.
 
 ✓ **Fix:** Test mix of easy and hard queries. You'll see patterns in failures.
 
+> **Analogy:** This is like a student only practicing the questions they already know the answers to, then being shocked when the real exam has questions they've never seen. If your test set is all "easy, exact-match" queries, of course precision looks great — you've only tested the conditions where the system was already guaranteed to succeed.
+
 ### ❌ **Changing test set after seeing results**
 If Q6 fails, and you decide Q6 was "bad," you're cheating.
 
 ✓ **Fix:** Design test set first. Lock it. Then measure.
+
+> **Why this matters:** This is the evaluation equivalent of moving the goalposts after the kick — if you're allowed to quietly delete the queries your system failed, your "score" stops measuring the system and starts measuring your own willingness to look good. Locking the test set *before* you see results is what makes the eventual score trustworthy, including to yourself.
 
 ### ❌ **Measuring only precision**
 You might miss a ranking problem (right doc is #5, not #1).
 
 ✓ **Fix:** Measure both precision and MRR. Or at least precision@1 and precision@5.
 
+> **Plain-English restatement:** Precision@5 only asks "was the right answer somewhere in the top 5?" — it can't tell the difference between a system that nails the answer at rank 1 every time and one that always barely squeaks it in at rank 5. Both look identical on precision@5 alone, but one is a far better user experience than the other. Adding MRR (or comparing precision@1 to precision@5) is what exposes that difference.
+
 ### ❌ **Running one query and declaring success**
 One successful retrieval isn't data; it's anecdote.
 
 ✓ **Fix:** Run 10+ queries. Look for patterns.
+
+> **Analogy:** One good result is like flipping a coin once, getting heads, and declaring the coin "always lands on heads." It might genuinely be a fair coin that happened to land well once — you can't tell the difference between "it works" and "it got lucky" without more trials.
 
 ---
 
@@ -352,3 +370,7 @@ Why different: researchers need high-quality ranking + comprehensive coverage
 - LangChain evaluation: How production RAG systems measure retrieval
 - LlamaIndex evaluation: Semantic search quality metrics
 - Anthropic blog: RAG evaluation best practices
+
+---
+
+> **Big picture:** Every metric on this page is really just a different, more precise way of asking the same plain question: "did the user actually find what they needed, and how quickly?" Precision@K asks it for the top slice of results, MRR asks it about ranking, recall asks it about completeness, and NDCG asks it with shades of relevance instead of pure right/wrong. Picking the right metric for a project isn't about which one is "best" in the abstract — it's about matching the metric to your scale and your users' actual behavior (do they only look at the first result, or do they scroll through ten?).

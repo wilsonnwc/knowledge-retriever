@@ -8,6 +8,8 @@
 
 These become the subfolders inside `notes/`. Aim for 8–12. Broad enough to stay durable, specific enough to be meaningful.
 
+> **Analogy:** Think of these folders like the section signs in a library ("Fiction," "History," "Biography") rather than individual book titles. Too granular ("ai-agents," "ai-context-windows," "ai-rag-systems") and you end up with a sign for every single book — no one can browse it, and you'll constantly be unsure which sign a new book belongs under. Too broad ("AI") and the sign is useless because it tells you nothing about what's behind it. The goal is the middle ground: a handful of durable categories that stay meaningful as the collection grows.
+
 **Rules:**
 - Never create a `notes/` subfolder that isn't on this list
 - If a new topic genuinely doesn't fit, add it here first, then create the folder
@@ -38,6 +40,8 @@ Tags that apply across topics — not folder names, just metadata labels you can
 - revisit
 - job-application
 ```
+
+> **Why folders vs. tags are different tools:** A folder is where a note *lives* (one folder only — like a filing cabinet drawer). A tag is a label you can stick on top of that, and a note can carry several. For example, a note in the `ai-products` folder about evaluation design could also be tagged both `foundational-knowledge` (a senior PM should know this cold) and `job-application` (it's specifically relevant to an AI PM interview) at the same time — see `system/agent-bulk-import-instructions.md` for the precise definition of each tag and how they combine.
 
 ---
 

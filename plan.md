@@ -97,6 +97,10 @@ behaviour-change/
 
 **The rule:** When you add a note and it doesn't fit an existing folder, you must either fit it into an existing one or add a new folder to this list first. Never create ad-hoc folders on the fly. Inconsistency is what breaks retrieval — this is the core lesson of the article.
 
+> **Analogy:** Imagine a filing cabinet where every new document gets its own brand-new folder label instead of going into an existing one — "Q3 Invoice," "Invoice October," "Invoices-2026," all subtly different labels for the same category. Within a year you'd have hundreds of one-off folders and no way to reliably find anything, because you'd have to remember the exact label you used that day. A fixed, small list of folders forces consistency — you're always choosing from the same set of doors, not inventing a new one each time.
+
+> **Why this matters:** Later, when you search your notes, the system relies on this same folder structure and its labels as part of how it narrows down relevant results. If the folders are inconsistent, retrieval quality suffers before the AI even gets involved — the mess is upstream of the technology.
+
 Write your final taxonomy before moving to Step 0.2.
 
 ### Step 0.2 — Define your content types
@@ -129,6 +133,8 @@ tags: [ai-systems, information-architecture]
 ```
 
 The frontmatter (between `---`) is metadata. The `<!-- Why this matters -->` comment is the single most important field for retrieval quality — it captures your intention when you saved the item. Notes without it are harder to surface accurately.
+
+> **Why this matters (the concept, not just the field):** A raw quote often uses different words than the question you'll later ask about it. Writing down *why* you saved something, in your own words, gives the search system an extra piece of text that's more likely to overlap with how you'll phrase a future question — because it's already written in your natural language, not the source's. It's the difference between filing a business card with just a name on it versus filing it with a sticky note that says "met at the AI PM meetup, follow up about their eval tooling" — the sticky note is what makes it findable months later when you've forgotten the name.
 
 ---
 
@@ -196,6 +202,8 @@ No code here either. This is your second context architecture exercise. The syst
 - What *skills* (modes of response) it can activate
 - What it should never do
 
+> **Analogy:** Think of the system prompt as the job description and house rules you'd hand a new employee on day one — before they've seen a single customer. It tells them what kinds of requests they'll get (content types), which "mode" to switch into depending on the request (skills), and what's off-limits no matter what (never do X). Without it, even a very capable person (or model) has to guess what's expected — and guesses are inconsistent.
+
 ### Step 2.1 — Create the system prompt
 
 Create the folder `prompts/`. Inside it, create `system.txt`. Paste this starter and edit it to match your actual taxonomy:
@@ -261,6 +269,8 @@ OUTPUT FORMAT
 ```
 
 This prompt will evolve. Whenever retrieval surfaces the right notes but the response feels wrong, the fix lives here.
+
+> **Why this matters:** This is a genuinely useful distinction to internalize — "retrieval" (did the system find the right notes?) and "response quality" (did it use those notes well?) are two separate failure points, and they need two separate fixes. If the right notes came back but the answer still felt off — too listy, missing the point, wrong tone — that's a system prompt problem, not a search problem. Fixing the wrong layer wastes time and can even make the real problem harder to spot.
 
 ---
 
@@ -374,7 +384,11 @@ Expected: the agent distinguishes your own notes (type:insight, type:note) from 
 
 The keyword search in Phase 3 works well for 20–50 notes. When your collection grows beyond that, semantic search (which finds relevance by meaning, not just matching words) becomes important.
 
+> **Analogy:** Keyword search is like Ctrl+F — it only finds notes containing the literal words you typed. If your note says "human error" but you ask "how do I stop users from making mistakes," keyword search finds nothing, even though the note is a perfect answer, because none of those exact words appear in it. Semantic search instead converts text into a list of numbers (an "embedding") that represents *meaning*, so texts that mean similar things land close together even if they don't share a single word — like a map where distance represents conceptual closeness, not physical location.
+
 Do this phase only after Phase 3 is working reliably.
+
+> **Why sequencing matters:** Keyword search is simpler to build and debug, so getting it working first gives you a reliable baseline — a known-good version to compare against later. Jumping straight to semantic search without that baseline would make it harder to tell whether a bad result is a real problem or just how the system always behaves.
 
 ### Step 5.1 — Install ChromaDB
 

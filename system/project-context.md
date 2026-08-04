@@ -20,8 +20,12 @@ A RAG system over my own saved articles, notes, and reading.
 I want to be able to ask natural language questions and get
 relevant passages back from my own collection.
 
+> **Plain-English restatement:** "RAG" stands for Retrieval-Augmented Generation. In plain terms: instead of an AI model answering purely from what it was trained on, it first *retrieves* the most relevant pieces of your own notes, then *generates* an answer grounded in that retrieved content. It's the difference between asking a well-read friend a question from memory versus asking them to first pull the exact right book off your shelf and then answer using it.
+
 Tech stack: Python, local vector store (Chroma preferred),
 simple CLI or script interface. No UI needed.
+
+> **Plain-English restatement:** A "vector store" is a specialized database built to store and search embeddings (the lists of numbers representing meaning — see `system/interview-prep/04-semantic-search-concepts-briefing.md`). Chroma is one such vector store that runs locally on your own machine, free, with no external account needed — the alternative would be a hosted/cloud vector database that costs money and requires setup.
 
 ---
 
@@ -33,6 +37,8 @@ By end of this build:
 - At least one failure diagnosed and fixed
 - Honest assessment of where retrieval works and where it fails
 - A log of what I tried, what broke, and what I changed
+
+> **Why this matters for interviews:** Notice this goal list explicitly includes "at least one failure diagnosed and fixed" and "honest assessment of where retrieval fails" — not just "build a working system." That's deliberate: a system that never breaks and is never measured critically doesn't teach you anything, and doesn't give you a real story to tell in an interview. The 82% → 96% keyword-vs-semantic comparison and the three-bug eval debugging story (see `system/session-log.md` Session 6 and `system/evaluation/DIAGNOSIS.md`) exist because this goal was set upfront, not because things happened to go wrong.
 
 ---
 
@@ -101,3 +107,5 @@ Append each session's entries — do not overwrite previous ones.
 - Overclaiming: I will not say "I built RAG" in an interview
   unless I can explain what chunking strategy I used,
   why I chose it, and what broke when I tried something else
+
+> **Why this matters for interviews:** "I built RAG" is a claim anyone can make; being able to walk through the actual chunking rule (see `system/session-log.md` Session 8), why a 30-line threshold was chosen empirically rather than guessed, and what the eval score showed before and after (see `system/evaluation/DIAGNOSIS.md`) is what separates a real hands-on answer from a buzzword. Interviewers for AI PM roles typically probe past the headline claim precisely to test for this kind of depth.

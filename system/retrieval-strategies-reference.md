@@ -27,6 +27,10 @@ Researchers query a knowledge base containing:
 - Treating all sections equally (some are inherently more important)
 - Requiring manual labeling at scale
 
+> **Analogy:** Think of the knowledge base as a giant filing cabinet with thousands of folders, some containing a single index card (a short note) and some containing a 50-page report. "Retrieval" is the job of a research assistant who has to open the *right* folder and pull the *right page* every time someone asks a question — without dumping the whole cabinet on the desk (too much noise) and without saying "nothing here" when the answer is actually two drawers away (missed the folder because it used a different word).
+
+Each strategy below is really just a different theory of *how that research assistant should decide which folder to open*. Some rely on literal word-matching (a strict but fast assistant), others try to understand what you actually mean (a more expensive but more helpful assistant). Reading through them in order roughly traces the evolution from "cheapest, dumbest" to "most expensive, smartest."
+
 ---
 
 ## Strategy 1: Query-Word Density
@@ -53,6 +57,8 @@ Section B (Results): "CRISPR treatment showed 60% cell death..." → 3 word matc
 - No notion of *why* a section is relevant, just word overlap
 
 **When to use:** Tiny knowledge bases (< 50 documents) or first-pass filtering before a smarter ranker.
+
+> **Analogy:** This is the Ctrl+F approach to search — the assistant literally counts how many times your exact words appear on each page and hands you the page with the most hits. It has no idea what any of the words *mean*, so a section that talks about "cell death" instead of "cell viability" scores zero, even though it's clearly the answer you wanted.
 
 ---
 
@@ -93,6 +99,8 @@ Section titled "Discussion of Results" with matching content:
 
 **When to use:** Medium-sized KBs with structured documents (research papers, tech docs). This is **likely LeapSpace's starting point**.
 
+> **Analogy:** This is the assistant learning to also read the tabs on the folders, not just the contents inside. A folder tab that literally says "Error Handling" is a much stronger clue than a folder that merely mentions the word "error" once in paragraph three — so the assistant gives tab matches extra weight. It's a cheap, common-sense upgrade over pure word-counting, but it only helps if whoever labeled the folders used good, descriptive tabs in the first place.
+
 ---
 
 ## Strategy 3: TF-IDF Scoring
@@ -127,6 +135,8 @@ Section B: "the" 20x
 - Domain-dependent (in biology, "CRISPR" is common; in medicine, rare — same term, different importance)
 
 **When to use:** Large, stable document collections (institutional repositories, published corpora). Too expensive for personal, evolving KBs.
+
+> **Analogy:** Imagine the assistant has read *every* folder in the cabinet ahead of time and quietly noted which words are rare and distinctive versus which words show up everywhere (like "the" or "study"). So when your query contains a rare word like "plasticity," the assistant treats a match on it as a much stronger signal than a match on a common word like "results." The catch: this only works if the assistant has already read the *entire* cabinet cover-to-cover first — expensive to set up, and it has to re-read everything whenever a new folder is added.
 
 ---
 
@@ -163,6 +173,8 @@ Query: "How did they do it?" → Intent: [process/methods]
 
 **When to use:** Specialized research tool focused on one domain (e.g., biomedical papers). Too rigid for mixed-content knowledge bases.
 
+> **Analogy:** This is like the assistant pre-sorting every page in the cabinet into labeled trays — "Findings," "Methods," "Background" — so that when you ask "what did they find?" it only searches the "Findings" tray instead of every page in every folder. Powerful when documents reliably follow the same template (like formal papers), but it falls apart the moment someone hands over a messy hand-written note or a scanned PDF that doesn't sort neatly into any tray.
+
 ---
 
 ## Strategy 5: Positional Bias
@@ -190,6 +202,8 @@ Discussion (position 8): 1.0x multiplier
 - Doesn't work for unstructured notes
 
 **When to use:** Quick heuristic when structure is unknown. Rarely useful in isolation.
+
+> **Analogy:** This is the assistant assuming "whatever's on the first page must be the most important" — a decent rule of thumb for skimming (abstracts usually *are* a good summary), but a bad rule if you specifically asked for the fine print buried on page 8. It's a shortcut, not a real understanding of relevance.
 
 ---
 
@@ -224,6 +238,8 @@ Query: "Why didn't this approach work?"
 
 **When to use:** Mature systems after product-market fit. Too complex and risky for early-stage.
 
+> **Analogy:** Instead of just reading your words, the assistant now tries to guess the *purpose* behind your question — "are you asking because you want to reuse their data, or because you're trying to understand why an experiment failed?" — and pulls different folders depending on the guess. It's the most human-like behavior on this list, but also the riskiest: if the assistant guesses your intent wrong, it confidently hands you the *completely* wrong folder instead of just a mediocre one.
+
 ---
 
 ## Strategy 7: Semantic/Embedding-Based Search
@@ -254,6 +270,10 @@ Section B embedding: [0.1, 0.3, 0.2, ...] → cosine similarity: 0.45
 - Evaluating semantic search harder than keyword (no simple relevance metrics)
 
 **When to use:** After keyword search foundation is proven. This is Phase 5 of this project.
+
+> **Analogy:** This is the meaning-map idea — instead of the assistant checking your words against the folder's words, both your question and every section get converted into a "point on a meaning-map" (the embedding). The assistant just measures which points are closest together, the same way you'd find the nearest coffee shop on a physical map. "Stop users from making mistakes" and "error messages / human error design" land near each other on this map even though they don't share a single word, because they're conceptually close.
+
+> **Learning:** Notice the tradeoff pattern repeating: every step up in retrieval *quality* (Strategy 1 → 7) costs something in *interpretability* — with keyword density you can always explain "why ranked high" (count the matching words), but with embeddings the "why" lives inside millions of opaque numbers. This exact tradeoff — accuracy vs. explainability — comes up constantly in AI product decisions, not just search.
 
 ---
 
@@ -286,6 +306,8 @@ final_score = (
 - Maintenance burden: each signal has own bugs
 
 **When to use:** After you have evidence that multiple signals help. Start simple; add complexity only when data justifies it.
+
+> **Analogy:** This is the assistant using several clues at once instead of just one — like a detective weighing a fingerprint (40%), a witness statement (20%), and a security-camera timestamp (20%) rather than relying on any single piece of evidence. It can be more accurate than any one clue alone, but it also means five different things can each go slightly wrong and quietly drag the final answer off course, and untangling *which* clue misled you becomes much harder than with a single-signal system.
 
 ---
 
@@ -333,3 +355,5 @@ There's no single "best" strategy — it depends on:
 - **Team** (data science team vs. single PM)
 
 The progression from keyword → hybrid → semantic is natural and proven across industry.
+
+> **Big picture:** Every strategy on this page is answering the same question — "how does the assistant decide which folder to open?" — just with progressively more expensive and more human-like reasoning, from literally counting words up to genuinely understanding meaning. Picking the right one isn't about finding the objectively "best" strategy; it's about matching the tool's sophistication to your actual constraints (data size, budget, team, and how forgiving your users are of a wrong answer).

@@ -20,9 +20,13 @@ You are helping the user organize and import multiple quotes, excerpts, or artic
 
 4. **Organize internally by theme, with self-contained sections.** Use `## Section Headers` to group related concepts within a file. Each `##` section must be understandable on its own (no "as mentioned above") and capped at roughly 40–60 lines — this is deliberate prep for semantic search chunking later (see `system/semantic-search-chunking-plan.md`). Sections become the retrieval unit; the file stays the citation unit.
 
+   > **Why this matters:** Later, semantic search will break each file into these `##` sections and search them individually — so if a section only makes sense alongside the section before it ("as discussed above"), the search engine will retrieve it in isolation and it'll read as confusing or incomplete. Writing each section to stand alone now avoids having to rewrite everything later.
+
 5. **No speculation.** If you don't know the source, mark it as "source unknown" or ask the user. Don't guess or invent sources.
 
 6. **Never finalize AI-drafted "Why this matters" without user confirmation.** See the dedicated workflow below — this field is meant to capture the user's authentic reasoning, not the agent's inferred rationale.
+
+   > **Why this matters:** If Claude guesses at why a note mattered and the user never checks it, the note ends up carrying a plausible-sounding rationale that isn't actually the user's own thinking — which defeats the point of a personal knowledge base and could read as rehearsed rather than understood if quoted back in an interview.
 
 ---
 

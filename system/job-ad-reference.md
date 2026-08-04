@@ -75,7 +75,11 @@ Read closely, this role does **not** own the full retrieval pipeline:
 - **Owns:** project spaces (the workspace), the project memory system, personalisation, tools to keep/reuse findings, and the overall knowledge-management strategy.
 - **Partners with (does not own):** document upload/storage (a separate team), and **core retrieval** (also a separate team). The PM "partners on how the AI reasons across a researcher's knowledge" but doesn't build retrieval directly.
 
+> **Analogy:** Think of it like a head chef vs. the farm that supplies ingredients. The chef (this PM role) decides the menu, how dishes are composed, and what the kitchen prioritizes — but doesn't personally run the farm (core retrieval) or the delivery trucks (upload/storage). The chef still needs to know enough about ingredient quality and supply chains to have an informed opinion and push back when something's off, without literally growing the vegetables.
+
 This matters for interview framing: this project (hands-on RAG, chunking, retrieval evaluation) demonstrates the *technical fluency* the role needs to partner credibly with the retrieval and data science teams — not a claim that the role itself writes retrieval code. That framing matches the ad's own line: "comfortable reasoning about architecture and technical trade-offs... without writing production code."
+
+> **Why this matters for interviews:** If asked "did you build the retrieval system LeapSpace uses in production?", the honest and correct answer is no — this project is practice for the *judgment* the role requires (spotting a retrieval failure, understanding why chunking choices affect it, reading an evaluation result), not a claim of having built LeapSpace's actual pipeline.
 
 ### Does the product actually integrate with Notion/Obsidian/Zotero/Mendeley?
 
@@ -88,6 +92,8 @@ Two lines matter most here:
 2. Responsibilities: *"Anticipate what the product roadmap will ask of the personal-knowledge layer (new project workflows, collaboration, **richer integrations**) and keep the strategy ahead of it."* — this is the stronger signal. It explicitly names "richer integrations" as a category of future roadmap demand this role is expected to anticipate and plan for.
 
 **Conclusion:** Integrations with tools like Zotero/Mendeley/Obsidian/Notion are a **plausible, anticipated future direction** — the ad tells the candidate to expect and plan for "richer integrations" as the personal-knowledge layer matures, and the specific tools named as requirements are exactly the tools such integrations would plausibly target. But this is still an **inference about direction, not a confirmed commitment** — the ad never names a specific integration, tool, or protocol as a build target. **MCP specifically is my own inference about a plausible mechanism** (it's becoming a standard way products connect to a user's existing tools as of 2026), not anything stated or implied by the ad or the demo videos.
+
+> **Plain-English restatement:** The ad is basically saying "expect that we'll eventually need to plug into the tools researchers already use" — it's a heads-up about a future need, not a spec sheet for a specific feature. It's the difference between a manager telling you "budget for headcount growth next year" (a real signal to plan around) versus handing you an approved job requisition (a confirmed commitment). Reading the first as the second — and confidently describing a feature that was never actually promised — would be the mistake to avoid here.
 
 Cross-check against the product demos ([leapspace-product-reference.md](leapspace-product-reference.md)): today's shipped product only supports session-scoped PDF uploads (max 5 per conversation), with no persistent external-tool sync shown. This gap — between "anticipate richer integrations" (ad) and "upload up to 5 PDFs per conversation" (current product) — **is itself a good interview talking point**: it shows the distance between today's feature set and the ad's "living knowledge base" ambition, and this role exists to define the staged path across that gap.
 
@@ -115,6 +121,8 @@ This models exactly the "frame a problem space... articulate the user outcome, n
 **What happened:** We consolidated 14 fragmented files into one coherent Design of Everyday Things file to preserve narrative and citeability — good for humans, bad for AI retrieval.
 
 **Why it matters for this role:** This is the exact tension LeapSpace will face at scale. Researchers want their knowledge organized coherently (one research project space, one author's complete work), but the AI needs to be able to reason over it precisely. This is the "parent-child chunking" / "citation unit vs. retrieval unit" problem.
+
+> **Analogy:** Imagine a single 300-page book sitting on a shelf versus that same book cut into 40 index cards, one per idea. The whole book is what you'd hand someone to cite as "the source" — coherent, easy to reference, respects the author's argument. But if you're trying to answer "what did this book say about error messages specifically," searching 40 short, focused index cards finds the answer far more precisely than searching one giant book where "error messages" is buried on page 214. The knowledge base needs both: the book (for citation) and the index cards (for precise retrieval) — which is exactly what "citation unit vs. retrieval unit" means.
 
 **Interview angle:** "I built a personal knowledge base with the same constraints LeapSpace faces — how to organize knowledge for human coherence and AI reasoning simultaneously. I hit the retrieval problem firsthand, diagnosed why it was happening, and fixed it. That experience taught me the real-world complexity of 'how the AI reasons across a researcher's knowledge' beyond the theory."
 
