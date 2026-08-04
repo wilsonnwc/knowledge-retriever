@@ -10,6 +10,8 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 import anthropic
+import chromadb
+from openai import OpenAI
 
 # Load API key from .env
 load_dotenv()
@@ -25,6 +27,9 @@ PROJECT_ROOT = Path(__file__).parent.parent
 NOTES_DIR = PROJECT_ROOT / "notes"
 PROMPTS_DIR = PROJECT_ROOT / "prompts"
 SYSTEM_PROMPT_PATH = PROMPTS_DIR / "system.txt"
+CHROMA_DIR = PROJECT_ROOT / "system" / "chroma_db"
+COLLECTION_NAME = "notes"
+EMBEDDING_MODEL = "text-embedding-3-small"
 
 if not SYSTEM_PROMPT_PATH.exists():
     print(f"ERROR: System prompt not found at {SYSTEM_PROMPT_PATH}")
@@ -90,6 +95,35 @@ def search_notes(query: str) -> str:
     context_parts = []
     for item in relevant_items[:5]:  # Top 5 matches
         context_parts.append(f"=== {item['path']} ===\n{item['preview']}\n")
+
+    return "\n".join(context_parts)
+
+
+def search_notes_semantic(query: str) -> str:
+    """
+    Semantic search across all notes using embeddings stored in Chroma.
+    Same output shape as search_notes() so it's a drop-in swap for evaluation.
+    """
+    if not CHROMA_DIR.exists():
+        return "[No Chroma index found — run scripts/embed.py first]"
+
+    openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    chroma_client = chromadb.PersistentClient(path=str(CHROMA_DIR))
+    collection = chroma_client.get_or_create_collection(name=COLLECTION_NAME)
+
+    query_embedding = openai_client.embeddings.create(
+        model=EMBEDDING_MODEL, input=[query]
+    ).data[0].embedding
+
+    results = collection.query(query_embeddings=[query_embedding], n_results=5)
+
+    if not results["ids"] or not results["ids"][0]:
+        return "[No matching notes found]"
+
+    context_parts = []
+    for doc, meta in zip(results["documents"][0], results["metadatas"][0]):
+        source_path = meta.get("source_file", "unknown")
+        context_parts.append(f"=== {source_path} ===\n{doc}\n")
 
     return "\n".join(context_parts)
 

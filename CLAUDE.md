@@ -37,13 +37,14 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
 
 - **Phase 1–3:** Complete. ~26 real notes indexed across 10 topic folders.
 - **Phase 3.5:** Complete. Keyword search evaluated against 28 test queries — corrected baseline is **82% precision@5** (see "Where to Find Learnings" below for why the first raw result was 18%, and what that taught us).
-- **Retrieval:** Keyword-only search (no semantic/embedding search yet)
+- **Phase 4:** Complete. Semantic search (OpenAI `text-embedding-3-small` + Chroma) built and evaluated on the same locked 28-query set — **96% precision@5** vs. 82% keyword baseline. See `system/session-log.md` Session 10.
+- **Retrieval:** Both keyword (`search_notes()`) and semantic (`search_notes_semantic()`) search implemented in `scripts/chat.py`; semantic is the stronger of the two per evaluation
 - **Interface:** CLI chat via `scripts/chat.py`
-- **Next:** Implement semantic search (embeddings), re-run the same 28 test queries, compare precision@5 before/after
+- **Next:** Project-scoped organization (Roadmap item 2 below)
 
 ## Roadmap (updated 2026-08-03, after re-reading full job ad)
 
-1. **Finish semantic search** — chunking strategy decision → embeddings → Chroma → re-run 28-query test set → compare precision@5 vs. 82% keyword baseline (current phase)
+1. **Finish semantic search** — chunking strategy decision → embeddings → Chroma → re-run 28-query test set → compare precision@5 vs. 82% keyword baseline. **Complete: 96% precision@5.**
 2. **Project-scoped organization** — explore a "project" concept alongside the existing topic taxonomy. This is the most direct match to the actual squad this role would join (LeapSpace's "project spaces" — see `system/job-ad-reference.md`). Sequenced after semantic search because it depends on the retrieval approach being stable first (a "project" boundary likely affects chunk metadata/scoping).
 3. **Evaluation-as-practice writeup** — reframe the existing 18%→82% debugging work as ongoing evaluation *practice* (define → commission → act on results), matching the ad's "commission the evaluations, read the results, turn them into prioritised improvements" language. Mostly narrative/documentation work on what's already built, not new build work — can slot in anytime.
 
@@ -105,8 +106,8 @@ knowledge-retriever/
 | Component | Tool | Why |
 |---|---|---|
 | Notes format | Markdown with YAML frontmatter | Simple, portable, human-readable |
-| Retrieval (current) | Keyword search | Lightweight, works for small knowledge bases |
-| Retrieval (next) | Chroma + embeddings | Semantic search — the core RAG concept |
+| Retrieval (keyword) | Keyword search | Lightweight baseline; still available as `search_notes()` |
+| Retrieval (semantic) | Chroma + OpenAI `text-embedding-3-small` | The stronger retrieval method per evaluation; `search_notes_semantic()` |
 | AI responses | Claude API (claude-opus-4-1-latest) | Thinking partner responses over retrieved context |
 | Env variables | python-dotenv | Loads API key from `.env` |
 

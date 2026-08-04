@@ -1,0 +1,441 @@
+{
+  "test_set_size": 28,
+  "precision_at_5": 0.9642857142857143,
+  "queries_correct": 27,
+  "by_difficulty": {
+    "easy": {
+      "total": 3,
+      "found": 3
+    },
+    "hard": {
+      "total": 16,
+      "found": 15
+    },
+    "medium": {
+      "total": 9,
+      "found": 9
+    }
+  },
+  "results": [
+    {
+      "id": 1,
+      "query": "What makes good strategy vs bad strategy?",
+      "expected": "bad-strategy or three-parts-of-good-strategy",
+      "retrieved": [
+        "bad-strategy",
+        "three-parts-of-good-strategy",
+        "leverage-points",
+        "Product Management in Practice (Strategy)",
+        "the-mom-test"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "easy"
+    },
+    {
+      "id": "1b",
+      "query": "What should my strategy be?",
+      "expected": "bad-strategy or three-parts-of-good-strategy or Product Management in Practice (Strategy)",
+      "retrieved": [
+        "leverage-points",
+        "three-parts-of-good-strategy",
+        "Product Management in Practice (Strategy)",
+        "bad-strategy",
+        "the-mom-test"
+      ],
+      "found": true,
+      "rank": 2,
+      "difficulty": "hard"
+    },
+    {
+      "id": 2,
+      "query": "How do I talk to customers about their problems?",
+      "expected": "the-mom-test",
+      "retrieved": [
+        "customer-support-4-as",
+        "the-mom-test",
+        "the-mom-test",
+        "the-mom-test",
+        "Product Management in Practice (Communication)"
+      ],
+      "found": true,
+      "rank": 2,
+      "difficulty": "easy"
+    },
+    {
+      "id": "2b",
+      "query": "Tell me about customer research",
+      "expected": "the-mom-test or analytics-framework or accepting-negative-findings",
+      "retrieved": [
+        "the-mom-test",
+        "the-mom-test",
+        "customer-support-4-as",
+        "the-mom-test",
+        "pm-playbook-shipping-ai-features"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": 3,
+      "query": "How should I handle user mistakes in design?",
+      "expected": "design-of-everyday-things",
+      "retrieved": [
+        "design-of-everyday-things",
+        "pm-playbook-shipping-ai-features",
+        "design-of-everyday-things",
+        "design-of-everyday-things",
+        "pm-playbook-shipping-ai-features"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": "3b",
+      "query": "What's important in product design?",
+      "expected": "design-of-everyday-things",
+      "retrieved": [
+        "design-of-everyday-things",
+        "product-sense-definition",
+        "lean-start-up",
+        "design-of-everyday-things",
+        "pm-managing-time"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": 4,
+      "query": "What's the best way to organize a knowledge base?",
+      "expected": "Information architecture",
+      "retrieved": [
+        "Information architecture is the foundation AI is starving for",
+        "the-mom-test",
+        "Product Management in Practice (Strategy)",
+        "pm-playbook-shipping-ai-features",
+        "Product Management in Practice (general)"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": "4b",
+      "query": "How should I organize things?",
+      "expected": "design-of-everyday-things",
+      "retrieved": [
+        "Product Management in Practice (general)",
+        "the-mom-test",
+        "the-mom-test",
+        "Product Management in Practice (Strategy)",
+        "three-parts-of-good-strategy"
+      ],
+      "found": false,
+      "rank": null,
+      "difficulty": "hard"
+    },
+    {
+      "id": 5,
+      "query": "How do I know what will matter to my stakeholders?",
+      "expected": "identifying-key-stakeholders or stakeholder-communication-approach",
+      "retrieved": [
+        "identifying-key-stakeholders",
+        "four-questions-execs-ask",
+        "stakeholder-communication-approach",
+        "Product Management in Practice (Stakeholder)",
+        "Product Management in Practice (Strategy)"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": "5b",
+      "query": "Tell me about stakeholders",
+      "expected": "identifying-key-stakeholders or stakeholder-communication-approach or human-relational-intelligence or Product Management in Practice (Stakeholder) or four-questions-execs-ask",
+      "retrieved": [
+        "identifying-key-stakeholders",
+        "stakeholder-communication-approach",
+        "Product Management in Practice (Stakeholder)",
+        "human-relational-intelligence",
+        "four-questions-execs-ask"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
+      "id": 6,
+      "query": "How should I spend my time as a PM?",
+      "expected": "pm-managing-time",
+      "retrieved": [
+        "pm-managing-time",
+        "Product Management in Practice (Communication)",
+        "Product Management in Practice (Communication)",
+        "human-relational-intelligence",
+        "Product Management in Practice (Strategy)"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
+      "id": "6b",
+      "query": "What should I focus on as a product manager?",
+      "expected": "pm-managing-time or Product Management in Practice (Strategy)",
+      "retrieved": [
+        "pm-managing-time",
+        "Product Management in Practice (Communication)",
+        "Product Management in Practice (Strategy)",
+        "Product Management in Practice (Communication)",
+        "Product Management in Practice (Communication)"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": 7,
+      "query": "How do I stop users from making mistakes?",
+      "expected": "design-of-everyday-things",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "design-of-everyday-things",
+        "pm-playbook-shipping-ai-features",
+        "pm-playbook-shipping-ai-features",
+        "Product Management in Practice (Communication)"
+      ],
+      "found": true,
+      "rank": 2,
+      "difficulty": "hard"
+    },
+    {
+      "id": "7b",
+      "query": "What's important about errors?",
+      "expected": "design-of-everyday-things",
+      "retrieved": [
+        "design-of-everyday-things",
+        "accepting-negative-findings",
+        "design-of-everyday-things",
+        "pm-playbook-shipping-ai-features",
+        "pm-playbook-shipping-ai-features"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
+      "id": 8,
+      "query": "What's the difference between strategy and goals?",
+      "expected": "bad-strategy",
+      "retrieved": [
+        "bad-strategy",
+        "three-parts-of-good-strategy",
+        "Product Management in Practice (Strategy)",
+        "leverage-points",
+        "four-questions-execs-ask"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
+      "id": "8b",
+      "query": "Explain strategy",
+      "expected": "bad-strategy or three-parts-of-good-strategy or Product Management in Practice (Strategy)",
+      "retrieved": [
+        "three-parts-of-good-strategy",
+        "leverage-points",
+        "bad-strategy",
+        "Product Management in Practice (Strategy)",
+        "Product Management in Practice (Communication)"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "easy"
+    },
+    {
+      "id": 9,
+      "query": "How should teams make decisions together?",
+      "expected": "communication or pm-managing-time",
+      "retrieved": [
+        "Product Management in Practice (Communication)",
+        "Product Management in Practice (Strategy)",
+        "Product Management in Practice (Communication)",
+        "stakeholder-communication-approach",
+        "Product Management in Practice (Stakeholder)"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": "9b",
+      "query": "What makes good teamwork?",
+      "expected": "Product Management in Practice (Communication) or Product Management in Practice (general)",
+      "retrieved": [
+        "Product Management in Practice (Communication)",
+        "Product Management in Practice (general)",
+        "Product Management in Practice (Strategy)",
+        "Product Management in Practice (Communication)",
+        "human-relational-intelligence"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": 10,
+      "query": "What should a product roadmap show?",
+      "expected": "four-questions-execs-ask",
+      "retrieved": [
+        "Product Management in Practice (Stakeholder)",
+        "four-questions-execs-ask",
+        "Product Management in Practice (Strategy)",
+        "lean-start-up",
+        "stakeholder-communication-approach"
+      ],
+      "found": true,
+      "rank": 2,
+      "difficulty": "medium"
+    },
+    {
+      "id": "10b",
+      "query": "Tell me about roadmaps",
+      "expected": "four-questions-execs-ask or Product Management in Practice (Stakeholder)",
+      "retrieved": [
+        "four-questions-execs-ask",
+        "Product Management in Practice (Stakeholder)",
+        "human-relational-intelligence",
+        "Product Management in Practice (Strategy)",
+        "three-parts-of-good-strategy"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
+      "id": 11,
+      "query": "How should I run A/B tests for AI features?",
+      "expected": "pm-playbook-shipping-ai-features",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "pm-playbook-shipping-ai-features",
+        "magical-experiences",
+        "pm-playbook-shipping-ai-features",
+        "pm-playbook-shipping-ai-features"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
+      "id": "11b",
+      "query": "How do I test if an AI feature works?",
+      "expected": "pm-playbook-shipping-ai-features or the-mom-test",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "magical-experiences",
+        "pm-playbook-shipping-ai-features",
+        "Information architecture is the foundation AI is starving for",
+        "pm-playbook-shipping-ai-features"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": 12,
+      "query": "What's different about building AI products versus traditional software?",
+      "expected": "pm-playbook-shipping-ai-features or magical-experiences",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "pm-playbook-shipping-ai-features",
+        "generalists-comeback",
+        "Information architecture is the foundation AI is starving for",
+        "magical-experiences"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": "12b",
+      "query": "Tell me about AI products",
+      "expected": "pm-playbook-shipping-ai-features or magical-experiences or product-sense-definition",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "pm-playbook-shipping-ai-features",
+        "Information architecture is the foundation AI is starving for",
+        "generalists-comeback",
+        "magical-experiences"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": 13,
+      "query": "What communication skills should a product manager develop?",
+      "expected": "Product Management in Practice (Communication) or creating-clarity",
+      "retrieved": [
+        "Product Management in Practice (Communication)",
+        "pm-managing-time",
+        "Product Management in Practice (Communication)",
+        "human-relational-intelligence",
+        "Product Management in Practice (Communication)"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
+      "id": "13b",
+      "query": "How do I communicate better?",
+      "expected": "Product Management in Practice (Communication) or Product Management in Practice (Stakeholder)",
+      "retrieved": [
+        "Product Management in Practice (Communication)",
+        "the-mom-test",
+        "Product Management in Practice (Communication)",
+        "Product Management in Practice (Communication)",
+        "creating-clarity"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "id": 14,
+      "query": "How do I know if a problem is worth solving?",
+      "expected": "the-mom-test",
+      "retrieved": [
+        "the-mom-test",
+        "the-mom-test",
+        "Product Management in Practice (Strategy)",
+        "the-mom-test",
+        "four-questions-execs-ask"
+      ],
+      "found": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
+      "id": "14b",
+      "query": "Which problems should I focus on?",
+      "expected": "the-mom-test or Product Management in Practice (Stakeholder)",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "the-mom-test",
+        "the-mom-test",
+        "pm-playbook-shipping-ai-features",
+        "the-mom-test"
+      ],
+      "found": true,
+      "rank": 2,
+      "difficulty": "hard"
+    }
+  ]
+}

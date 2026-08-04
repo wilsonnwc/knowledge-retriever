@@ -38,6 +38,29 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 10 — 2026-08-04 (continued from Session 9)
+
+**Phase/step completed:** Built `embed.py` (chunking → OpenAI embeddings → Chroma upsert, deterministic IDs), committed it, then built `search_notes_semantic()` in `chat.py` with the same input/output shape as the existing keyword `search_notes()`. Re-ran the locked 28-query eval set through semantic search and compared against the 82% keyword baseline.
+
+**Where to pick up next:** Phase 4 (semantic search) is functionally done and measured. Next per the roadmap: Project-scoped organization (Phase 2 in `CLAUDE.md`'s roadmap).
+
+**What worked:**
+- Semantic search scored **96% precision@5 (27/28)** vs. keyword's 82% (23/28) on the exact same locked test set — a clean, directly comparable before/after number
+- The interface match (`search_notes_semantic()` returns the same `=== path ===` block format as `search_notes()`) meant no changes were needed to the eval scoring logic itself — only which search function it called
+- Deterministic chunk IDs from `embed.py` meant no duplicate-chunk issues when testing
+
+**What didn't work / got stuck on:**
+- One failure: Q4b ("How should I organize things?") expected `design-of-everyday-things` but retrieved PM-practice/strategy content instead. Read as a genuinely ambiguous query rather than a retrieval bug — "organize things" has no strong semantic anchor to information architecture specifically.
+
+**Learnings:**
+- **A locked, reusable test set is what makes a before/after comparison credible.** Because the 28 queries and their expected answers were frozen before either retrieval method was built, the 82% → 96% jump is a real measured improvement, not a number that could have been shaped by hindsight.
+- **Semantic search's biggest wins were on "hard" queries requiring synonymy** (e.g. "stop users from making mistakes" → design-of-everyday-things' error-handling content, zero literal keyword overlap) — exactly the retrieval gap semantic search is supposed to close, and exactly the kind of concrete example worth having ready for an interview.
+- **A good evaluation should still produce failures.** 96% with one legitimately ambiguous miss is a more credible, interview-ready result than 100% would have been — it shows the eval set isn't rigged and that ambiguous queries are being called out as ambiguous, not silently "fixed."
+
+**Open questions to come back to:**
+- Should `system/chroma_db/` be `.gitignore`d? It's local, regenerable (via `embed.py`), and somewhat binary — likely yes, but not yet decided
+- Wire `run_evaluation.py`/canary-set automation (carried over from Session 9)
+---
 ### Session 9 — 2026-08-04 (continued from Session 8)
 
 **Phase/step completed:** Built and verified `scripts/chunking.py` implementing the Session 8 decision. Caught a real bug while testing (line-counting mismatch: manual review counted raw file lines, code counted non-blank body lines — recalibrated threshold from 40 to 30 using actual measured values). Then discussed chunking robustness at scale: how commercial RAG systems handle content variety we haven't seen (token-based sizing, recursive/structural splitting with fallback, format-aware parsers per content type, canary-set evaluation). Built the paragraph-break fallback path for long, unstructured notes (no `##`, no bold-labels) — the one real gap our hand-tuned rule had. Verified against synthetic unstructured content and confirmed zero regressions on the real 26-note corpus.
