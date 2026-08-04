@@ -38,6 +38,29 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 11 — 2026-08-04 (continued from Session 10)
+
+**Phase/step completed:** Doc-elaboration pass across all 18 non-notes project docs (plan.md, CLAUDE.md, every file in `system/` and `system/interview-prep/` and `system/evaluation/`, excluding the raw template). Added an analogy, plain-English restatement, or "why this matters" callout to every non-trivial technical/product claim, so the material can be recited from memory in an interview rather than re-read cold. No facts, numbers, or decisions were changed — verified as pure additions via diff review.
+
+**Where to pick up next:** Project-scoped organization (Roadmap item 2 in `CLAUDE.md`) — unchanged from Session 10's next step; this session was a documentation pass, not new build work.
+
+**What worked:**
+- Splitting the 18 files across 4 parallel background agents by natural cluster (interview-prep write-ups; retrieval/chunking reference docs; logs and diagnosis; planning/taxonomy docs) let the elaboration happen concurrently instead of one file at a time
+- Requiring each agent to self-QA every file twice against a 9/10 rubric (example-per-claim, interview-usable, still scannable, zero factual drift, tone match) caught a real problem before it shipped: one agent's first CLAUDE.md draft invented specific precision numbers to illustrate a concept, and its own QA pass flagged and replaced it with an accurate generic explanation
+- Verifying `git diff --stat` showed only additions (a handful of minor deletions from light rewording) across all 18 files was a fast, objective way to confirm no facts were silently altered, on top of the agents' own self-reported QA scores
+
+**What didn't work / got stuck on:**
+- N/A — all 4 agents completed cleanly on the first dispatch; no rework needed beyond the one self-caught fabrication above
+
+**Learnings:**
+- **A documentation "richness" preference is itself worth codifying as a standing instruction, not a one-off request.** After seeing one example of the desired explanation style, the instruction ("always include an example/analogy, never just the technical description alone") was added to the global CLAUDE.md and memory system before doing the bulk elaboration — so future sessions default to this depth without being asked again.
+  > **Analogy:** This is the difference between fixing one typo versus updating the style guide so the same typo doesn't recur. A single elaborated reply solves today's request; codifying the preference solves every future request of the same kind.
+- **Requiring self-QA with a numeric bar (9/10, minimum 2 passes) produces a meaningfully different result than "please double check your work."** The one caught fabrication (invented precision numbers) only surfaced because the agent was forced to explicitly score itself against "is anything factually changed or invented" as a discrete rubric item, not left as a vague quality gate.
+- **Parallel background agents work well when file sets are genuinely disjoint.** Splitting by file, with each agent owning a fixed list and no overlap, meant merging back into the main repo was a simple four-way copy with zero merge conflicts — the upfront planning cost (deciding the split) paid for itself at merge time.
+
+**Open questions to come back to:**
+- None blocking — ready to move to Project-scoped organization (Roadmap item 2)
+---
 ### Session 10 — 2026-08-04 (continued from Session 9)
 
 **Phase/step completed:** Built `embed.py` (chunking → OpenAI embeddings → Chroma upsert, deterministic IDs), committed it, then built `search_notes_semantic()` in `chat.py` with the same input/output shape as the existing keyword `search_notes()`. Re-ran the locked 28-query eval set through semantic search and compared against the 82% keyword baseline.
