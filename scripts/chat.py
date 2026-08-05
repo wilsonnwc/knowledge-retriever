@@ -246,6 +246,83 @@ def search_notes_semantic(query: str, project: str = None) -> str:
     return "\n".join(context_parts)
 
 
+def suggest_related(note_path: str, top_n: int = 3) -> str:
+    """
+    Suggest existing notes related to `note_path`, grouped by whether they
+    share a project with it. `note_path` must already be embedded (run
+    embed.py after adding/editing the note, before calling this).
+
+    Chroma stores one entry per chunk, not per note, so a naive top-N query
+    could return several chunks from the same other note. To avoid that,
+    every chunk of the target note is queried, and for each *other* note
+    the single highest-similarity chunk becomes that note's score — then
+    notes are ranked by that one score, not by raw chunk count.
+
+    This collection uses Chroma's default distance metric (squared L2, not
+    cosine — confirmed by inspecting raw values: a chunk matched against
+    itself returns distance 0.0, and unrelated chunks return ~0.8-1.0+,
+    which is L2's range, not cosine distance's ~0-2 range). Lower distance
+    is more related; there is no clean "similarity score" to report without
+    also changing the collection's indexing metric, so results are ranked
+    and displayed by raw distance instead of inventing a similarity number.
+    """
+    if not CHROMA_DIR.exists():
+        return "[No Chroma index found — run scripts/embed.py first]"
+
+    rel_path = str(Path(note_path).resolve().relative_to(NOTES_DIR.resolve()))
+
+    chroma_client = chromadb.PersistentClient(path=str(CHROMA_DIR))
+    collection = chroma_client.get_or_create_collection(name=COLLECTION_NAME)
+
+    target = collection.get(where={"source_file": rel_path}, include=["embeddings"])
+    if not target["ids"]:
+        return f"[No embeddings found for {rel_path} — run scripts/embed.py first]"
+
+    target_projects = set()
+    full_text = (NOTES_DIR / rel_path).read_text(encoding="utf-8")
+    target_projects.update(_note_projects(full_text))
+
+    best_by_note = {}  # source_file -> (distance, meta)
+    for embedding in target["embeddings"]:
+        results = collection.query(query_embeddings=[embedding], n_results=len(target["ids"]) + 10)
+        for dist, meta in zip(results["distances"][0], results["metadatas"][0]):
+            other_file = meta.get("source_file", "unknown")
+            if other_file == rel_path:
+                continue
+            if other_file not in best_by_note or dist < best_by_note[other_file][0]:
+                best_by_note[other_file] = (dist, meta)
+
+    if not best_by_note:
+        return "[No other notes to compare against]"
+
+    same_project, other = [], []
+    for other_file, (dist, meta) in best_by_note.items():
+        other_projects = set(_note_projects(f"projects: {meta.get('projects', '')}"))
+        if target_projects and target_projects & other_projects:
+            same_project.append((other_file, dist))
+        else:
+            other.append((other_file, dist))
+
+    same_project.sort(key=lambda x: x[1])  # lower distance = more related
+    other.sort(key=lambda x: x[1])
+
+    lines = [f"Related notes for '{rel_path}' (lower distance = more related):\n"]
+    if target_projects:
+        lines.append(f"Same project ({', '.join(sorted(target_projects))}):")
+        if same_project:
+            for f, d in same_project[:top_n]:
+                lines.append(f"  - {f} (distance: {d:.2f})")
+        else:
+            lines.append("  (none)")
+        lines.append("\nOther projects / unassigned:")
+    else:
+        lines.append("(no projects tagged — showing closest matches overall)")
+    for f, d in other[:top_n]:
+        lines.append(f"  - {f} (distance: {d:.2f})")
+
+    return "\n".join(lines)
+
+
 def chat(project: str = None):
     """
     Main chat loop.
@@ -319,11 +396,14 @@ if __name__ == "__main__":
     parser.add_argument("--new-project", metavar="NAME", help="Register a new active project")
     parser.add_argument("--archive-project", metavar="NAME", help="Archive an existing project")
     parser.add_argument("--project", metavar="NAME", help="Scope chat search to one project")
+    parser.add_argument("--suggest-related", metavar="NOTE_PATH", help="Suggest notes related to NOTE_PATH")
     args = parser.parse_args()
 
     if args.new_project:
         new_project(args.new_project)
     elif args.archive_project:
         archive_project(args.archive_project)
+    elif args.suggest_related:
+        print(suggest_related(args.suggest_related))
     else:
         chat(project=args.project)

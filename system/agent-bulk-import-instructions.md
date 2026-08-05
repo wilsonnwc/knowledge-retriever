@@ -250,6 +250,7 @@ design-of-everyday-things.md
 2. **Summarize back to the user** what was created, organized by topic folder
 3. **Note any sources marked "unknown"** that the user should verify later
 4. **Flag any tagging decisions** you made (e.g., "I tagged X as job-application because...")
+5. **Ask whether to check for related notes.** If the new note carries a `projects:` tag, ask: "Want me to check for related notes in [project name(s)]?" If yes: re-run `scripts/embed.py` first (the new note must be embedded before it can be compared), then run `scripts/chat.py --suggest-related <path-to-new-note>` and present the results. Skip this step silently if the note has no `projects:` tag — don't ask.
 
 ---
 
