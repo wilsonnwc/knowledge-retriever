@@ -38,6 +38,34 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 12 — 2026-08-05
+
+**Phase/step completed:** Built and evaluated "project spaces" (Roadmap item 2, Layer 2 of the four-layer stack analysis in `system/job-ad-reference.md`): a `projects:` frontmatter field (many-to-many, separate from `tags:`), a `system/projects.md` registry tracking active/archived status, `--new-project`/`--archive-project` CLI lifecycle commands, and a `--project` filter added to both `search_notes()` and `search_notes_semantic()`. Also imported two new Kindle-highlight books ("Continuous Discovery Habits," "The Hard Thing About Hard Things") via the bulk-import workflow, both tagged into the one real active project (`leapspace-interview-prep`).
+
+**Where to pick up next:** Decide whether to continue into a small Layer 3 taste (auto-suggesting related notes within a project as new ones are added — deliberately scoped small enough to defend under a follow-up question, not a shallow agentic demo) or first close the interview-defense gap (see Open Questions below).
+
+**What worked:**
+- Researching how Notion, Obsidian (PARA), and Zotero handle "project" as a concept before designing our own — all three independently converged on the same pattern (many-to-many grouping, structurally separate from tags), which gave real, citable evidence for the design rather than an invented convention.
+- Deciding not to force a second project into existence just to have multi-project test data — `leapspace-interview-prep` is genuinely the only active project right now, and that's a legitimate finding, not a gap to paper over.
+- Testing each CLI command's actual output after every step (not just "it ran without error") — this is what caught the registry bug below.
+
+**What didn't work / got stuck on:**
+- Found and fixed a real bug: `load_projects()` originally discarded each project's full detail line (e.g. `created 2026-08-05`) and kept only its status, so *any* registry rewrite silently dropped the date off every project except the one actively being changed. Caught by re-reading the file after an unrelated archive operation, not by the success message (which looked fine). Fixed by preserving each project's full line text and only ever replacing the line for the project actually being modified.
+- Chroma's `where` metadata filter can't cleanly filter on `projects:` because `embed.py` stores frontmatter values as raw strings (e.g. `"[a, b]"`), not real lists — exact-match filtering breaks the moment a note has more than one project. Worked around by over-fetching (25 instead of 5) and filtering client-side in Python before trimming to the top 5.
+- A semantic search query ("acting in a role before hiring") missed the newly-added Horowitz note and surfaced an unrelated one instead, even though the Horowitz note was correctly indexed (verified directly in Chroma — all 9 chunks present). A more distinctively-phrased query retrieved it correctly. Read as a retrieval-ranking/query-phrasing issue, not a defect in the project-filtering feature itself — worth keeping in mind as the note collection grows.
+
+**Learnings:**
+- **A "project" is structurally a many-to-many metadata grouping, not a folder or a tag** — and the reason it needs to be separate from a tag isn't arbitrary: a tag describes something permanently true about a note, while a project describes a temporary purpose tied to a real lifecycle event (an interview happening, a deadline passing). That's *why* projects need an archive mechanism and tags structurally don't.
+  > **Analogy:** a tag is like a book's genre label (always true); a project is like the stack of books on your desk for this week's essay (temporary, purpose-driven, and the same book can sit in a different stack next month for a different essay).
+- **Silent data-loss bugs are the hardest to catch precisely because the obvious test passes.** Archiving the *targeted* project worked correctly every time; a *different*, unrelated project's data was what quietly broke. Only caught by re-reading full file state after an operation, not by trusting a success message — directly reinforces this project's own "never move on without measuring" rule.
+- **Re-reading a dense job-ad passage as a layered architecture (not just a sentence to interpret) surfaced a build-sequencing insight that a single read-through missed:** three separate passages, read together, describe four explicit layers (corpora → project spaces → living knowledge base → goal-oriented research), each stated as being built *from* the one below it — which is also, implicitly, the org chart of who owns what. Full breakdown in `system/job-ad-reference.md` under "The Four-Layer Stack."
+- **AI-executed engineering and AI-suggested product decisions carry different interview risk, and conflating them is itself a risk.** Writing the Python is safe to claim as AI-assisted (matches the ad's own "prototype with AI tools" framing); approving a *design* option (e.g. why `projects:` is a separate field from `tags:`) without independently reconstructing the reasoning is not yet "internalized" and needs active rehearsal before interview, not just recall that it happened. See the new "Ownership Check" section in `system/job-ad-reference.md`.
+
+**Open questions to come back to:**
+- Interview-defense drill deferred, not done: can I explain, closed-book, why `projects:` isn't just another tag? Why many-to-many? Why did semantic search need a client-side workaround? Flagged explicitly in `system/job-ad-reference.md`'s "Ownership Check" section — not yet drilled as of this session.
+- 5 total "Why this matters" TODOs deferred across the two new notes (1 in Continuous Discovery Habits — Ideation section; 4 in The Hard Thing About Hard Things — Product Strategy, Culture as Deliberate Design, Evaluate Executives Holistically, Two Core Skills sections) — need the user's own reasoning, not an AI-drafted guess.
+- Whether to build a small Layer 3 taste (auto-suggested related notes within a project) this session or next, and whether to eventually wire in the `ai-chief-of-staff` project's daily article pipeline as a real "living memory" data source — both flagged as live ideas, neither started.
+---
 ### Session 11 — 2026-08-04 (continued from Session 10)
 
 **Phase/step completed:** Doc-elaboration pass across all 18 non-notes project docs (plan.md, CLAUDE.md, every file in `system/` and `system/interview-prep/` and `system/evaluation/`, excluding the raw template). Added an analogy, plain-English restatement, or "why this matters" callout to every non-trivial technical/product claim, so the material can be recited from memory in an interview rather than re-read cold. No facts, numbers, or decisions were changed — verified as pure additions via diff review.
@@ -201,7 +229,7 @@ At the end of each session, copy the template below and fill it in at the top of
   > **Plain-English restatement:** "Keyword search is limited" and "*this* keyword search is limited" are different claims. Real production keyword search engines boost results using metadata (recency, popularity, tags) — this project's version deliberately skipped that, to keep the baseline simple and easy to reason about. The gaps we found are gaps in *this implementation's choices*, not proof that keyword search as a category is inherently weak.
 - **Test set correctness is itself a design decision.** `expected_source` values must reference real filenames (not folders, not imagined files), and fixing them only after seeing failures needs to be done transparently (grounded in file content, not adjusted to make numbers look better) and the set explicitly locked before the next comparison.
   > **Analogy:** Adjusting your answer key *after* seeing which students failed is fine only if you're correcting a genuine mistake (a typo in the key) — not if you're quietly changing answers to make the class look better. The fix here was audited against the real file contents each time, and then the test set was locked, so nobody could keep "improving" it after the fact.
-- Full bug-by-bug detail lives in `system/interview-prep/03-three-bugs-that-hid-the-baseline.md`; compressed cross-project version in `/Users/wilsonnwc/Tech/AI/learnings.md`.
+- Full bug-by-bug detail lives in `system/interview-prep/03-three-bugs-that-hid-the-baseline.md`; compressed cross-project version in `../learnings.md`.
 
 **Open questions to come back to:**
 - Phase 4: does semantic search close the 5 remaining gaps (Q4, Q5, Q6, Q9, Q9b) — all synonymy/phrasing gaps in nature?

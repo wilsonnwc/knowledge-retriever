@@ -4,6 +4,7 @@ source: "PM Playbook for Shipping AI Features — O'Reilly Radar"
 url: "https://www.oreilly.com/radar/the-pms-playbook-for-shipping-ai-features-that-actually-work-in-production/"
 date: 2026-06-21
 tags: [foundational-knowledge, revisit, job-application]
+projects: [leapspace-interview-prep]
 ---
 
 Common problems:

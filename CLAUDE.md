@@ -18,7 +18,7 @@ Do not ask the user to explain the project. Lead with context, then ask how they
 
 ## Where to Find Learnings & Deeper Analysis
 
-- **Cross-project learnings (short, interview-ready bullets):** `/Users/wilsonnwc/Tech/AI/learnings.md` — see the "Knowledge Retriever" section. This is the fastest way to recall what was learned without re-reading full write-ups.
+- **Cross-project learnings (short, interview-ready bullets):** `../learnings.md` (project root's parent directory) — see the "Knowledge Retriever" section. This is the fastest way to recall what was learned without re-reading full write-ups.
 - **Deeper technical write-ups (this project only):** `system/interview-prep/*.md` — one file per topic, written to be read cold before an interview. Includes the full story of the 18%→82% keyword search debugging journey (`03-three-bugs-that-hid-the-baseline.md`).
 - **Raw evaluation data and full diagnosis:** `system/evaluation/DIAGNOSIS.md` — the complete technical detail behind any evaluation number quoted elsewhere (test set, script, root causes).
 - **Session-by-session history:** `system/session-log.md`.
@@ -35,19 +35,22 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
 
 ## Current Status
 
-- **Phase 1–3:** Complete. ~26 real notes indexed across 10 topic folders.
+- **Phase 1–3:** Complete. 28 real notes indexed across 10 topic folders.
 - **Phase 3.5:** Complete. Keyword search evaluated against 28 test queries — corrected baseline is **82% precision@5** (see "Where to Find Learnings" below for why the first raw result was 18%, and what that taught us).
 - **Phase 4:** Complete. Semantic search (OpenAI `text-embedding-3-small` + Chroma) built and evaluated on the same locked 28-query set — **96% precision@5** vs. 82% keyword baseline. See `system/session-log.md` Session 10.
   > **Plain-English translation:** "Precision@5" means "of the top 5 results a search returns, what fraction were actually relevant?" A perfect 100% would mean every single one of the top 5 results was a good match. Semantic search landing near-perfect (96%) versus keyword search's 82% is the concrete evidence that matching by *meaning* beats matching by *literal words* for this note collection.
-- **Retrieval:** Both keyword (`search_notes()`) and semantic (`search_notes_semantic()`) search implemented in `scripts/chat.py`; semantic is the stronger of the two per evaluation
+- **Phase 5 (Project Spaces):** Complete. `projects:` frontmatter field (many-to-many), `system/projects.md` registry, `--new-project`/`--archive-project` lifecycle, `--project` filter on both search functions. See `system/session-log.md` Session 12. Currently one real active project (`leapspace-interview-prep`) — not artificially expanded to more, per the decision not to force test data that doesn't reflect real use.
+- **Retrieval:** Both keyword (`search_notes()`) and semantic (`search_notes_semantic()`) search implemented in `scripts/chat.py`; semantic is the stronger of the two per evaluation; both support project-scoped filtering
 - **Interface:** CLI chat via `scripts/chat.py`
-- **Next:** Project-scoped organization (Roadmap item 2 below)
+- **Next:** Undecided — either a small Layer 3 "living memory" taste (auto-suggest related notes within a project) or the deferred interview-defense drill (see Session 12 open questions)
 
-## Roadmap (updated 2026-08-03, after re-reading full job ad)
+## Roadmap (updated 2026-08-05, after re-reading full job ad's layer structure)
 
 1. **Finish semantic search** — chunking strategy decision → embeddings → Chroma → re-run 28-query test set → compare precision@5 vs. 82% keyword baseline. **Complete: 96% precision@5.**
-2. **Project-scoped organization** — explore a "project" concept alongside the existing topic taxonomy. This is the most direct match to the actual squad this role would join (LeapSpace's "project spaces" — see `system/job-ad-reference.md`). Sequenced after semantic search because it depends on the retrieval approach being stable first (a "project" boundary likely affects chunk metadata/scoping).
+2. **Project-scoped organization ("project spaces," Layer 2)** — a "project" concept alongside the existing topic taxonomy. This is the most direct match to the actual squad this role would join (LeapSpace's "project spaces" — see `system/job-ad-reference.md`'s "Four-Layer Stack" section). **Complete.**
 3. **Evaluation-as-practice writeup** — reframe the existing 18%→82% debugging work as ongoing evaluation *practice* (define → commission → act on results), matching the ad's "commission the evaluations, read the results, turn them into prioritised improvements" language. Mostly narrative/documentation work on what's already built, not new build work — can slot in anytime.
+4. **Small Layer 3 taste ("living knowledge base")** — one small, fully-defensible mechanic (e.g. auto-suggest related existing notes when a new one is added to a project), deliberately scoped small enough to explain and defend under a follow-up question rather than a shallow agentic demo. Not started. Possible real data source: the `ai-chief-of-staff` project's daily article suggestions.
+5. **Layer 4 stretch ("goal-oriented research")** — an iterative research-loop prototype against a stated goal. Explicitly a stretch step after Layer 3, not a near-term commitment.
 
 > **Why sequencing matters here:** Item 2 depends on item 1 the way you'd wait to paint a room until after you've decided where the walls go — a "project" boundary changes how notes get grouped and searched, so building it before retrieval was stable would have meant redoing it once the approach changed underneath it.
 
@@ -178,7 +181,7 @@ Do not wait for the user to say "update the session log" or "add this to learnin
 | Trigger | Update |
 |---|---|
 | A phase/step is completed or a significant bug is found+fixed | Append a new entry to `system/session-log.md` (see format below) |
-| A surprising, non-obvious, or interview-worthy insight comes up | Append a compressed bullet to `/Users/wilsonnwc/Tech/AI/learnings.md` under the Knowledge Retriever section (match the existing bullet length/format there — do not paste full write-ups) |
+| A surprising, non-obvious, or interview-worthy insight comes up | Append a compressed bullet to `../learnings.md` under the Knowledge Retriever section (match the existing bullet length/format there — do not paste full write-ups) |
 | A finding is deep/technical enough to need a full write-up | Create or update a file in `system/interview-prep/` |
 | A test set, baseline number, or key project fact changes | Update `CLAUDE.md`'s "Current Status" section so it never goes stale |
 

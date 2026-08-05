@@ -106,6 +106,60 @@ This models exactly the "frame a problem space... articulate the user outcome, n
 
 ---
 
+## The Four-Layer Stack (re-read 2026-08-05)
+
+Three passages in the ad, read side by side rather than separately, describe an architecture — not just an ambition — with each layer explicitly built *from* the one below it:
+
+```
+Layer 4 — GOAL-ORIENTED RESEARCH  (the destination, later stage)
+  "a researcher states what they are trying to achieve and LeapSpace
+   runs iterative research loops against that goal, drawing on
+   everything it already knows about their work"
+      ↑ built FROM ↓
+
+Layer 3 — LIVING KNOWLEDGE BASE  (the ambition, mid stage)
+  "structured, current, and grown from every project, source,
+   and finding they work through"
+      ↑ built FROM ↓
+
+Layer 2 — PROJECT SPACES  (near-term, what the squad ships NOW)
+  "the workspace where a researcher's questions, documents, and
+   findings live together, and the foundation the personal-knowledge
+   experience grows from"
+      ↑ reasons over ↓
+
+Layer 1 — TWO SEPARATE CORPORA, owned by OTHER teams
+  "personal knowledge" (upload/storage team)  +  "wider scientific
+  corpus" (core retrieval team)
+```
+
+**Why the arrangement matters:** "the foundation the personal-knowledge experience grows from" (Layer 2→3) and "from there the work points toward" (Layer 3→4) aren't loose language — they're the ad telling you the build sequence, which is also the org chart. You're not hired to build Layer 1 (two other teams' job) or Layer 4 (a later stage). You're hired to build **Layer 2**, with a defensible staged opinion about how it becomes 3 and 4.
+
+**What's confirmed vs. inferred:**
+- Confirmed (direct quote): the ad explicitly names Layer 4 as "the long-term ambition" and states the squad is "currently focused on project spaces" (Layer 2) — the destination and the near-term focus are both stated as fact, not inferred.
+- My inference, not the ad's claim: the *mechanism* of how an agentic research loop would actually work (scheduling, goal-inference, etc.). The ad gives the destination, not the mechanism — don't overclaim specifics beyond "iterative research loops against a stated goal."
+
+### What the two "partner with" lines actually specify
+
+These aren't boilerplate cross-team-collaboration language — each is phrased differently in a way that draws the exact boundary of what you own:
+
+- **"Partner with the team that owns document upload and storage on how LeapSpace *surfaces and reasons over* uploaded documents. Upload and storage functionality stays with that team."** → You don't own *getting documents in* (the plumbing). You own *what happens once they're in* — how a project space represents an uploaded document, lets a researcher organize/tag it, decide it belongs to Project X.
+- **"Partner with the team that owns core retrieval on how the AI reasons across a researcher's knowledge and the wider corpus."** → You don't own *how search finds things* (the algorithm). You own *the boundary conditions search operates within* — what counts as "this researcher's knowledge," what "project" means as a retrievable unit. You specify the shape of the problem; retrieval solves the mechanics.
+
+> **Analogy:** if core retrieval is the line cook executing a technique, you're the person specifying "the sauce from table 4's earlier course, reduced, plus tonight's catch" — not cooking, but you have to understand the ingredients well enough to specify that combination, defend it, and notice when the result doesn't match.
+
+### The one item on the "anticipate" list you can prototype solo
+
+> "Anticipate what the product roadmap will ask of the personal-knowledge layer (**new project workflows**, collaboration, richer integrations) and keep the strategy ahead of it."
+
+"New project workflows" is named first, and it's the only item of the three requiring zero dependency on a partner team or infra you don't have — collaboration needs multi-user infra, integrations need external-tool access. A project workflow (create/name/scope/archive a project) is pure interaction design over metadata already fully in your control. This is the precise, literal reason the knowledge-retriever "project spaces" build (frontmatter + create/archive lifecycle) is a real rehearsal of a named ad phrase — not just a generically-relevant RAG exercise.
+
+### How far past Layer 2 to go for interview prep
+
+Decided 2026-08-05: build Layer 2 fully first (and evaluate it, per this project's own rule — never move on without measuring). Only after that, optionally take one small, fully-explainable taste of Layer 3 (e.g. auto-suggesting related notes within a project as new ones are added — a tiny rehearsal of the AI "maintaining" the knowledge base) — deliberately small enough to defend under a follow-up question, not a shallow demo that gestures at agentic behavior without earning it. Layer 4 (goal-oriented loops) is explicitly a stretch step after that, not a same-session commitment. A promising real-world hook for Layer 3/4, flagged for later, not yet built: feeding the "living memory" mechanic from the `ai-chief-of-staff` project's daily article suggestions, since that's a genuine ongoing "knowledge growing over time" input rather than a synthetic test case.
+
+---
+
 ## Exact Mapping to This Knowledge-Retriever Project
 
 1. **Knowledge base organization** — how to structure researcher knowledge (this project's taxonomy, consolidation vs. fragmentation)
@@ -137,3 +191,40 @@ This models exactly the "frame a problem space... articulate the user outcome, n
 - **Evaluation discipline** — tested the system, found it broken, diagnosed root cause, didn't ship it broken
 - **Cross-disciplinary reasoning** — can talk about both human UX (researchers organizing knowledge) and technical constraints (embeddings, chunking, retrieval)
 - **Honest scoping of inference vs. fact** — e.g. the Notion/Obsidian integration question above: reasoned to a plausible answer, clearly flagged what's inference vs. confirmed
+
+---
+
+## Ownership Check: What Was Actually My Decision vs. AI-Executed (added 2026-08-05)
+
+Built during the "project spaces" (Layer 2) session: `projects:` frontmatter field, `system/projects.md` registry, create/archive CLI workflow, project-scoped search filtering in both keyword and semantic search. Before reusing this build as interview evidence, it's worth being precise about which parts were genuine product judgment on my part vs. AI-executed engineering — because "I designed it, an AI coding tool implemented it, I verified the results" is honest and matches the ad's own "prototype with AI tools" framing, but claiming design decisions I didn't actually reason through myself would not be.
+
+**Legitimately mine (safe to claim directly):**
+- The push to go beyond Layer 2 into a taste of Layer 3/4, over Claude's initial "stay scoped" recommendation — I proposed the AI Chief of Staff connection myself and negotiated the sequencing compromise (Layer 2 fully done + evaluated first, then decide). This is the most authentically product-judgment moment of the session.
+- The archive-vs-delete choice (note labels stay forever, only registry status changes) — I engaged directly with this tradeoff rather than defaulting to the recommended option.
+- Pushing back on the "just tell me the plan" framing to ask harder questions about LeapSpace's actual direction (the four-layer stack reading, the "partner with" boundary analysis) — the original push to interrogate the job ad more deeply, rather than accept a first-pass reading, was mine.
+
+**AI-executed, needs active reconstruction before claiming as "my reasoning" (not yet drilled as of 2026-08-05):**
+- Why `projects:` is a separate frontmatter field rather than folded into `tags:` — the tags-vs-projects lifecycle argument (permanent property vs. temporary purpose-bound grouping, tied to a real end-state like an interview or deadline)
+- Why projects are many-to-many rather than one-per-note — the Zotero "collections as playlists" evidence and why a single-project-per-note model would have been a false constraint
+- Why semantic search needed a client-side filtering workaround while keyword search didn't — the Chroma metadata-as-string limitation and the over-fetch-then-filter fix
+
+**Self-test before the interview:** can you explain, closed-book, why `projects:` isn't just another tag? If not yet, that's the one to drill first — it's the decision most likely to get a natural interviewer follow-up ("why not just use a tag for that?").
+
+> **Why this matters:** the interview risk isn't "did you write the Python yourself" (the ad doesn't require that) — it's being caught flat if asked to defend a design choice you can't actually reconstruct the reasoning for. The fix is rehearsing the reasoning now, not avoiding AI-assisted builds.
+
+---
+
+## Claude/ChatGPT as a Reference Point for LeapSpace's "End Game" (added 2026-08-05)
+
+**The observation:** the ad's language — "the product's memory of a researcher's projects," "a living knowledge base... grown from every project, source, and finding," "richer integrations" — maps structurally onto a pattern Claude and ChatGPT's own consumer apps already ship: **Projects** (a named container scoping conversations/files/instructions), **Memory** (facts retained across sessions), and **Connectors** (pulling in Drive, GitHub, Slack, etc.).
+
+**Why this pattern showing up twice isn't a coincidence:** "project + memory + connectors" has become the default shape of a mature AI-assisted knowledge tool in 2026, across consumer AI apps and specialized tools alike — because they're all solving the same underlying problem (an AI needs durable, scoped, external context to be useful beyond one chat). Recognizing that LeapSpace's ambition rhymes with an already-shipped pattern is useful; mistaking the rhyme for a confirmed roadmap is not.
+
+**Where the comparison breaks, and why that's the actual insight:** the shape is borrowed technology; the differentiation is domain-specific trust. Claude/ChatGPT's connectors reach into a professional's *general* tools because their users span every profession. LeapSpace's "wider scientific corpus" (100M+ Scopus-indexed papers via ScienceDirect) is a specialized, pre-integrated, trust-verified corpus a general assistant doesn't have — paired with Trust Cards and Claim Radar, features that exist specifically because researchers need to *verify* claims, not just retrieve them. A general chatbot user rarely needs a citation's relationship to a claim labeled Supporting/Contradicting/Neutral; a researcher does.
+
+**The interview framing (verbatim, ready to use):**
+> "The 'project space with memory and integrations' pattern the ad describes isn't unique to LeapSpace — it's the same shape Claude and ChatGPT have already shipped for general knowledge work. I think that's a useful reference point for imagining the mechanics, since I can go observe how a shipped version of this pattern actually behaves. But LeapSpace's differentiated bet isn't the pattern itself — it's applying it to a trust-verified scientific corpus, which is a harder problem than general knowledge work because researchers need to verify claims, not just retrieve them."
+
+**Why this framing works, specifically for this ad's own stated requirements:** it demonstrates "frame a problem space... articulate the user outcome, not just the feature list" (the ad's own requirement) by naming *what's* differentiated (trust layer) rather than just listing features (projects, memory, connectors). It also correctly avoids overclaiming — see the Notion/Obsidian integration question earlier in this doc for the prior instance of the same discipline (label inference as inference, don't present a structural analogy as a confirmed fact about LeapSpace's actual build plan).
+
+**Suggested next step, not yet done:** open Claude's own Projects feature directly and observe its actual mechanics (what persists, how scoping behaves, what a user does to add something to a project) — turns "I've read about this pattern" into "I've directly observed one working implementation of it," which is a stronger evidentiary basis than description alone.
