@@ -31,6 +31,7 @@ PROMPTS_DIR = PROJECT_ROOT / "prompts"
 SYSTEM_PROMPT_PATH = PROMPTS_DIR / "system.txt"
 CHROMA_DIR = PROJECT_ROOT / "system" / "chroma_db"
 PROJECTS_PATH = PROJECT_ROOT / "system" / "projects.md"
+GOALS_DIR = PROJECT_ROOT / "system" / "goals"
 COLLECTION_NAME = "notes"
 EMBEDDING_MODEL = "text-embedding-3-small"
 PROJECTS_START = "<!-- PROJECTS_START -->"
@@ -334,6 +335,323 @@ def suggest_related(note_path: str, top_n: int = 3) -> str:
     return "\n".join(lines)
 
 
+def _slugify(text: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+    return slug[:60]
+
+
+def _ask_claude(prompt: str, max_tokens: int = 1024) -> str:
+    response = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=max_tokens,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.content[0].text
+
+
+def _closest_match(candidate: str, valid_items: list, threshold: float = 0.6):
+    """
+    Find the item in valid_items that candidate most likely refers to, using
+    word-overlap similarity — not an exact string match, since Claude may
+    paraphrase an item slightly even when "re-checking" the same list.
+    Returns None if nothing clears the threshold, which is the case that
+    matters here: it means Claude invented an item outside the real list,
+    and it must be discarded rather than silently counted.
+    """
+    candidate_words = set(re.findall(r"[a-z0-9']+", candidate.lower()))
+    if not candidate_words:
+        return None
+
+    best_item, best_score = None, 0.0
+    for item in valid_items:
+        item_words = set(re.findall(r"[a-z0-9']+", item.lower()))
+        if not item_words:
+            continue
+        overlap = len(candidate_words & item_words)
+        score = overlap / min(len(candidate_words), len(item_words))
+        if score > best_score:
+            best_item, best_score = item, score
+
+    return best_item if best_score >= threshold else None
+
+
+def _validate_against(items_with_sources: list, valid_items: list, valid_sources: list = None) -> list:
+    """
+    Keep only the items that genuinely match something in valid_items,
+    mapped to that item's exact original wording — enforces in code what
+    the prompt only requests, since a model asked to "only use items from
+    this list" will still sometimes invent new ones. Returns (item, source)
+    tuples; a cited source is dropped (set to None) unless it's a path we
+    actually retrieved this round — a citation to a file that was never
+    shown to the model can't be trusted any more than an invented item.
+    """
+    validated = []
+    for item, source in items_with_sources:
+        match = _closest_match(item, valid_items)
+        if not match or match in [v[0] for v in validated]:
+            continue
+        if source and valid_sources and source not in valid_sources:
+            source = None
+        validated.append((match, source))
+    return validated
+
+
+def _parse_labeled_list(text: str, label: str) -> list:
+    """
+    Pull items out of a "LABEL:" block in Claude's response, one per
+    numbered/bulleted line, up to the next all-caps "WORD:" header or
+    end of text. If a line ends with "[source: <path>]", the item and
+    source are split apart — item text first, source path second (source
+    is None if no citation was given).
+    """
+    block_match = re.search(rf"{label}:\s*\n(.*?)(?:\n[A-Z ]+:|\Z)", text, re.DOTALL)
+    if not block_match:
+        return []
+    items = []
+    for line in block_match.group(1).split("\n"):
+        line = line.strip()
+        m = re.match(r"^(?:[-*]|\d+\.)\s+(.+)", line)
+        if not m:
+            continue
+        item_text = m.group(1).strip()
+        source_match = re.search(r"\[source:\s*(.+?)\]\s*$", item_text)
+        if source_match:
+            item_text = item_text[:source_match.start()].strip()
+            items.append((item_text, source_match.group(1).strip()))
+        else:
+            items.append((item_text, None))
+    return items
+
+
+def _extract_retrieved_paths(context: str) -> list:
+    """Pull the source-file paths out of search_notes_semantic()'s '=== path ===' headers."""
+    return re.findall(r"^=== (.+?) ===$", context, re.MULTILINE)
+
+
+def scope_goal(goal: str, max_exchanges: int = 4) -> str:
+    """
+    Iteratively narrow a stated goal until Claude judges it specific enough
+    for gap-finding against a personal notes corpus to be diagnostic (i.e.
+    actually about what's IN or MISSING from the notes, not generic
+    advice-giving Claude would produce the same way with zero notes at
+    all) — OR the user says to stop narrowing and use the current version.
+
+    Like research_goal()'s own stopping condition, the real end state is
+    "the model judges this specific enough" or "the user says stop"; the
+    max_exchanges cap is a safety net against endless back-and-forth, not
+    the real termination condition.
+    """
+    current = goal
+    for _ in range(max_exchanges):
+        prompt = f"""A user wants to run a gap-analysis of their personal notes against this goal:
+
+GOAL: {current}
+
+A goal is "too broad" for this purpose if answering it would rely mostly on
+general knowledge of the topic rather than on what's actually inside a
+specific person's notes — i.e. the gap list would look about the same
+whether or not their notes existed at all.
+
+If the goal is too broad, respond with exactly one line:
+SUGGESTION: <a narrower, still-plausible version of this same goal, scoped
+to something a personal notes collection could realistically be checked
+against>
+
+If the goal is already specific enough, respond with exactly:
+SPECIFIC"""
+
+        response_text = _ask_claude(prompt, max_tokens=200)
+        if "SUGGESTION:" not in response_text:
+            return current
+
+        suggestion = response_text.split("SUGGESTION:", 1)[1].strip()
+        print(f"\nThat goal is broad enough that the gap list would look similar with or without your notes.")
+        print(f"Suggested narrower framing: \"{suggestion}\"")
+        choice = input("Use this (y), keep current and stop narrowing (n), or type your own to keep refining: ").strip()
+        if choice.lower() == "n":
+            return current
+        if choice.lower() == "y" or not choice:
+            current = suggestion
+        else:
+            current = choice
+        # loop again — Claude re-judges whichever goal we now have
+
+    print(f"Reached {max_exchanges} rounds of narrowing — using the current version.")
+    return current
+
+
+def research_goal(goal: str, max_rounds: int = 3) -> str:
+    """
+    Layer 4 taste: an iterative research loop against a stated goal.
+
+    Round 1 asks Claude to lay out the FULL set of things the goal needs
+    (the denominator) and mark each covered/open against retrieved notes —
+    not just a one-sided "what's missing" list, which has no real total to
+    report a coverage tally against. Later rounds re-search only on the
+    open items and re-ask against the SAME original list, so the
+    denominator stays stable across rounds. Stops early if a round closes
+    zero additional items (diminishing returns) — the max_rounds cap is a
+    safety net against noisy output looping forever, not the real stopping
+    condition.
+
+    Explicitly a small personal prototype, not a claim this role would
+    build Layer 4 — the job ad names it as the company's long-term
+    destination, built by a later stage, not this squad's near-term scope.
+    """
+    scoped_goal = scope_goal(goal)
+
+    GOALS_DIR.mkdir(parents=True, exist_ok=True)
+    goal_path = GOALS_DIR / f"{_slugify(scoped_goal)}.md"
+
+    round_log = []
+    all_items = []          # the full, stable requirements list (the denominator)
+    covered_sources = {}    # item -> source file path (or None if uncited)
+    open_items = []
+
+    for round_num in range(1, max_rounds + 1):
+        queries = open_items if round_num > 1 else [scoped_goal]
+
+        seen_context = set()
+        combined_context = []
+        for query in queries:
+            context, _ = search_notes_semantic(query)
+            if context not in seen_context:
+                seen_context.add(context)
+                combined_context.append(context)
+        retrieved = "\n".join(combined_context)
+        note_count = len(combined_context)
+        retrieved_paths = _extract_retrieved_paths(retrieved)
+
+        if round_num == 1:
+            prompt = f"""GOAL: {scoped_goal}
+
+RETRIEVED NOTES:
+{retrieved}
+
+List the full set of things someone would need to know or have in order to
+achieve this goal — not just what's missing, everything, including what IS
+already covered by the retrieved notes above.
+
+Mark an item COVERED only if the retrieved notes substantively address it
+(real detail, not a passing one-word mention). If a note only briefly
+touches on something without real depth, list it under OPEN instead.
+For every COVERED item, cite the exact "=== path ===" it came from, in the
+format shown below.
+
+Respond in exactly this format:
+COVERED:
+- <item substantively covered by the retrieved notes> [source: <path>]
+OPEN:
+- <item NOT covered, or only mentioned in passing>"""
+        else:
+            prompt = f"""GOAL: {scoped_goal}
+
+FULL REQUIREMENTS LIST (established in round 1):
+{chr(10).join(f"- {item}" for item in all_items)}
+
+NEWLY RETRIEVED NOTES (searched using the previously-open items as queries):
+{retrieved}
+
+Re-check each item in the full requirements list above against these newly
+retrieved notes. Mark an item COVERED only if the notes substantively
+address it, not just mention it in passing. For every COVERED item, cite
+the exact "=== path ===" it came from. Respond in exactly this format,
+using the SAME items from the full requirements list — do not invent new
+items:
+COVERED:
+- <item now substantively covered, from the full list above> [source: <path>]
+OPEN:
+- <item still not covered, from the full list above>"""
+
+        response_text = _ask_claude(prompt)
+        round_covered = _parse_labeled_list(response_text, "COVERED")
+        round_open = _parse_labeled_list(response_text, "OPEN")
+
+        if round_num == 1:
+            all_items = [item for item, _ in round_covered] + [item for item, _ in round_open]
+
+        # Enforce in code what the prompt only requests: discard anything
+        # that isn't a genuine match to the round-1 list, so covered can
+        # never exceed len(all_items). A cited source is only trusted if
+        # it's a path actually retrieved this round. An uncited "covered"
+        # claim is no more trustworthy than an invented item, so it's
+        # demoted — dropped here, meaning it falls through to open below.
+        validated_covered = _validate_against(round_covered, all_items, retrieved_paths)
+        covered_sources.update({item: source for item, source in validated_covered if source})
+
+        # open_items is always computed fresh from the two things already
+        # trusted (all_items, covered_sources) rather than patched together
+        # from this round's lists — anything not covered is open, full
+        # stop, so nothing can be double-counted or silently dropped.
+        open_items = [i for i in all_items if i not in covered_sources]
+
+        round_log.append({
+            "round": round_num,
+            "queries": list(queries),
+            "notes_retrieved": note_count,
+            "covered_count": len(covered_sources),
+            "open_count": len(open_items),
+        })
+
+        print(f"Round {round_num}: searched {len(queries)} quer{'y' if len(queries) == 1 else 'ies'}, "
+              f"retrieved {note_count} note section(s) -> {len(covered_sources)}/{len(all_items)} covered, "
+              f"{len(open_items)} still open")
+
+        if round_num > 1 and len(covered_sources) == round_log[-2]["covered_count"]:
+            print("No new items covered this round — stopping early.")
+            break
+        if not open_items:
+            print("All items covered — stopping early.")
+            break
+
+    # Persist goal + round history to a markdown file
+    lines = [f"# Research Goal: {scoped_goal}", ""]
+    if scoped_goal != goal:
+        lines.append(f"(Originally stated as: \"{goal}\")")
+        lines.append("")
+    lines.append(f"Last run: {date.today().isoformat()}")
+    lines.append("")
+    lines.append(f"## Coverage: {len(covered_sources)}/{len(all_items)}")
+    lines.append("")
+    lines.append("### Covered (with source notes — review these again as part of your goal process)")
+    for item in sorted(covered_sources):
+        source = covered_sources[item]
+        lines.append(f"- {item} — *{source}*" if source else f"- {item} — *(source not cited)*")
+    lines.append("")
+    lines.append("### Still Open")
+    for item in open_items:
+        lines.append(f"- {item}")
+    lines.append("")
+    lines.append("## Round History")
+    for r in round_log:
+        lines.append(f"### Round {r['round']}")
+        lines.append(f"Searched: {', '.join(r['queries'])}")
+        lines.append(f"Notes retrieved: {r['notes_retrieved']}")
+        lines.append(f"Coverage after this round: {r['covered_count']}/{len(all_items)}")
+        lines.append("")
+    goal_path.write_text("\n".join(lines), encoding="utf-8")
+
+    summary = [
+        "",
+        f"Research loop for goal: '{scoped_goal}'",
+        f"Ran {len(round_log)} round(s). Saved to {goal_path.relative_to(PROJECT_ROOT)}.",
+        "",
+        f"Coverage: {len(covered_sources)}/{len(all_items)}",
+    ]
+    if covered_sources:
+        summary.append("Covered (review these notes again as part of your goal process):")
+        for item in sorted(covered_sources):
+            source = covered_sources[item]
+            summary.append(f"  - {item} — {source}" if source else f"  - {item} — (source not cited)")
+    if open_items:
+        summary.append("Remaining gaps:")
+        for g in open_items:
+            summary.append(f"  - {g}")
+    else:
+        summary.append("No remaining gaps — goal is fully covered by current notes.")
+    return "\n".join(summary)
+
+
 def chat(project: str = None):
     """
     Main chat loop.
@@ -413,6 +731,7 @@ if __name__ == "__main__":
     parser.add_argument("--archive-project", metavar="NAME", help="Archive an existing project")
     parser.add_argument("--project", metavar="NAME", help="Scope chat search to one project")
     parser.add_argument("--suggest-related", metavar="NOTE_PATH", help="Suggest notes related to NOTE_PATH")
+    parser.add_argument("--research-goal", metavar="GOAL", help="Run a multi-round gap-finding loop against a stated goal")
     args = parser.parse_args()
 
     if args.new_project:
@@ -421,5 +740,7 @@ if __name__ == "__main__":
         archive_project(args.archive_project)
     elif args.suggest_related:
         print(suggest_related(args.suggest_related))
+    elif args.research_goal:
+        print(research_goal(args.research_goal))
     else:
         chat(project=args.project)

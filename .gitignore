@@ -3,3 +3,6 @@
 __pycache__/
 *.pyc
 system/chroma_db/
+
+# Test-run outputs from --research-goal, regenerated each real run
+system/goals/
