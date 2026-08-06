@@ -140,13 +140,19 @@ def _note_projects(content: str) -> list:
     return [p.strip() for p in match.group(1).split(",") if p.strip()]
 
 
-def search_notes(query: str, project: str = None) -> str:
+def search_notes(query: str, project: str = None) -> tuple:
     """
     Keyword search across all notes with section-aware preview.
     Respects ## section boundaries for consolidated files.
+
+    Returns (context_string, top_note_path). top_note_path is the
+    relative path (str) of the highest-ranked match, or None if there
+    were no matches — lets callers offer follow-on actions (e.g.
+    suggest_related()) on the single best result without re-parsing
+    the formatted context string.
     """
     if not NOTES_DIR.exists():
-        return "[No notes directory found]"
+        return "[No notes directory found]", None
 
     relevant_items = []
     # Strip punctuation so "goals?" matches "goals" in content
@@ -193,20 +199,22 @@ def search_notes(query: str, project: str = None) -> str:
     relevant_items.sort(key=lambda x: x["matches"], reverse=True)
 
     if not relevant_items:
-        return "[No matching notes found]"
+        return "[No matching notes found]", None
 
     # Build context
     context_parts = []
     for item in relevant_items[:5]:  # Top 5 matches
         context_parts.append(f"=== {item['path']} ===\n{item['preview']}\n")
 
-    return "\n".join(context_parts)
+    top_note_path = str(relevant_items[0]["path"])
+    return "\n".join(context_parts), top_note_path
 
 
-def search_notes_semantic(query: str, project: str = None) -> str:
+def search_notes_semantic(query: str, project: str = None) -> tuple:
     """
     Semantic search across all notes using embeddings stored in Chroma.
-    Same output shape as search_notes() so it's a drop-in swap for evaluation.
+    Same output shape as search_notes() so it's a drop-in swap for evaluation:
+    returns (context_string, top_note_path).
 
     Project filtering happens client-side, after retrieval: the `projects`
     frontmatter field is stored by embed.py as a raw string (e.g.
@@ -215,7 +223,7 @@ def search_notes_semantic(query: str, project: str = None) -> str:
     can't drop below 5 results just because non-matching chunks ranked higher.
     """
     if not CHROMA_DIR.exists():
-        return "[No Chroma index found — run scripts/embed.py first]"
+        return "[No Chroma index found — run scripts/embed.py first]", None
 
     openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     chroma_client = chromadb.PersistentClient(path=str(CHROMA_DIR))
@@ -229,21 +237,24 @@ def search_notes_semantic(query: str, project: str = None) -> str:
     results = collection.query(query_embeddings=[query_embedding], n_results=n_results)
 
     if not results["ids"] or not results["ids"][0]:
-        return "[No matching notes found]"
+        return "[No matching notes found]", None
 
     context_parts = []
+    top_note_path = None
     for doc, meta in zip(results["documents"][0], results["metadatas"][0]):
         if project and project not in _note_projects(f"projects: {meta.get('projects', '')}"):
             continue
         source_path = meta.get("source_file", "unknown")
+        if top_note_path is None:
+            top_note_path = source_path
         context_parts.append(f"=== {source_path} ===\n{doc}\n")
         if len(context_parts) == 5:
             break
 
     if not context_parts:
-        return "[No matching notes found]"
+        return "[No matching notes found]", None
 
-    return "\n".join(context_parts)
+    return "\n".join(context_parts), top_note_path
 
 
 def suggest_related(note_path: str, top_n: int = 3) -> str:
@@ -347,7 +358,7 @@ def chat(project: str = None):
             continue
 
         # Search for relevant notes
-        retrieved_context = search_notes(user_input, project=project)
+        retrieved_context, top_note_path = search_notes_semantic(user_input, project=project)
         
         # Build the message with retrieved context
         context_message = f"""
@@ -384,7 +395,12 @@ Please respond based on the retrieved notes above. If no relevant notes exist, s
             })
             
             print(f"\nAssistant: {assistant_message}\n")
-        
+
+            if top_note_path:
+                check = input(f"Check for notes related to '{top_note_path}'? (y/n): ").strip().lower()
+                if check == "y":
+                    print("\n" + suggest_related(str(NOTES_DIR / top_note_path)) + "\n")
+
         except anthropic.APIError as e:
             print(f"\nERROR: {e}\n")
             # Remove the last user message if API call failed

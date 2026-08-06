@@ -35,7 +35,7 @@ def evaluate():
         difficulty = q["difficulty"]
 
         # Run retrieval
-        context = search_notes(query_text)
+        context, _ = search_notes(query_text)
 
         # Parse results: extract file paths from context
         retrieved_files = []
