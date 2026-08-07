@@ -340,12 +340,19 @@ def _slugify(text: str) -> str:
     return slug[:60]
 
 
-def _ask_claude(prompt: str, max_tokens: int = 1024) -> str:
-    response = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=max_tokens,
-        messages=[{"role": "user", "content": prompt}],
-    )
+def _ask_claude(prompt: str, max_tokens: int = 1024, temperature: float = None) -> str:
+    """
+    temperature=None leaves the API default (1) — used for exploratory
+    steps like goal-scoping, where some variation in phrasing/suggestions
+    is fine. Pass temperature=0 for judgment/classification steps (e.g.
+    "is this item covered, yes or no") where a consistent answer matters
+    more than variety.
+    """
+    kwargs = {"model": "claude-haiku-4-5-20251001", "max_tokens": max_tokens,
+              "messages": [{"role": "user", "content": prompt}]}
+    if temperature is not None:
+        kwargs["temperature"] = temperature
+    response = client.messages.create(**kwargs)
     return response.content[0].text
 
 
@@ -380,19 +387,21 @@ def _validate_against(items_with_sources: list, valid_items: list, valid_sources
     Keep only the items that genuinely match something in valid_items,
     mapped to that item's exact original wording — enforces in code what
     the prompt only requests, since a model asked to "only use items from
-    this list" will still sometimes invent new ones. Returns (item, source)
-    tuples; a cited source is dropped (set to None) unless it's a path we
-    actually retrieved this round — a citation to a file that was never
-    shown to the model can't be trusted any more than an invented item.
+    this list" will still sometimes invent new ones. Returns (item, source,
+    caveat) tuples; a cited source is dropped (set to None) unless it's a
+    path we actually retrieved this round — a citation to a file that was
+    never shown to the model can't be trusted any more than an invented
+    item. caveat passes through unchanged — it's Claude's own quality
+    flag, not something code can verify.
     """
     validated = []
-    for item, source in items_with_sources:
+    for item, source, caveat in items_with_sources:
         match = _closest_match(item, valid_items)
         if not match or match in [v[0] for v in validated]:
             continue
         if source and valid_sources and source not in valid_sources:
             source = None
-        validated.append((match, source))
+        validated.append((match, source, caveat))
     return validated
 
 
@@ -400,9 +409,12 @@ def _parse_labeled_list(text: str, label: str) -> list:
     """
     Pull items out of a "LABEL:" block in Claude's response, one per
     numbered/bulleted line, up to the next all-caps "WORD:" header or
-    end of text. If a line ends with "[source: <path>]", the item and
-    source are split apart — item text first, source path second (source
-    is None if no citation was given).
+    end of text. A line may carry a trailing "[source: <path>]" and/or
+    "[caveat: <text>]" tag, in either order; each is split off into its
+    own field (None if absent). caveat is Claude's own flag that a
+    "covered" match is thin/generic rather than a solid, on-topic hit —
+    e.g. a generic discovery-methodology note answering an AI-specific
+    question. Returns (item, source, caveat) tuples.
     """
     block_match = re.search(rf"{label}:\s*\n(.*?)(?:\n[A-Z ]+:|\Z)", text, re.DOTALL)
     if not block_match:
@@ -414,12 +426,20 @@ def _parse_labeled_list(text: str, label: str) -> list:
         if not m:
             continue
         item_text = m.group(1).strip()
+
+        caveat = None
+        caveat_match = re.search(r"\[caveat:\s*(.+?)\]\s*$", item_text)
+        if caveat_match:
+            item_text = item_text[:caveat_match.start()].strip()
+            caveat = caveat_match.group(1).strip()
+
+        source = None
         source_match = re.search(r"\[source:\s*(.+?)\]\s*$", item_text)
         if source_match:
             item_text = item_text[:source_match.start()].strip()
-            items.append((item_text, source_match.group(1).strip()))
-        else:
-            items.append((item_text, None))
+            source = source_match.group(1).strip()
+
+        items.append((item_text, source, caveat))
     return items
 
 
@@ -505,7 +525,7 @@ def research_goal(goal: str, max_rounds: int = 3) -> str:
 
     round_log = []
     all_items = []          # the full, stable requirements list (the denominator)
-    covered_sources = {}    # item -> source file path (or None if uncited)
+    covered_sources = {}    # item -> (source file path or None, caveat or None)
     open_items = []
 
     for round_num in range(1, max_rounds + 1):
@@ -538,9 +558,16 @@ touches on something without real depth, list it under OPEN instead.
 For every COVERED item, cite the exact "=== path ===" it came from, in the
 format shown below.
 
+Additionally, if a COVERED item's source note is generic — i.e. it answers
+the general topic but isn't specific to the goal's actual subject (for
+example, a general product-discovery note "covering" a question that asks
+specifically about AI products) — add a caveat tag noting that, in the
+format shown below. Leave the caveat tag off if the note is genuinely
+on-topic, not just generically related.
+
 Respond in exactly this format:
 COVERED:
-- <item substantively covered by the retrieved notes> [source: <path>]
+- <item substantively covered by the retrieved notes> [source: <path>] [caveat: <why this is thin or off-topic, if applicable>]
 OPEN:
 - <item NOT covered, or only mentioned in passing>"""
         else:
@@ -555,20 +582,26 @@ NEWLY RETRIEVED NOTES (searched using the previously-open items as queries):
 Re-check each item in the full requirements list above against these newly
 retrieved notes. Mark an item COVERED only if the notes substantively
 address it, not just mention it in passing. For every COVERED item, cite
-the exact "=== path ===" it came from. Respond in exactly this format,
-using the SAME items from the full requirements list — do not invent new
-items:
+the exact "=== path ===" it came from.
+
+Additionally, if a COVERED item's source note is generic — i.e. it answers
+the general topic but isn't specific to the goal's actual subject — add a
+caveat tag noting that. Leave the caveat tag off if the note is genuinely
+on-topic.
+
+Respond in exactly this format, using the SAME items from the full
+requirements list — do not invent new items:
 COVERED:
-- <item now substantively covered, from the full list above> [source: <path>]
+- <item now substantively covered, from the full list above> [source: <path>] [caveat: <why this is thin or off-topic, if applicable>]
 OPEN:
 - <item still not covered, from the full list above>"""
 
-        response_text = _ask_claude(prompt)
+        response_text = _ask_claude(prompt, temperature=0)
         round_covered = _parse_labeled_list(response_text, "COVERED")
         round_open = _parse_labeled_list(response_text, "OPEN")
 
         if round_num == 1:
-            all_items = [item for item, _ in round_covered] + [item for item, _ in round_open]
+            all_items = [item for item, _, _ in round_covered] + [item for item, _, _ in round_open]
 
         # Enforce in code what the prompt only requests: discard anything
         # that isn't a genuine match to the round-1 list, so covered can
@@ -577,7 +610,7 @@ OPEN:
         # claim is no more trustworthy than an invented item, so it's
         # demoted — dropped here, meaning it falls through to open below.
         validated_covered = _validate_against(round_covered, all_items, retrieved_paths)
-        covered_sources.update({item: source for item, source in validated_covered if source})
+        covered_sources.update({item: (source, caveat) for item, source, caveat in validated_covered if source})
 
         # open_items is always computed fresh from the two things already
         # trusted (all_items, covered_sources) rather than patched together
@@ -615,8 +648,11 @@ OPEN:
     lines.append("")
     lines.append("### Covered (with source notes — review these again as part of your goal process)")
     for item in sorted(covered_sources):
-        source = covered_sources[item]
-        lines.append(f"- {item} — *{source}*" if source else f"- {item} — *(source not cited)*")
+        source, caveat = covered_sources[item]
+        line = f"- {item} — *{source}*" if source else f"- {item} — *(source not cited)*"
+        if caveat:
+            line += f" — caveat: *{caveat}*"
+        lines.append(line)
     lines.append("")
     lines.append("### Still Open")
     for item in open_items:
@@ -641,8 +677,11 @@ OPEN:
     if covered_sources:
         summary.append("Covered (review these notes again as part of your goal process):")
         for item in sorted(covered_sources):
-            source = covered_sources[item]
-            summary.append(f"  - {item} — {source}" if source else f"  - {item} — (source not cited)")
+            source, caveat = covered_sources[item]
+            line = f"  - {item} — {source}" if source else f"  - {item} — (source not cited)"
+            if caveat:
+                line += f" [caveat: {caveat}]"
+            summary.append(line)
     if open_items:
         summary.append("Remaining gaps:")
         for g in open_items:
