@@ -448,7 +448,7 @@ def _extract_retrieved_paths(context: str) -> list:
     return re.findall(r"^=== (.+?) ===$", context, re.MULTILINE)
 
 
-def scope_goal(goal: str, max_exchanges: int = 4) -> str:
+def scope_goal(goal: str, max_exchanges: int = 4, auto_narrow: bool = False) -> str:
     """
     Iteratively narrow a stated goal until Claude judges it specific enough
     for gap-finding against a personal notes corpus to be diagnostic (i.e.
@@ -460,6 +460,9 @@ def scope_goal(goal: str, max_exchanges: int = 4) -> str:
     "the model judges this specific enough" or "the user says stop"; the
     max_exchanges cap is a safety net against endless back-and-forth, not
     the real termination condition.
+
+    If auto_narrow=True, auto-accepts the first narrowing suggestion instead
+    of prompting the user (used for eval/non-interactive contexts).
     """
     current = goal
     for _ in range(max_exchanges):
@@ -487,7 +490,12 @@ SPECIFIC"""
         suggestion = response_text.split("SUGGESTION:", 1)[1].strip()
         print(f"\nThat goal is broad enough that the gap list would look similar with or without your notes.")
         print(f"Suggested narrower framing: \"{suggestion}\"")
-        choice = input("Use this (y), keep current and stop narrowing (n), or type your own to keep refining: ").strip()
+
+        if auto_narrow:
+            choice = "y"
+        else:
+            choice = input("Use this (y), keep current and stop narrowing (n), or type your own to keep refining: ").strip()
+
         if choice.lower() == "n":
             return current
         if choice.lower() == "y" or not choice:
@@ -500,7 +508,7 @@ SPECIFIC"""
     return current
 
 
-def research_goal(goal: str, max_rounds: int = 3) -> str:
+def research_goal(goal: str, max_rounds: int = 3, auto_narrow: bool = False) -> str:
     """
     Layer 4 taste: an iterative research loop against a stated goal.
 
@@ -517,8 +525,11 @@ def research_goal(goal: str, max_rounds: int = 3) -> str:
     Explicitly a small personal prototype, not a claim this role would
     build Layer 4 — the job ad names it as the company's long-term
     destination, built by a later stage, not this squad's near-term scope.
+
+    If auto_narrow=True, auto-accepts narrowing suggestions instead of
+    prompting the user (used for eval/non-interactive contexts).
     """
-    scoped_goal = scope_goal(goal)
+    scoped_goal = scope_goal(goal, auto_narrow=auto_narrow)
 
     GOALS_DIR.mkdir(parents=True, exist_ok=True)
     goal_path = GOALS_DIR / f"{_slugify(scoped_goal)}.md"
