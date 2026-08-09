@@ -8,6 +8,7 @@ import argparse
 import os
 import re
 import sys
+import time
 from datetime import date
 from pathlib import Path
 from dotenv import load_dotenv
@@ -529,7 +530,52 @@ def research_goal(goal: str, max_rounds: int = 3, auto_narrow: bool = False) -> 
     If auto_narrow=True, auto-accepts narrowing suggestions instead of
     prompting the user (used for eval/non-interactive contexts).
     """
+    # Feature 1: Upfront expectation-setting prompt
+    print("\n" + "="*60)
+    print("📚 Personal Goal Research — Powered by Your Notes")
+    print("="*60)
+    print("""
+This tool searches YOUR NOTES (not the web) for gaps against a goal you define.
+
+How it works:
+  1. You describe a goal or question
+  2. I refine it with you to make sure I understand your focus
+  3. I search your notes across multiple rounds, narrowing gaps each time
+  4. You see what's covered and what's still missing in your notes
+
+Your notes capture YOUR thinking and experience — so gaps that aren't
+covered often mean you need external sources (books, articles, interviews)
+or that's an area you haven't explored yet.
+""")
+
     scoped_goal = scope_goal(goal, auto_narrow=auto_narrow)
+
+    # Feature 2: Process flow explanation
+    print("\n" + "─"*60)
+    print("Starting Research Loop...")
+    print("─"*60)
+    print(f"""
+Now I'll search your notes to find what's covered vs. open for your goal:
+
+📍 GOAL: {scoped_goal}
+
+HOW THE SEARCH WORKS:
+
+  Round 1: Search your notes for items that directly match your goal
+           → Show you what's covered and what's missing
+
+  Round 2: Search specifically for the gaps found in Round 1
+           → Find new coverage. If nothing new appears, stop early.
+
+  Round 3: Final pass on remaining gaps (if Round 2 found new items)
+           → Compile your final results
+
+Why multiple rounds? Each search refines based on what's already covered,
+helping me avoid missing notes by searching too broadly the first time.
+
+Estimated time: 1-2 minutes. Watch for progress updates below.
+""")
+    print("─"*60 + "\n")
 
     GOALS_DIR.mkdir(parents=True, exist_ok=True)
     goal_path = GOALS_DIR / f"{_slugify(scoped_goal)}.md"
@@ -541,6 +587,16 @@ def research_goal(goal: str, max_rounds: int = 3, auto_narrow: bool = False) -> 
 
     for round_num in range(1, max_rounds + 1):
         queries = open_items if round_num > 1 else [scoped_goal]
+
+        # Feature 3: Show query terms being used
+        round_start_time = time.time()
+        if round_num == 1:
+            print(f"Round {round_num}: Searching for: "{scoped_goal}"")
+        else:
+            query_preview = ", ".join([f""{q}"" for q in queries[:3]])
+            if len(queries) > 3:
+                query_preview += f", ... and {len(queries) - 3} more"
+            print(f"Round {round_num}: Searching for gaps like: {query_preview}")
 
         seen_context = set()
         combined_context = []
@@ -639,15 +695,19 @@ OPEN:
             "open_count": len(open_items),
         })
 
-        print(f"Round {round_num}: searched {len(queries)} quer{'y' if len(queries) == 1 else 'ies'}, "
-              f"retrieved {note_count} note section(s) -> {len(covered_sources)}/{len(all_items)} covered, "
-              f"{len(open_items)} still open")
+        # Feature 4 & 5: Add timing to output and explicit fallback notification
+        elapsed_time = time.time() - round_start_time
+        print(f"  └─ Retrieved: {note_count} note section(s)")
+        print(f"  └─ Coverage: {len(covered_sources)}/{len(all_items)} ({len(open_items)} gaps remain)")
+        print(f"  └─ [completed in {elapsed_time:.1f}s]\n")
 
         if round_num > 1 and len(covered_sources) == round_log[-2]["covered_count"]:
-            print("No new items covered this round — stopping early.")
+            print(f"⚠️  Round {round_num} found zero new items. Stopping here.")
+            print("Why? Searching further would hit diminishing returns—your notes likely don't cover these gaps.")
+            print("What this means: The remaining gaps probably need external sources or aren't in your notes.\n")
             break
         if not open_items:
-            print("All items covered — stopping early.")
+            print("✓ All items covered — stopping early.\n")
             break
 
     # Persist goal + round history to a markdown file
@@ -718,6 +778,57 @@ OPEN:
 
     # Print summary for CLI, return structured result
     print("\n".join(summary))
+
+    # Feature 6: Follow-up prompts
+    print("\n" + "="*60)
+    print("What would you like to do next?")
+    print("="*60)
+    print("""
+1. Research a new goal
+2. Modify this goal and re-search
+3. Search online for more information
+q. Quit
+""")
+
+    while True:
+        choice = input("Enter your choice (1-3 or q): ").strip().lower()
+
+        if choice == "1":
+            print()
+            new_goal = input("Enter your new goal: ").strip()
+            if new_goal:
+                return research_goal(new_goal, max_rounds=max_rounds, auto_narrow=auto_narrow)
+            else:
+                print("No goal entered. Exiting.\n")
+                break
+
+        elif choice == "2":
+            print()
+            print(f"Current goal: {scoped_goal}")
+            refined_goal = input("How would you like to refine it? ").strip()
+            if refined_goal:
+                return research_goal(refined_goal, max_rounds=max_rounds, auto_narrow=auto_narrow)
+            else:
+                print("No refinement entered. Exiting.\n")
+                break
+
+        elif choice == "3":
+            print("\n" + "─"*60)
+            print("Top gaps to research online:")
+            print("─"*60)
+            for i, gap in enumerate(open_items[:5], 1):
+                print(f"  {i}. {gap}")
+            print("\nTry searching these terms on Google, books, articles, or in your field's literature.")
+            print()
+            break
+
+        elif choice == "q":
+            print("\nGoodbye!")
+            break
+
+        else:
+            print("Invalid choice. Please enter 1, 2, 3, or q.\n")
+
     return result
 
 
