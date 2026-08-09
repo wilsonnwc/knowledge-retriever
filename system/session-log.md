@@ -38,6 +38,41 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 18 — 2026-08-09
+
+**Phase/step completed:** Designed comprehensive UX/error-recovery eval checklist for `research_goal()`. Extracted candidate checklist items from three UX design frameworks (Microsoft's 18 Human-AI Interaction Guidelines, Error Recovery Patterns from AIUXDesign, Google PAIR's Calibrated Trust framework). Prioritized PM-level must-haves and should-haves, grounded in real user experience patterns (ChatGPT, Claude chat). Created reusable testing templates and test-goal candidates file.
+
+**UX Spec Locked (5 core decisions):**
+1. Every-step streaming updates (Claude-like: step completion visible, new step on new line)
+2. Immediate mid-loop fallback notifications in plain language (not silent degradation)
+3. Follow-up sequence: New goal → Modify goal → Online search (CLI prompts now, buttons in lightweight UI later)
+4. LLM-powered error recovery suggestions (intelligent per-error-type mapping)
+5. Upfront expectation-setting prompt (clarify: "searches *your* notes, not web search")
+
+**Eval Strategy: Hybrid (Rule-based + Manual UX review)**
+- Rule-based checks: structural/timing verification (YES/NO, measurable)
+- Manual UX quality: tone/clarity/naturalness (1–5 rating scale)
+- Why: personal project scale, user will do manual testing; reserve LLM-as-judge for only genuinely subjective quality calls
+
+**Artifacts Created:**
+- `system/research-goal-ux-testing-checklist.md` — 14-item reusable template covering ESTABLISH → EVOLVE → RECOVER → COMPLETION phases
+- `system/research-goal-test-candidates.md` — running list of test goals (3 candidates identified: stakeholder communication, design judgment, AI PM skills/frameworks)
+
+**Where to pick up next:** User will test with 3 goal candidates using the checklist template, capture structural/UX feedback, then return findings. Once patterns emerge from testing, prioritize UX fixes before building lightweight UI (roadmap item 6).
+
+**What worked:**
+- PM-driven strategy: user defined success criteria upfront (must-haves vs. should-haves), then I surfaced options from frameworks. Avoided engineer-first-proposal trap identified in learnings file.
+- Grounding spec in familiar patterns (ChatGPT, Claude) reduces unfamiliarity tax — users already know what "streaming updates" and "follow-up prompts" feel like.
+- Hybrid eval strategy balances speed (rule-based checks) with quality (manual UX spot-check) — appropriate for personal-project scale.
+
+**Learnings:**
+- **User experience design is strategy work, not taste work.** The three frameworks (trust calibration, error recovery, interaction guidelines) give structure to "make it feel natural" — not arbitrary preference, but proven principles. Every checklist item maps back to a user need or a trust/error principle.
+- **Testing strategy depends on project scale and who the user is.** For a personal project where the PM (user) will be the primary tester, manual UX review + rule-based structural checks beats full LLM-as-judge automation. Different tradeoff for a production multi-user product.
+
+**Open questions / deferred:**
+- None blocking. Ready to test whenever user resumes.
+
+---
 ### Session 17 — 2026-08-09 (continued)
 
 **Phase/step completed (second half):** Diagnosed and fixed the test design mismatch discovered in first half of session. Core issue: the original eval strategy assumed "given a pre-specified item, judge if covered" but the feature actually does "generate items from goal + notes, then judge them." This fundamental mismatch meant no pre-specified item would ever appear in the output.
