@@ -591,9 +591,9 @@ Estimated time: 1-2 minutes. Watch for progress updates below.
         # Feature 3: Show query terms being used
         round_start_time = time.time()
         if round_num == 1:
-            print(f"Round {round_num}: Searching for: "{scoped_goal}"")
+            print(f"Round {round_num}: Searching for: '{scoped_goal}'")
         else:
-            query_preview = ", ".join([f""{q}"" for q in queries[:3]])
+            query_preview = ", ".join([f"'{q}'" for q in queries[:3]])
             if len(queries) > 3:
                 query_preview += f", ... and {len(queries) - 3} more"
             print(f"Round {round_num}: Searching for gaps like: {query_preview}")
