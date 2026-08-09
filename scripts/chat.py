@@ -758,6 +758,12 @@ OPEN:
     }
 
     # Build human-readable summary (for CLI output)
+    # Helper to strip "How to " prefix for cleaner display
+    def clean_item(text):
+        if text.lower().startswith("how to "):
+            return text[6:].strip()
+        return text
+
     summary = [
         "",
         f"Research loop for goal: '{scoped_goal}'",
@@ -769,14 +775,15 @@ OPEN:
         summary.append("Covered (review these notes again as part of your goal process):")
         for item in sorted(covered_sources):
             source, caveat = covered_sources[item]
-            line = f"  - {item} — {source}" if source else f"  - {item} — (source not cited)"
+            clean_text = clean_item(item)
+            line = f"  - {clean_text} — {source}" if source else f"  - {clean_text} — (source not cited)"
             if caveat:
                 line += f" [caveat: {caveat}]"
             summary.append(line)
     if open_items:
         summary.append("Remaining gaps:")
         for g in open_items:
-            summary.append(f"  - {g}")
+            summary.append(f"  - {clean_item(g)}")
     else:
         summary.append("No remaining gaps — goal is fully covered by current notes.")
 
@@ -820,9 +827,14 @@ q. Quit
             print("\n" + "─"*60)
             print("Top gaps to research online:")
             print("─"*60)
+            print("\nYour notes don't cover these topics. Search for them in:")
+            print("  • Google / Wikipedia")
+            print("  • Books or articles in your field")
+            print("  • Podcasts or conference talks")
+            print("  • Mentors or colleagues\n")
             for i, gap in enumerate(open_items[:5], 1):
-                print(f"  {i}. {gap}")
-            print("\nTry searching these terms on Google, books, articles, or in your field's literature.")
+                clean_text = gap[6:].strip() if gap.lower().startswith("how to ") else gap
+                print(f"  {i}. {clean_text}")
             print()
             break
 
@@ -915,7 +927,7 @@ if __name__ == "__main__":
     parser.add_argument("--archive-project", metavar="NAME", help="Archive an existing project")
     parser.add_argument("--project", metavar="NAME", help="Scope chat search to one project")
     parser.add_argument("--suggest-related", metavar="NOTE_PATH", help="Suggest notes related to NOTE_PATH")
-    parser.add_argument("--research-goal", metavar="GOAL", help="Run a multi-round gap-finding loop against a stated goal")
+    parser.add_argument("--research-goal", metavar="GOAL", nargs='?', const=True, help="Run a multi-round gap-finding loop against a stated goal (optional: provide goal, or enter interactively)")
     args = parser.parse_args()
 
     if args.new_project:
@@ -924,7 +936,32 @@ if __name__ == "__main__":
         archive_project(args.archive_project)
     elif args.suggest_related:
         print(suggest_related(args.suggest_related))
-    elif args.research_goal:
-        research_goal(args.research_goal)  # prints summary internally
+    elif args.research_goal is not None:
+        # If --research-goal was passed without an argument, prompt user for goal
+        if args.research_goal is True:
+            # Show upfront explanation first
+            print("\n" + "="*60)
+            print("📚 Personal Goal Research — Powered by Your Notes")
+            print("="*60)
+            print("""
+This tool searches YOUR NOTES (not the web) for gaps against a goal you define.
+
+How it works:
+  1. You describe a goal or question
+  2. I refine it with you to make sure I understand your focus
+  3. I search your notes across multiple rounds, narrowing gaps each time
+  4. You see what's covered and what's still missing in your notes
+
+Your notes capture YOUR thinking and experience — so gaps that aren't
+covered often mean you need external sources (books, articles, interviews)
+or that's an area you haven't explored yet.
+""")
+            goal = input("Enter your goal: ").strip()
+            if not goal:
+                print("No goal entered. Exiting.")
+            else:
+                research_goal(goal)
+        else:
+            research_goal(args.research_goal)
     else:
         chat(project=args.project)
