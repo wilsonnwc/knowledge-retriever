@@ -801,12 +801,11 @@ OPEN:
     print("""
 1. Research a new goal
 2. Modify this goal and re-search
-3. Search online for more information
 q. Quit
 """)
 
     while True:
-        choice = input("Enter your choice (1-3 or q): ").strip().lower()
+        choice = input("Enter your choice (1-2 or q): ").strip().lower()
 
         if choice == "1":
             print()
@@ -827,27 +826,12 @@ q. Quit
                 print("No refinement entered. Exiting.\n")
                 break
 
-        elif choice == "3":
-            print("\n" + "─"*60)
-            print("Top gaps to research online:")
-            print("─"*60)
-            print("\nYour notes don't cover these topics. Search for them in:")
-            print("  • Google / Wikipedia")
-            print("  • Books or articles in your field")
-            print("  • Podcasts or conference talks")
-            print("  • Mentors or colleagues\n")
-            for i, gap in enumerate(open_items[:5], 1):
-                clean_text = gap[6:].strip() if gap.lower().startswith("how to ") else gap
-                print(f"  {i}. {clean_text}")
-            print()
-            break
-
         elif choice == "q":
             print("\nGoodbye!")
             break
 
         else:
-            print("Invalid choice. Please enter 1, 2, 3, or q.\n")
+            print("Invalid choice. Please enter 1, 2, or q.\n")
 
     return result
 
