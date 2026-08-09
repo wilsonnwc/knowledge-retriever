@@ -513,7 +513,7 @@ SPECIFIC"""
     return current
 
 
-def research_goal(goal: str, max_rounds: int = 3, auto_narrow: bool = False) -> str:
+def research_goal(goal: str, max_rounds: int = 3, auto_narrow: bool = False, show_intro: bool = True) -> str:
     """
     Layer 4 taste: an iterative research loop against a stated goal.
 
@@ -533,12 +533,16 @@ def research_goal(goal: str, max_rounds: int = 3, auto_narrow: bool = False) -> 
 
     If auto_narrow=True, auto-accepts narrowing suggestions instead of
     prompting the user (used for eval/non-interactive contexts).
+
+    If show_intro=False, skips the upfront explanation (used when it's already
+    been shown by the CLI handler).
     """
-    # Feature 1: Upfront expectation-setting prompt
-    print("\n" + "="*60)
-    print("📚 Personal Goal Research — Powered by Your Notes")
-    print("="*60)
-    print("""
+    # Feature 1: Upfront expectation-setting prompt (skip if already shown)
+    if show_intro:
+        print("\n" + "="*60)
+        print("📚 Personal Goal Research — Powered by Your Notes")
+        print("="*60)
+        print("""
 This tool searches YOUR NOTES (not the web) for gaps against a goal you define.
 
 How it works:
@@ -808,7 +812,7 @@ q. Quit
             print()
             new_goal = input("Enter your new goal: ").strip()
             if new_goal:
-                return research_goal(new_goal, max_rounds=max_rounds, auto_narrow=auto_narrow)
+                return research_goal(new_goal, max_rounds=max_rounds, auto_narrow=auto_narrow, show_intro=False)
             else:
                 print("No goal entered. Exiting.\n")
                 break
@@ -818,7 +822,7 @@ q. Quit
             print(f"Current goal: {scoped_goal}")
             refined_goal = input("How would you like to refine it? ").strip()
             if refined_goal:
-                return research_goal(refined_goal, max_rounds=max_rounds, auto_narrow=auto_narrow)
+                return research_goal(refined_goal, max_rounds=max_rounds, auto_narrow=auto_narrow, show_intro=False)
             else:
                 print("No refinement entered. Exiting.\n")
                 break
@@ -960,7 +964,7 @@ or that's an area you haven't explored yet.
             if not goal:
                 print("No goal entered. Exiting.")
             else:
-                research_goal(goal)
+                research_goal(goal, show_intro=False)
         else:
             research_goal(args.research_goal)
     else:
