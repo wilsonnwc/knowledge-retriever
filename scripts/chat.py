@@ -484,6 +484,7 @@ against>
 If the goal is already specific enough, respond with exactly:
 SPECIFIC"""
 
+        print("⏳ Analyzing your goal...")
         response_text = _ask_claude(prompt, max_tokens=200)
         if "SUGGESTION:" not in response_text:
             return current
