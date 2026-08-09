@@ -496,10 +496,13 @@ SPECIFIC"""
         if auto_narrow:
             choice = "y"
         else:
-            choice = input("Use this (y), keep current and stop narrowing (n), or type your own to keep refining: ").strip()
+            choice = input("Use this (y), keep current and stop narrowing (n), type your own to refine, or '.' to use original goal as-is: ").strip()
 
         if choice.lower() == "n":
             return current
+        if choice.lower() in [".", "original", "use original"]:
+            # User override: use the original goal as stated, stop narrowing
+            return goal
         if choice.lower() == "y" or not choice:
             current = suggestion
         else:
