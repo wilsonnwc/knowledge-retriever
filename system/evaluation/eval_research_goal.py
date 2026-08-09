@@ -141,24 +141,26 @@ def run_test_case(test_case: dict) -> TestResult:
     try:
         output = research_goal(goal, max_rounds=3, auto_narrow=True)
 
-        # Run appropriate structural checks based on eval_method
+        # Run appropriate structural checks based on test_name
+        test_name_lower = test_name.lower()
+
         if eval_method == "rule_based":
-            if "arithmetic" in test_id.lower():
+            if "arithmetic" in test_name_lower:
                 passed, feedback = check_coverage_arithmetic(output)
-            elif "duplicate" in test_id.lower():
+            elif "duplicate" in test_name_lower:
                 passed, feedback = check_no_duplicates(output)
-            elif "uncited" in test_id.lower():
+            elif "uncited" in test_name_lower:
                 passed, feedback = check_no_uncited_covered(output)
-            elif "source" in test_id.lower():
+            elif "source" in test_name_lower or "valid file" in test_name_lower:
                 passed, feedback = check_all_sources_valid(output)
             else:
-                passed, feedback = False, "Unknown rule-based test"
+                passed, feedback = False, f"Unknown rule-based test: {test_name}"
 
         elif eval_method == "structural":
-            if "caveat" in test_id.lower():
+            if "caveat" in test_name_lower:
                 passed, feedback = check_caveat_usage(output)
             else:
-                passed, feedback = False, "Unknown structural test"
+                passed, feedback = False, f"Unknown structural test: {test_name}"
         else:
             passed, feedback = False, f"Unknown eval method: {eval_method}"
 

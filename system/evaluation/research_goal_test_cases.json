@@ -14,7 +14,7 @@
       "name": "Uncited claims are not in covered_items",
       "description": "If a COVERED item has no source citation (or source is None/null), it should NOT be in the covered_items dict at all — it should have been demoted to open_items during validation.",
       "goal": "Identify AI-PM-specific discovery practices and frameworks I should master",
-      "eval_method": "structural",
+      "eval_method": "rule_based",
       "test_logic": "Iterate over covered_items dict: every item must have (source, caveat) tuple where source is not None and not empty string",
       "acceptance_criteria": "100% — No covered item has source=None or source=''"
     },
