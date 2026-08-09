@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-LLM-as-judge evaluation script for research_goal() coverage verdicts.
+Evaluation script for research_goal() — validates structural properties of output.
 
-Runs test cases from research_goal_test_cases.json, executes research_goal(),
-then uses Claude as a judge to evaluate whether the model's verdicts match
-expected verdicts along multiple dimensions:
-  - Correct COVERED vs. OPEN verdict
-  - Citation accuracy (does source exist in retrieved notes?)
-  - Caveat appropriateness (flagged when generic, not flagged when specific)
+Instead of trying to judge pre-specified items (which the feature doesn't support),
+this script validates that research_goal() produces well-formed output:
+- Coverage arithmetic holds (covered + open == total)
+- No duplicates or overlaps
+- All sources are valid file paths
+- Caveats are used correctly (present when appropriate, absent when not)
 
-Prints per-test results + aggregate metrics.
+Runs test cases from research_goal_test_cases.json and reports pass/fail for each.
 """
 
 import json
@@ -20,17 +20,18 @@ from typing import Optional
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
-from chat import research_goal, _ask_claude
+from chat import research_goal
 
 EVAL_DIR = Path(__file__).parent
+PROJECT_ROOT = EVAL_DIR.parent.parent
+NOTES_DIR = PROJECT_ROOT / "notes"
 TEST_CASES_FILE = EVAL_DIR / "research_goal_test_cases.json"
 
 @dataclass
 class TestResult:
     test_id: str
+    test_name: str
     passed: bool
-    expected_verdict: str
-    actual_verdict: Optional[str]
     feedback: str
     eval_method: str
 
@@ -39,186 +40,156 @@ def load_test_cases() -> dict:
     with open(TEST_CASES_FILE) as f:
         return json.load(f)
 
-def eval_rule_based(test_case: dict, actual_output: dict) -> TestResult:
+def check_coverage_arithmetic(output: dict) -> tuple[bool, str]:
+    """Check: covered_count + open_count == total_count"""
+    covered_count = output["coverage_count"]
+    open_count = len(output["open_items"])
+    total_count = output["total_count"]
+
+    if covered_count + open_count == total_count:
+        return True, f"✓ Arithmetic holds: {covered_count} + {open_count} == {total_count}"
+    else:
+        return False, f"✗ Arithmetic failed: {covered_count} + {open_count} != {total_count}"
+
+def check_no_duplicates(output: dict) -> tuple[bool, str]:
+    """Check: no item in both covered and open, no duplicates in open"""
+    covered_items = set(output["covered_items"].keys())
+    open_items = output["open_items"]
+
+    # Check overlap
+    overlap = covered_items & set(open_items)
+    if overlap:
+        return False, f"✗ Items in both covered and open: {overlap}"
+
+    # Check duplicates in open
+    if len(set(open_items)) != len(open_items):
+        dupes = [item for item in set(open_items) if open_items.count(item) > 1]
+        return False, f"✗ Duplicate items in open: {dupes}"
+
+    return True, "✓ No duplicates or overlaps"
+
+def check_no_uncited_covered(output: dict) -> tuple[bool, str]:
+    """Check: all covered items have non-empty sources"""
+    uncited = []
+    for item, (source, caveat) in output["covered_items"].items():
+        if not source or source.strip() == "":
+            uncited.append(item)
+
+    if uncited:
+        return False, f"✗ Covered items without valid sources: {uncited[:3]}..."
+    else:
+        return True, f"✓ All {len(output['covered_items'])} covered items have valid sources"
+
+def check_all_sources_valid(output: dict) -> tuple[bool, str]:
+    """Check: all cited sources point to existing note files"""
+    invalid = []
+    for item, (source, caveat) in output["covered_items"].items():
+        if not source:
+            continue
+        # Extract the file path from source (format: "path/to/file.md")
+        source_path = NOTES_DIR / source
+        if not source_path.exists():
+            invalid.append(source)
+
+    if invalid:
+        return False, f"✗ Sources pointing to non-existent files: {invalid[:3]}..."
+    else:
+        return True, f"✓ All sources are valid file paths"
+
+def check_caveat_usage(output: dict) -> tuple[bool, str]:
     """
-    Evaluate using deterministic rule-based checks (100% accuracy required).
-    - Arithmetic: len(covered) + len(open) == len(all_items)
-    - Citation validation: cited sources exist in retrieved notes
+    Structural check: items with generic/off-topic sources should have caveats.
+    This is heuristic — we check for patterns rather than trying to judge intent.
     """
-    test_id = test_case["test_id"]
-    eval_method = "rule_based"
+    generic_categories = ["discovery"]  # notes/discovery/* files are often general PM
+    ai_specific_categories = ["ai-products", "ai-general"]
 
-    if test_case["expected_verdict"] == "ARITHMETIC":
-        # Check coverage arithmetic: the output should pass the arithmetic test
-        total_items = actual_output.get("total_items", 0)
-        covered_count = actual_output.get("covered_count", 0)
-        open_count = actual_output.get("open_count", 0)
+    findings = []
+    for item, (source, caveat) in output["covered_items"].items():
+        if not source:
+            continue
 
-        if covered_count + open_count == total_items:
-            return TestResult(
-                test_id=test_id,
-                passed=True,
-                expected_verdict="ARITHMETIC",
-                actual_verdict=f"{covered_count}+{open_count}=={total_items}",
-                feedback="Coverage arithmetic is consistent",
-                eval_method=eval_method
-            )
-        else:
-            return TestResult(
-                test_id=test_id,
-                passed=False,
-                expected_verdict="ARITHMETIC",
-                actual_verdict=f"{covered_count}+{open_count}!={total_items}",
-                feedback=f"Arithmetic check failed: {covered_count} + {open_count} ≠ {total_items}",
-                eval_method=eval_method
-            )
+        is_generic = any(cat in source for cat in generic_categories)
+        is_ai_specific = any(cat in source for cat in ai_specific_categories)
 
-    # For citation validation checks
-    retrieved_paths = set(actual_output.get("retrieved_paths", []))
-    cited_sources = actual_output.get("cited_sources", [])
+        # Heuristic: generic sources for an AI goal should have caveats
+        # This is a weak check, but better than nothing for structural validation
+        if is_generic and not caveat:
+            findings.append(f"  • {item} (source: {source}) — generic source, no caveat")
 
-    all_valid = all(source in retrieved_paths for source in cited_sources if source)
-
-    return TestResult(
-        test_id=test_id,
-        passed=all_valid,
-        expected_verdict="CITATION_VALID",
-        actual_verdict="VALID" if all_valid else "INVALID",
-        feedback="All citations point to retrieved notes" if all_valid else "Some citations point to non-retrieved notes",
-        eval_method=eval_method
-    )
-
-def eval_llm_as_judge(test_case: dict, actual_output: dict) -> TestResult:
-    """
-    Use Claude to judge whether the model's verdict matches expectations
-    across multiple dimensions: correctness, citation, caveat appropriateness.
-    """
-    test_id = test_case["test_id"]
-    eval_method = "llm_as_judge"
-
-    prompt = f"""You are evaluating whether a research goal evaluation was correct.
-
-TEST CASE:
-Goal: {test_case['goal']}
-Item being judged: {test_case['item_being_judged']}
-Expected verdict: {test_case['expected_verdict']}
-Expected source: {test_case['expected_source']}
-Expected caveat: {test_case['expected_caveat']}
-
-ACTUAL OUTPUT FROM MODEL:
-Total items found: {actual_output.get('total_items', 0)}
-Covered: {actual_output.get('covered_count', 0)}
-Open: {actual_output.get('open_count', 0)}
-Retrieved notes: {json.dumps(actual_output.get('retrieved_paths', []), indent=2)}
-
-MODEL'S VERDICT ON THIS ITEM:
-{actual_output.get('item_verdict_text', 'No specific verdict found')}
-
-EVALUATION TASK:
-1. Did the model correctly identify the item as COVERED or OPEN?
-2. If COVERED, did it cite a valid source from the retrieved notes?
-3. If the source is generic/thin (like a general note covering a specific question), did the model add an appropriate caveat tag?
-
-Respond with:
-PASS or FAIL
-Reasoning: [1-2 sentences explaining why]"""
-
-    judge_response = _ask_claude(prompt, max_tokens=200, temperature=0)
-
-    passed = "PASS" in judge_response.upper()
-
-    return TestResult(
-        test_id=test_id,
-        passed=passed,
-        expected_verdict=test_case["expected_verdict"],
-        actual_verdict=actual_output.get("item_verdict", "UNKNOWN"),
-        feedback=judge_response,
-        eval_method=eval_method
-    )
+    if findings:
+        # This is a warning, not a hard fail, since we can't know intent
+        feedback = f"⚠ Potential missing caveats ({len(findings)} items):\n" + "\n".join(findings[:3])
+        return False, feedback
+    else:
+        return True, "✓ Caveat usage appears correct (heuristic check)"
 
 def run_test_case(test_case: dict) -> TestResult:
     """
     Execute a single test case:
     1. Run research_goal() with the test's goal
-    2. Analyze output for the specific item being judged
-    3. Evaluate using the specified method (rule_based or llm_as_judge)
+    2. Validate output using structural checks
     """
     test_id = test_case["test_id"]
     goal = test_case["goal"]
-    item_being_judged = test_case["item_being_judged"]
     eval_method = test_case["eval_method"]
+    test_name = test_case["name"]
 
-    print(f"\n[{test_id}] Running: {test_case['name']}")
+    print(f"\n[{test_id}] {test_name}")
     print(f"  Goal: {goal}")
 
-    # Run the research goal feature
     try:
-        # research_goal() prints to stdout and returns the final markdown content
-        result = research_goal(goal, max_rounds=3, auto_narrow=True)
+        output = research_goal(goal, max_rounds=3, auto_narrow=True)
 
-        # Parse the result to extract verdicts
-        # This is simplified — in reality we'd parse the markdown more carefully
-        covered_items = []
-        open_items = []
+        # Run appropriate structural checks based on eval_method
+        if eval_method == "rule_based":
+            if "arithmetic" in test_id.lower():
+                passed, feedback = check_coverage_arithmetic(output)
+            elif "duplicate" in test_id.lower():
+                passed, feedback = check_no_duplicates(output)
+            elif "uncited" in test_id.lower():
+                passed, feedback = check_no_uncited_covered(output)
+            elif "source" in test_id.lower():
+                passed, feedback = check_all_sources_valid(output)
+            else:
+                passed, feedback = False, "Unknown rule-based test"
 
-        if "### Covered" in result:
-            covered_section = result.split("### Covered")[1].split("###")[0] if "###" in result.split("### Covered")[1] else result.split("### Covered")[1]
-            for line in covered_section.split("\n"):
-                if line.strip().startswith("- "):
-                    covered_items.append(line.strip()[2:])
-
-        if "### Open" in result:
-            open_section = result.split("### Open")[1]
-            for line in open_section.split("\n"):
-                if line.strip().startswith("- "):
-                    open_items.append(line.strip()[2:])
-
-        actual_output = {
-            "total_items": len(covered_items) + len(open_items),
-            "covered_count": len(covered_items),
-            "open_count": len(open_items),
-            "covered_items": covered_items,
-            "open_items": open_items,
-            "item_verdict": "COVERED" if item_being_judged in covered_items else "OPEN" if item_being_judged in open_items else "NOT_FOUND",
-            "full_result": result
-        }
+        elif eval_method == "structural":
+            if "caveat" in test_id.lower():
+                passed, feedback = check_caveat_usage(output)
+            else:
+                passed, feedback = False, "Unknown structural test"
+        else:
+            passed, feedback = False, f"Unknown eval method: {eval_method}"
 
     except Exception as e:
         return TestResult(
             test_id=test_id,
+            test_name=test_name,
             passed=False,
-            expected_verdict=test_case["expected_verdict"],
-            actual_verdict="ERROR",
-            feedback=f"Failed to run research_goal(): {str(e)}",
+            feedback=f"ERROR running research_goal(): {str(e)}",
             eval_method=eval_method
         )
 
-    # Evaluate based on method
-    if eval_method == "rule_based":
-        return eval_rule_based(test_case, actual_output)
-    elif eval_method == "llm_as_judge":
-        return eval_llm_as_judge(test_case, actual_output)
-    else:
-        return TestResult(
-            test_id=test_id,
-            passed=False,
-            expected_verdict=test_case["expected_verdict"],
-            actual_verdict="UNKNOWN",
-            feedback=f"Unknown eval method: {eval_method}",
-            eval_method=eval_method
-        )
+    return TestResult(
+        test_id=test_id,
+        test_name=test_name,
+        passed=passed,
+        feedback=feedback,
+        eval_method=eval_method
+    )
 
 def main():
     """Load test cases and run evaluation."""
     print("=" * 80)
-    print("RESEARCH_GOAL() EVALUATION — LLM-as-Judge")
+    print("RESEARCH_GOAL() EVALUATION — Structural Validation")
     print("=" * 80)
 
     test_data = load_test_cases()
     test_cases = test_data["test_cases"]
 
     print(f"\nLoaded {len(test_cases)} test cases from {TEST_CASES_FILE.name}")
-    print(f"Acceptance bar: {json.dumps(test_data['metadata']['acceptance_bar'], indent=2)}\n")
+    print(f"Test strategy: {test_data['metadata']['eval_philosophy']}\n")
 
     results = []
     for test_case in test_cases:
@@ -226,7 +197,7 @@ def main():
         results.append(result)
 
         status = "✅ PASS" if result.passed else "❌ FAIL"
-        print(f"  {status}: {result.feedback[:100]}")
+        print(f"  {status}: {result.feedback}")
 
     # Summary
     print("\n" + "=" * 80)
@@ -259,9 +230,7 @@ def main():
         print("FAILED CASES (detailed feedback)")
         print("=" * 80)
         for result in failed:
-            print(f"\n[{result.test_id}]")
-            print(f"Expected: {result.expected_verdict}")
-            print(f"Actual: {result.actual_verdict}")
+            print(f"\n[{result.test_id}] {result.test_name}")
             print(f"Feedback:\n{result.feedback}")
 
     return 0 if overall_passed == overall_total else 1

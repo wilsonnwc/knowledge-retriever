@@ -678,6 +678,20 @@ OPEN:
         lines.append("")
     goal_path.write_text("\n".join(lines), encoding="utf-8")
 
+    # Build structured result (for eval and programmatic use)
+    result = {
+        "original_goal": goal,
+        "narrowed_goal": scoped_goal,
+        "all_items": all_items,
+        "covered_items": covered_sources,  # dict: item -> (source, caveat)
+        "open_items": open_items,
+        "coverage_count": len(covered_sources),
+        "total_count": len(all_items),
+        "round_log": round_log,
+        "markdown_path": str(goal_path.relative_to(PROJECT_ROOT)),
+    }
+
+    # Build human-readable summary (for CLI output)
     summary = [
         "",
         f"Research loop for goal: '{scoped_goal}'",
@@ -699,7 +713,10 @@ OPEN:
             summary.append(f"  - {g}")
     else:
         summary.append("No remaining gaps — goal is fully covered by current notes.")
-    return "\n".join(summary)
+
+    # Print summary for CLI, return structured result
+    print("\n".join(summary))
+    return result
 
 
 def chat(project: str = None):
@@ -791,6 +808,6 @@ if __name__ == "__main__":
     elif args.suggest_related:
         print(suggest_related(args.suggest_related))
     elif args.research_goal:
-        print(research_goal(args.research_goal))
+        research_goal(args.research_goal)  # prints summary internally
     else:
         chat(project=args.project)
