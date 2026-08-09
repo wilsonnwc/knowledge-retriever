@@ -271,4 +271,4 @@ design-of-everyday-things.md
 - See `system/split-vs-consolidate-guide.md` for decision framework and reasoning
 - See `system/semantic-search-chunking-plan.md` for why sections are capped/self-contained and how that supports future semantic search
 - See `CLAUDE.md` for taxonomy, note format, and project principles
-- See `system/taxonomy.md` for controlled vocabulary
+- See `system/project-management/taxonomy.md` for controlled vocabulary

@@ -55,10 +55,10 @@ projects: [leapspace-interview-prep]
 
 **Rules:**
 - `projects:` is a list in frontmatter, alongside (not replacing) `tags:`. A note can belong to zero, one, or several projects at once — same "playlist, not folder" pattern Zotero collections use: one paper can support three different literature reviews simultaneously with no duplication.
-- Every project name used in any note's `projects:` list must exist in `system/projects.md` (the project registry) with a status of `active`. Create the project there first via `python3 scripts/chat.py --new-project <name>`.
+- Every project name used in any note's `projects:` list must exist in `system/_data/projects.md` (the project registry) with a status of `active`. Create the project there first via `python3 scripts/chat.py --new-project <name>`.
 - Archiving a project (`--archive-project <name>`) only changes its status in the registry — it does **not** strip the label from notes that carry it. The label stays as historical record; an archived project is just excluded from the default active-projects listing and can still be explicitly searched.
 
-> **Why this is a separate field, not a tag:** A tag like `foundational-knowledge` never becomes false — there's no natural trigger to remove it. A project has a real lifecycle event (an interview happens, a deadline passes) that triggers archiving. Mixing the two into one `tags:` list would blur "what this note permanently is" with "what I'm temporarily using it for," making it harder to answer "what's still active" as your reading pile grows. See `system/job-ad-reference.md` for how this maps to LeapSpace's own "project spaces" concept.
+> **Why this is a separate field, not a tag:** A tag like `foundational-knowledge` never becomes false — there's no natural trigger to remove it. A project has a real lifecycle event (an interview happens, a deadline passes) that triggers archiving. Mixing the two into one `tags:` list would blur "what this note permanently is" with "what I'm temporarily using it for," making it harder to answer "what's still active" as your reading pile grows. See `system/documentation/job-ad-reference.md` for how this maps to LeapSpace's own "project spaces" concept.
 
 ---
 
