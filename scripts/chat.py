@@ -613,6 +613,8 @@ OPEN:
 
         if round_num == 1:
             all_items = [item for item, _, _ in round_covered] + [item for item, _, _ in round_open]
+            # Deduplicate while preserving order (in case model stated same item twice)
+            all_items = list(dict.fromkeys(all_items))
 
         # Enforce in code what the prompt only requests: discard anything
         # that isn't a genuine match to the round-1 list, so covered can
