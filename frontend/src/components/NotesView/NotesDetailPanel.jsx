@@ -4,8 +4,8 @@ import './NotesView.css';
 function NotesDetailPanel({ note, onClose, onEdit }) {
 
   return (
-    <div className="detail-panel-overlay">
-      <div className="detail-panel">
+    <div className="detail-panel-overlay" onClick={onClose}>
+      <div className="detail-panel" onClick={(e) => e.stopPropagation()}>
         {/* Panel header */}
         <div className="panel-header">
           <div className="panel-title">
