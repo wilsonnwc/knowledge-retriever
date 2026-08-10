@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
 import Navigation from './components/Navigation';
+import NotesListView from './components/NotesView/NotesListView';
 import UploadScreen from './components/ImportFlow/UploadScreen';
 import PreviewScreen from './components/ImportFlow/PreviewScreen';
 import FrontmatterScreen from './components/ImportFlow/FrontmatterScreen';
@@ -8,6 +9,7 @@ import ConfirmScreen from './components/ImportFlow/ConfirmScreen';
 import SuccessScreen from './components/ImportFlow/SuccessScreen';
 
 function App() {
+  const [currentPage, setCurrentPage] = useState('notes'); // notes, import
   const [currentScreen, setCurrentScreen] = useState('upload'); // upload, preview, frontmatter, confirm, success
   const [importData, setImportData] = useState({
     content: '',
@@ -61,43 +63,55 @@ function App() {
       topicFolder: '',
       tags: []
     });
+    setCurrentPage('notes');
   };
 
   return (
     <div className="app">
-      <Navigation />
+      <Navigation
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
+      />
       <div className="main-content">
-        {currentScreen === 'upload' && (
-          <UploadScreen onUpload={handleFileUpload} />
+        {currentPage === 'notes' && (
+          <NotesListView onImportClick={() => setCurrentPage('import')} />
         )}
-        {currentScreen === 'preview' && (
-          <PreviewScreen
-            content={importData.content}
-            onUpdate={handleContentUpdate}
-            onNext={() => setCurrentScreen('frontmatter')}
-            onBack={() => setCurrentScreen('upload')}
-          />
-        )}
-        {currentScreen === 'frontmatter' && (
-          <FrontmatterScreen
-            data={importData}
-            onUpdate={handleFrontmatterUpdate}
-            onNext={() => setCurrentScreen('confirm')}
-            onBack={() => setCurrentScreen('preview')}
-          />
-        )}
-        {currentScreen === 'confirm' && (
-          <ConfirmScreen
-            data={importData}
-            onConfirm={handleConfirm}
-            onBack={() => setCurrentScreen('frontmatter')}
-          />
-        )}
-        {currentScreen === 'success' && (
-          <SuccessScreen
-            notePath={`notes/${importData.topicFolder}/${importData.title.toLowerCase().replace(/\s+/g, '-')}.md`}
-            onNew={handleReset}
-          />
+
+        {currentPage === 'import' && (
+          <>
+            {currentScreen === 'upload' && (
+              <UploadScreen onUpload={handleFileUpload} />
+            )}
+            {currentScreen === 'preview' && (
+              <PreviewScreen
+                content={importData.content}
+                onUpdate={handleContentUpdate}
+                onNext={() => setCurrentScreen('frontmatter')}
+                onBack={() => setCurrentScreen('upload')}
+              />
+            )}
+            {currentScreen === 'frontmatter' && (
+              <FrontmatterScreen
+                data={importData}
+                onUpdate={handleFrontmatterUpdate}
+                onNext={() => setCurrentScreen('confirm')}
+                onBack={() => setCurrentScreen('preview')}
+              />
+            )}
+            {currentScreen === 'confirm' && (
+              <ConfirmScreen
+                data={importData}
+                onConfirm={handleConfirm}
+                onBack={() => setCurrentScreen('frontmatter')}
+              />
+            )}
+            {currentScreen === 'success' && (
+              <SuccessScreen
+                notePath={`notes/${importData.topicFolder}/${importData.title.toLowerCase().replace(/\s+/g, '-')}.md`}
+                onNew={handleReset}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

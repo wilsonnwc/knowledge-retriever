@@ -1,18 +1,39 @@
 import React from 'react';
 import './Navigation.css';
 
-function Navigation() {
+function Navigation({ currentPage, onNavigate }) {
+  const handleClick = (e, page) => {
+    e.preventDefault();
+    onNavigate(page);
+  };
+
   return (
     <nav className="navigation">
       <div className="nav-header">
         <h1 className="nav-title">🧠 Knowledge Retriever</h1>
       </div>
       <div className="nav-menu">
-        <a href="#" className="nav-item active">Import</a>
-        <a href="#" className="nav-item">Notes</a>
-        <a href="#" className="nav-item disabled">Projects</a>
-        <a href="#" className="nav-item disabled">Search</a>
-        <a href="#" className="nav-item disabled">Goals</a>
+        <button
+          className={`nav-item ${currentPage === 'notes' ? 'active' : ''}`}
+          onClick={(e) => handleClick(e, 'notes')}
+        >
+          Notes
+        </button>
+        <button
+          className={`nav-item ${currentPage === 'import' ? 'active' : ''}`}
+          onClick={(e) => handleClick(e, 'import')}
+        >
+          Import
+        </button>
+        <button className="nav-item disabled" disabled>
+          Projects
+        </button>
+        <button className="nav-item disabled" disabled>
+          Search
+        </button>
+        <button className="nav-item disabled" disabled>
+          Goals
+        </button>
       </div>
     </nav>
   );

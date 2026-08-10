@@ -23,6 +23,8 @@
 }
 
 .nav-item {
+  background: none;
+  border: none;
   color: #666;
   text-decoration: none;
   font-size: 15px;
@@ -30,9 +32,11 @@
   padding: 8px 0;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
+  cursor: pointer;
+  font-family: inherit;
 }
 
-.nav-item:hover:not(.disabled) {
+.nav-item:hover:not(:disabled) {
   color: #0066cc;
 }
 
@@ -41,7 +45,7 @@
   border-bottom-color: #0066cc;
 }
 
-.nav-item.disabled {
+.nav-item:disabled {
   color: #ccc;
   cursor: not-allowed;
 }
