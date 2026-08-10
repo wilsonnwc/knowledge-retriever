@@ -2,15 +2,18 @@ import React, { useState } from 'react';
 import './App.css';
 import Navigation from './components/Navigation';
 import NotesListView from './components/NotesView/NotesListView';
+import EditNoteModal from './components/NotesView/EditNoteModal';
 import UploadScreen from './components/ImportFlow/UploadScreen';
 import PreviewScreen from './components/ImportFlow/PreviewScreen';
 import FrontmatterScreen from './components/ImportFlow/FrontmatterScreen';
 import ConfirmScreen from './components/ImportFlow/ConfirmScreen';
 import SuccessScreen from './components/ImportFlow/SuccessScreen';
+import { mockNotes } from './mockData/mockData';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('notes'); // notes, import
   const [currentScreen, setCurrentScreen] = useState('upload'); // upload, preview, frontmatter, confirm, success
+  const [editingNoteId, setEditingNoteId] = useState(null);
   const [importData, setImportData] = useState({
     content: '',
     fileType: '',
@@ -66,6 +69,18 @@ function App() {
     setCurrentPage('notes');
   };
 
+  const handleEditNote = (noteId) => {
+    setEditingNoteId(noteId);
+  };
+
+  const handleSaveEditedNote = (updatedData) => {
+    // Mock save - in real app, would call API
+    console.log('Note saved:', updatedData);
+    setEditingNoteId(null);
+  };
+
+  const editingNote = editingNoteId ? mockNotes.find(n => n.id === editingNoteId) : null;
+
   return (
     <div className="app">
       <Navigation
@@ -74,7 +89,18 @@ function App() {
       />
       <div className="main-content">
         {currentPage === 'notes' && (
-          <NotesListView onImportClick={() => setCurrentPage('import')} />
+          <NotesListView
+            onImportClick={() => setCurrentPage('import')}
+            onEditNote={handleEditNote}
+          />
+        )}
+
+        {editingNote && (
+          <EditNoteModal
+            note={editingNote}
+            onSave={handleSaveEditedNote}
+            onCancel={() => setEditingNoteId(null)}
+          />
         )}
 
         {currentPage === 'import' && (

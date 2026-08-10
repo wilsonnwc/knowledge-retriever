@@ -3,7 +3,7 @@ import { mockNotes } from '../../mockData/mockData';
 import NotesDetailPanel from './NotesDetailPanel';
 import './NotesView.css';
 
-function NotesListView({ onImportClick }) {
+function NotesListView({ onImportClick, onEditNote }) {
   const [selectedNoteId, setSelectedNoteId] = useState(null);
   const [filterTopic, setFilterTopic] = useState('');
   const [filterTag, setFilterTag] = useState('');
@@ -118,6 +118,7 @@ function NotesListView({ onImportClick }) {
         <NotesDetailPanel
           note={selectedNote}
           onClose={() => setSelectedNoteId(null)}
+          onEdit={onEditNote}
         />
       )}
     </div>
