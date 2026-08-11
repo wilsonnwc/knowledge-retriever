@@ -3,6 +3,7 @@ import './App.css';
 import Navigation from './components/Navigation';
 import NotesListView from './components/NotesView/NotesListView';
 import EditNoteModal from './components/NotesView/EditNoteModal';
+import SearchChatPage from './components/SearchChat/SearchChatPage';
 import UploadScreen from './components/ImportFlow/UploadScreen';
 import PreviewScreen from './components/ImportFlow/PreviewScreen';
 import FrontmatterScreen from './components/ImportFlow/FrontmatterScreen';
@@ -73,6 +74,11 @@ function App() {
     setEditingNoteId(noteId);
   };
 
+  const handleGoToArticleFromChat = (noteId) => {
+    setCurrentPage('notes');
+    setEditingNoteId(noteId);
+  };
+
   const handleSaveEditedNote = (updatedData) => {
     // Mock save - in real app, would call API
     console.log('Note saved:', updatedData);
@@ -93,6 +99,10 @@ function App() {
             onImportClick={() => setCurrentPage('import')}
             onEditNote={handleEditNote}
           />
+        )}
+
+        {currentPage === 'search' && (
+          <SearchChatPage onGoToArticle={handleGoToArticleFromChat} />
         )}
 
         {editingNote && (

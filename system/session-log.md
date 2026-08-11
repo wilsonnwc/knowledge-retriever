@@ -38,6 +38,26 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 19 — 2026-08-12
+
+**Phase/step completed:** Built the Search/Chat UI (roadmap item 6) end-to-end with mock data — ChatGPT-style conversational interface: sidebar with "+ New Chat" and conversation history (first-question titles), chat thread with user/assistant bubbles, sources section per assistant reply (stat line + AI-generated 1-2 sentence elaboration + snippet cards), and an article modal reached by clicking a snippet card. Locked 4 UX design decisions with the user first: (1) snippet shows the exact embedded chunk if it's 2+ sentences, otherwise shows the sentence before/after in plain text with the matched chunk in bold italic; (2) the "N articles found" line is paired with a separately AI-generated elaboration specific to that conversation's retrieved sources; (3) sidebar history shows the first question verbatim (flagged for re-review once used in practice); (4) the article modal renders like a formatted document (parsed meta row, paragraphs, styled "Why this matters" quote block) rather than raw markdown, with "Back" (returns to chat) and "Go to article" buttons. Verified all of this live in the browser via claude-in-chrome — new chat, follow-ups, snippet clicks, and modal navigation all confirmed working.
+
+**Where to pick up next:** Three open questions from the user, not yet answered — see "Open questions" below. Also still pending: wiring this UI to the real `chat.py` backend (currently pure mock data, no Flask endpoints called yet).
+
+**What worked:**
+- Getting explicit answers to the 4 UX questions before building avoided rework — the snippet chunk/context split, the elaboration field, and the modal's read-vs-edit button pair were all decisions the user had specific opinions on that weren't guessable from the spec alone.
+- Testing live in the browser (not just reading the code) caught that "Go to article" needed to be wired through App.jsx's existing `handleEditNote`/`setCurrentPage` state — confirmed the full navigation flow actually lands on the Edit Note modal for the right note.
+
+**What didn't work / got stuck on:**
+- "Go to article" currently opens the note directly into **Edit** mode — there's no dedicated read-only "view" state distinct from the NotesListView's own click-to-preview panel (`NotesDetailPanel`) or the full edit modal. This wasn't caught until the user reviewed it after building — see open question 1 below.
+
+**Learnings:**
+- A CTA labeled "Go to article" carries an implicit expectation of a *read* view; wiring it to the nearest existing screen (Edit) without checking whether that screen matches the CTA's implied mode is an easy way to ship a mismatch between label and behavior — worth explicitly deciding "read vs. preview vs. edit" as named UI states before adding more entry points into note detail.
+
+**Open questions to come back to (from the user, 2026-08-12 — do not answer until next session):**
+1. **"Go to article" opens Edit, not Read.** Should this be fixed to open a read-only view instead? Or does this surface a bigger gap — the app currently has no clearly-defined "Read" view distinct from "Preview" (`NotesDetailPanel`, reached by clicking a note in the Notes list) and "Edit" (`EditNoteModal`)? May need to name and scope these three modes explicitly before deciding where "Go to article" should land.
+2. **How is the sources elaboration (1-2 sentences) actually generated?** Once this is wired to a real LLM call: should it go through the same eval discipline as other AI-generated pieces of this project (per this repo's "no skipping evaluation" principle), rather than just trusting whatever comes out? And — practically — will generating it consume Anthropic API usage/cost, or does it ride on the user's Claude Pro plan? (This project currently calls the Claude API directly via `ANTHROPIC_API_KEY` in `.env`, per `scripts/chat.py` — Claude Pro is a separate, unrelated subscription for claude.ai chat access, not API credits. This distinction itself may be worth confirming with the user next session, not assumed.)
+---
 ### Session 18 — 2026-08-09
 
 **Phase/step completed:** Designed comprehensive UX/error-recovery eval checklist for `research_goal()`. Extracted candidate checklist items from three UX design frameworks (Microsoft's 18 Human-AI Interaction Guidelines, Error Recovery Patterns from AIUXDesign, Google PAIR's Calibrated Trust framework). Prioritized PM-level must-haves and should-haves, grounded in real user experience patterns (ChatGPT, Claude chat). Created reusable testing templates and test-goal candidates file.

@@ -28,7 +28,10 @@ function Navigation({ currentPage, onNavigate }) {
         <button className="nav-item disabled" disabled>
           Projects
         </button>
-        <button className="nav-item disabled" disabled>
+        <button
+          className={`nav-item ${currentPage === 'search' ? 'active' : ''}`}
+          onClick={(e) => handleClick(e, 'search')}
+        >
           Search
         </button>
         <button className="nav-item disabled" disabled>
