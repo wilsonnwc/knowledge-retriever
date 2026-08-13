@@ -3,7 +3,7 @@ type: book | article | quote | own-note | podcast | video
 source: "Title — Author / Publication"
 url: 
 date: YYYY-MM-DD
-tags: [favourite, foundational-knowledge, revisit, job-application]
+tags: [favourite, foundational-knowledge, revisit, job-application, opinion]
 projects: []  # optional — e.g. [leapspace-interview-prep]; leave empty if not tied to an active project
 ---
 
