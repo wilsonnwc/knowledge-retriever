@@ -38,6 +38,58 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 21 — 2026-08-24
+
+**Phase/step completed:** UI build plan Session 2 (`system/ui-build-plan.md`) — implemented all 6 planned Flask API endpoints for real (import, import/confirm, notes list/get/patch, topics, tags), replacing the `501 not_implemented` stubs. Live-tested every endpoint end-to-end against real notes data, including a full import→save→verify→delete round trip, with no permanent trace left (`git status` on `notes/` clean afterward).
+
+**Where to pick up next:** Before anything else — (1) add `OPENAI_API_KEY` to `.env` (still missing as of end of session), and (2) actually run and try the backend end-to-end (user has not tried it yet — see "How to Run" in CLAUDE.md's "IMMEDIATE NEXT" line). Only after that: Step 4 of the plan — wire the React frontend to these real endpoints instead of mock data (Notes list/detail/tags first, then the Import wizard's Confirm step). Search/Chat still has no backend endpoint at all — deliberately out of scope this session (confirmed with user) since it has an open design question (Session 19's "how is sources elaboration generated" question) blocking a real implementation.
+
+**What worked:**
+- Reused `scripts/chunking.py`'s existing `parse_frontmatter()` rather than writing a second frontmatter parser — kept the new `/api/notes` listing consistent with how the same notes get chunked/embedded, instead of two parsers silently disagreeing on messy real frontmatter.
+- Diagnosed real notes' frontmatter before writing the parser: most notes have no `title` field at all (`source` doubles as the title), a few have a redundant `topic:` field, dates mix `YYYY-MM-DD` and `YYYY.MM.DD`. Derived title with a fallback chain (`title` → `source` → filename) and derived topic from the folder (authoritative) rather than trusting the inconsistent frontmatter field.
+- Caught a real crash risk before it could fire: `embed_all_notes()` calls `sys.exit(1)` if `OPENAI_API_KEY` is missing, which would kill the whole Flask process, not just fail one request. Added an explicit key-presence check before calling it, returning a normal warning response instead.
+- Live end-to-end testing (not just reading the code) caught two dependency bugs that reading alone wouldn't have: `backend/requirements.txt` pinned `anthropic==0.25.0`, incompatible with the `httpx` version it pulls in on this machine (`Client.__init__() got an unexpected keyword argument 'proxies'`) — fixed by unpinning `anthropic`/`openai` (matching the root `requirements.txt` convention) and pinning `httpx<0.28` (the version that removed the `proxies` kwarg anthropic's older client construction still passes).
+- A `pkill` pattern-match to restart the dev server silently failed to kill the actual running process (command-line format didn't match the grep pattern), so a stale server kept serving the *old*, broken dependency versions for several retries even after the fix was installed — each "still broken" result looked like the fix hadn't worked. Caught by checking `lsof -i :PORT` for the actual PID instead of trusting the pattern-based kill succeeded.
+
+**What didn't work / got stuck on:**
+- `.env` is missing `OPENAI_API_KEY` (only `ANTHROPIC_API_KEY` is present) on this machine, even though `backend/.env.example` documents it as required and Session 10 already built semantic search against it. Embedding is currently skipped with a warning on every save until this is added back.
+- Port 5000 was unavailable for local testing (macOS AirPlay Receiver commonly claims it) — tested on port 5050 instead; not a code issue, just a local dev annotation for next time.
+
+**Learnings:**
+- A version pin from early in a project (`anthropic==0.25.0`) can silently rot — the SDK's own internal HTTP client construction assumed an older `httpx` API shape that a fresh `pip install` on a new machine happily installs a newer, incompatible version of. Reading the code gives no signal of this; only actually running it surfaces it.
+- When a "fix, restart, retest" loop keeps failing identically, verify the restart actually happened (check the port's real PID) before concluding the fix itself is wrong — a silently-failed process kill can make a solved problem look unsolved indefinitely.
+
+**Open questions to come back to:**
+- `OPENAI_API_KEY` needs to be added to `.env` before real embedding/semantic search can run through the new `/api/import/confirm` endpoint.
+- All 3 Session 19 UX questions, still unanswered (Go to article behavior; sources elaboration generation + eval discipline; API cost).
+- Frontend-to-backend wiring (this session's "next" item) — not started.
+---
+### Session 20 — 2026-08-23
+
+**Phase/step completed:** Frontend design system pass on top of the Session 19 UI prototype — fixed a broken `npm` environment, then did a full visual reskin plus a real IA restructuring to a Claude Desktop-style layout (left sidebar with Projects/Notes/Goals nav + unified History, single Search/Import landing chat window replacing separate top-nav pages).
+
+**Where to pick up next:** Wiring the Search/Chat UI to the real `chat.py` backend (still pure mock data) — same as Session 19's open item, now on the new layout. Also the 3 open questions from Session 19 (Go to article → Edit not Read; how sources elaboration gets generated + eval discipline; API cost of that generation) are still unanswered.
+
+**What worked:**
+- Diagnosing before fixing: the "unstyled form" complaint traced to a real root cause — this project had **zero** base CSS for `input`/`select`/`label`/`.btn` anywhere, not a font/sizing tweak. Fixed once, globally, via CSS variables in `index.css` rather than patching each screen.
+- Restructuring App.jsx's page-routing state (`view`/`mode` instead of separate `notes`/`import`/`search` pages) let Import and Search share one landing window with a mode toggle, while reusing all the already-built wizard/chat components unchanged — no functionality was rebuilt, only re-routed.
+- Asking clarifying questions before the big IA restructuring (toggle vs. auto-detect, nav-click behavior, one-pass vs. incremental) avoided guessing on genuine UX decisions the user had opinions on.
+
+**What didn't work / got stuck on:**
+- User ran `npm audit fix --force` after a routine `npm install`, which silently downgraded `react-scripts` to a non-functional `0.0.0` and gutted `node_modules` from 1310 to 32 packages — broke the ability to run the app at all. Recovered cleanly via `git restore` on `package.json`/`package-lock.json` (uncommitted) + reinstall, since the damage was never committed.
+- Found and fixed a real duplicate-definition bug in `TagPicker.css`: `.btn`/`.btn-primary`/`.btn-secondary` were defined twice in the same file with different values, silently fighting the new global button styles depending on CSS load order.
+- `npm install` initially failed with `EACCES` on `~/.npm/_cacache` — leftover root-owned files from a past `sudo npm` invocation, unrelated to this project; fixed via `sudo npm cache clean --force`.
+
+**Learnings:**
+- `npm audit fix --force` is not a safe "clean up warnings" command — it's allowed to replace core tooling (here, the package that runs the whole app) to silence a vulnerability, even if that breaks the app. The `28 vulnerabilities` npm reports on a stock Create React App project are normal/low-real-risk noise in CRA's own dev-dependency chain, not something to "fix" reflexively.
+- A visually "almost right" UI can have a structural gap invisible until you go looking — this project's inputs/buttons had literally no CSS anywhere, not a styling mismatch. Worth checking base element styles exist at all before assuming a font-size tweak will fix an inconsistent look.
+- Large IA changes (nav restructuring, merging two flows into one) are worth pausing on for explicit scope/interaction decisions before writing code, even when the visual reference (a competitor's app) makes the target look obvious — the underlying state model (how "mode" and "view" and "history" relate) isn't obvious from a screenshot alone.
+
+**Open questions to come back to:**
+- Backend wiring for Search/Chat (Session 19's item, still open).
+- The 3 Session 19 UX questions (Go to article behavior; sources elaboration generation + eval discipline; API cost).
+- New from this session: history currently only supports reopening the *most recent* completed import with full detail — multiple past imports show in the list but aren't all individually reopenable yet (mock-data limitation, not a real backend).
+---
 ### Session 19 — 2026-08-12
 
 **Phase/step completed:** Built the Search/Chat UI (roadmap item 6) end-to-end with mock data — ChatGPT-style conversational interface: sidebar with "+ New Chat" and conversation history (first-question titles), chat thread with user/assistant bubbles, sources section per assistant reply (stat line + AI-generated 1-2 sentence elaboration + snippet cards), and an article modal reached by clicking a snippet card. Locked 4 UX design decisions with the user first: (1) snippet shows the exact embedded chunk if it's 2+ sentences, otherwise shows the sentence before/after in plain text with the matched chunk in bold italic; (2) the "N articles found" line is paired with a separately AI-generated elaboration specific to that conversation's retrieved sources; (3) sidebar history shows the first question verbatim (flagged for re-review once used in practice); (4) the article modal renders like a formatted document (parsed meta row, paragraphs, styled "Why this matters" quote block) rather than raw markdown, with "Back" (returns to chat) and "Go to article" buttons. Verified all of this live in the browser via claude-in-chrome — new chat, follow-ups, snippet clicks, and modal navigation all confirmed working.

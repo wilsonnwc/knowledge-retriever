@@ -22,9 +22,6 @@ if not api_key:
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
-# Import existing functions from chat.py
-# (We'll do this gradually as we implement endpoints)
-
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for React frontend
@@ -32,6 +29,13 @@ CORS(app)  # Enable CORS for React frontend
 # Configuration
 app.config['JSON_SORT_KEYS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file upload
+
+# Register route blueprints
+from routes.notes_routes import notes_bp  # noqa: E402
+from routes.import_routes import import_bp  # noqa: E402
+
+app.register_blueprint(notes_bp)
+app.register_blueprint(import_bp)
 
 
 # Health check endpoint

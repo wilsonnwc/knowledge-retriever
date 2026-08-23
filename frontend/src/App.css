@@ -10,19 +10,32 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #f5f5f5;
-  color: #333;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 .app {
   display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #ffffff;
+  flex-direction: row;
+  height: 100vh;
+  background: var(--color-bg);
+  overflow: hidden;
 }
 
 .main-content {
   flex: 1;
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Wraps non-chat pages (e.g. Notes) so they get the page padding/scroll
+   that MainChat manages for itself. */
+.page-scroll {
+  flex: 1;
+  overflow-y: auto;
   padding: 40px 60px;
   max-width: 1200px;
   margin: 0 auto;
@@ -63,7 +76,17 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+
   .main-content {
+    height: auto;
+  }
+
+  .page-scroll {
     padding: 20px;
   }
 

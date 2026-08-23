@@ -17,13 +17,13 @@
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: #fafafa;
+  background: var(--color-bg);
 }
 
 .upload-area:hover,
 .upload-area.active {
-  border-color: #0066cc;
-  background: #f0f6ff;
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
 }
 
 .upload-icon {
@@ -47,7 +47,7 @@
 .upload-button {
   display: inline-block;
   padding: 12px 24px;
-  background: #0066cc;
+  background: var(--color-accent);
   color: white;
   border-radius: 6px;
   cursor: pointer;
@@ -56,7 +56,7 @@
 }
 
 .upload-button:hover {
-  background: #0052a3;
+  background: var(--color-accent-hover);
 }
 
 .upload-formats {
@@ -82,14 +82,14 @@
 }
 
 .paste-section {
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 24px;
-  background: #fafafa;
+  background: var(--color-bg);
 }
 
 .paste-section h3 {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   margin-bottom: 16px;
   color: #000;
@@ -98,7 +98,7 @@
 .paste-section textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   font-family: 'Courier New', monospace;
   font-size: 13px;
@@ -117,7 +117,7 @@
 }
 
 .preview-container {
-  background: #f9f9f9;
+  background: var(--color-bg);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 40px;
@@ -129,7 +129,7 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .preview-header h2 {
@@ -140,7 +140,7 @@
 
 .preview-content {
   background: white;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 24px;
   max-height: 500px;
@@ -185,7 +185,7 @@
 
 .edit-area textarea {
   width: 100%;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   padding: 16px;
   font-family: 'Courier New', monospace;
   font-size: 13px;
@@ -194,8 +194,8 @@
 
 .edit-area .button-group {
   padding: 16px;
-  background: #f9f9f9;
-  border-top: 1px solid #ddd;
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
   justify-content: flex-end;
 }
 
@@ -206,9 +206,9 @@
 }
 
 .frontmatter-form {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 32px;
   margin-bottom: 40px;
 }
@@ -234,7 +234,7 @@
 
 .confirm-container {
   background: white;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 32px;
   margin-bottom: 40px;
@@ -252,8 +252,8 @@
 }
 
 .content-preview {
-  background: #f9f9f9;
-  border: 1px solid #ddd;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 16px;
   max-height: 200px;
@@ -289,8 +289,8 @@
 }
 
 .confirm-info {
-  background: #f0f6ff;
-  border: 1px solid #b3d9ff;
+  background: var(--color-accent-subtle);
+  border: 1px solid var(--color-accent);
   border-radius: 8px;
   padding: 16px;
   margin-top: 24px;
@@ -298,7 +298,7 @@
 
 .confirm-info p {
   margin-bottom: 8px;
-  color: #0052a3;
+  color: var(--color-accent-hover);
   font-size: 14px;
 }
 
@@ -325,7 +325,7 @@
   padding: 60px 40px;
   background: white;
   border-radius: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   margin-bottom: 40px;
 }
 
@@ -362,8 +362,8 @@
 }
 
 .success-details {
-  background: #f9f9f9;
-  border: 1px solid #ddd;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 32px;
@@ -386,14 +386,14 @@
   border-radius: 6px;
   font-family: 'Courier New', monospace;
   font-size: 13px;
-  color: #0066cc;
+  color: var(--color-accent);
   word-break: break-all;
 }
 
 .next-steps {
   text-align: left;
-  background: #f0f6ff;
-  border: 1px solid #b3d9ff;
+  background: var(--color-accent-subtle);
+  border: 1px solid var(--color-accent);
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 32px;
@@ -402,7 +402,7 @@
 .next-steps h3 {
   font-size: 14px;
   font-weight: 600;
-  color: #0052a3;
+  color: var(--color-accent-hover);
   margin-bottom: 12px;
 }
 
@@ -424,7 +424,7 @@
   content: '→';
   position: absolute;
   left: 0;
-  color: #0066cc;
+  color: var(--color-accent);
 }
 
 .success-screen .button-group {
