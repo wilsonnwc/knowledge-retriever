@@ -1,11 +1,11 @@
 ---
 type: article
-source: Information architecture is the foundation AI is starving for
-url: https://uxdesign.cc/information-architecture-is-the-foundation-artificial-intelligence-is-starving-for-1d91fb5bf59f
-date: 2026.08.01
+source: https://uxdesign.cc/information-architecture-is-the-foundation-artificial-intelligence-is-starving-for-1d91fb5bf59f
+date: 2026-08-01
 tags: [foundational-knowledge, revisit, job-application]
+title: Information architecture is the foundation AI is starving for — https://uxdesign.cc/information-architecture-is-the-foundation-artificial-intelligence-is-starving-for-1d91fb5bf59f
+author: Patrick Neeman
 ---
-
 AI Summary of the article:
 
 The core argument: Information architecture (IA) spent twenty years as an underfunded, invisible discipline — job titles vanished, and the hard work of getting teams to agree on shared naming and structure kept losing out to feature shipping. AI hasn't created a new problem; it's exposed an old one and made it expensive.

@@ -1,14 +1,13 @@
 ---
 title: Error Recovery Patterns — Take It Into Your Own Product
-source: AI UX Design Guide
-url: https://www.aiuxdesign.guide/patterns/error-recovery
+source: AI UX Design Guide (https://www.aiuxdesign.guide/patterns/error-recovery)
 type: article
 topic: design
 tags: [foundational-knowledge, job-application]
 projects: [leapspace-interview-prep]
 date: 2026-08-09
+author: 
 ---
-
 # Take it into your own product
 
 ### 1. Every error needs an exit, not just an apology.

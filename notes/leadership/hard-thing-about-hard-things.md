@@ -1,12 +1,12 @@
 ---
 type: book
-source: "The Hard Thing About Hard Things — Ben Horowitz"
-url: "https://www.amazon.com/dp/B00DQ845EA"
+source: 
 date: 2026-08-05
 tags: [foundational-knowledge]
 projects: [leapspace-interview-prep]
+title: The Hard Thing About Hard Things
+author: Ben Horowitz
 ---
-
 Horowitz's account of the leadership calls that have no clean answer — product vision under uncertainty, staying focused during a crisis, designing culture deliberately, and evaluating people holistically rather than by a single metric.
 
 ## Product Strategy Is the Innovator's Job

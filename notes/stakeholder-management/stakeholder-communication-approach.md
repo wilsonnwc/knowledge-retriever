@@ -1,11 +1,11 @@
 ---
 type: article
-source: "Stakeholder Management Framework (source unknown)"
-url:
+source: 
 date: 2026-08-02
 tags: [foundational-knowledge]
+title: Do not present to a large group with just a PowerPoint
+author: 
 ---
-
 It's not a good idea to have one large group meeting with all stakeholders and present with a PowerPoint.
 
 Why:

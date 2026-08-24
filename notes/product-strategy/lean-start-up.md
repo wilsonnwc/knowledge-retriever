@@ -1,10 +1,11 @@
 ---
 type: book
-source: "The Lean Startup — Eric Ries"
+source: 
 date: 2026-06-21
-tags: [foundational-knowledge]
+tags: []
+title: The Lean Startup
+author: Eric Ries
 ---
-
 * Goal is to achieve product-market fit - customer see your product' value and find the price attractive
 * Minimise waste to achieve product-market fit
 * Product achieves: "desirable to customers", "viable in marketplace", "possible with technology"

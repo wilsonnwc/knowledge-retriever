@@ -166,8 +166,8 @@ def confirm_import():
       "content": "<final note body>",
       "frontmatter_updates": {
         "title": "Final title",
-        "source": "Final source",
-        "url": "<optional>",
+        "author": "<optional>",
+        "source": "Final source (book, podcast, publication, URL, or video)",
         "date": "2026-08-10",
         "type": "article"
       },
@@ -190,8 +190,8 @@ def confirm_import():
 
     frontmatter_fields = {
         "type": frontmatter_updates.get("type", "article"),
+        "author": frontmatter_updates.get("author", ""),
         "source": frontmatter_updates.get("source", ""),
-        "url": frontmatter_updates.get("url", ""),
         "date": frontmatter_updates.get("date", ""),
         "tags": tags,
     }

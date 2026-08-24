@@ -1,11 +1,11 @@
 ---
 type: article
-source: "4 Questions Execs Use to Judge Your Product Roadmap"
-url:
+source: The Product Compass (https://www.productcompass.pm/p/product-roadmap-review-4-questions)
 date: 2026-08-02
 tags: [foundational-knowledge, favourite, job-application]
+title: 4 Questions Execs Use to Judge Your Product Roadmap
+author: 
 ---
-
 Four questions executives use to evaluate your roadmap:
 
 **"What is it?"**

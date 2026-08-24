@@ -95,8 +95,8 @@ def _note_summary(file_path: Path) -> dict:
         "id": _note_id_for(file_path),
         "path": f"notes/{_note_id_for(file_path)}",
         "title": title,
+        "author": _clean_scalar(frontmatter.get("author", "")),
         "source": _clean_scalar(frontmatter.get("source", "")),
-        "url": _clean_scalar(frontmatter.get("url", "")),
         "date": _clean_scalar(frontmatter.get("date", "")),
         "type": _clean_scalar(frontmatter.get("type", "")),
         "topic": file_path.parent.name,
@@ -158,13 +158,25 @@ def get_note(note_id: str) -> dict:
     return summary
 
 
-def update_note_tags(note_id: str, tags: list) -> dict:
+_SCALAR_FRONTMATTER_FIELDS = ("title", "author", "source", "date", "type")
+
+
+def update_note(note_id: str, updates: dict) -> dict:
+    """
+    Updates any combination of a note's scalar frontmatter fields (title,
+    source, url, date, type), tags, content, and/or topic. Only keys
+    present in `updates` are changed; everything else is left untouched.
+
+    `topic` is not itself a frontmatter field — it's derived from which
+    folder the file lives in (see _note_summary) — so changing it moves
+    the file to the new topic folder rather than rewriting a line.
+    """
     file_path = _find_note_path(note_id)
     if not file_path.exists() or not file_path.is_file():
         return None
 
-    content = file_path.read_text(encoding="utf-8")
-    lines = content.split("\n")
+    raw = file_path.read_text(encoding="utf-8")
+    lines = raw.split("\n")
     if not lines or lines[0].strip() != "---":
         raise ValueError(f"Note has no frontmatter block: {note_id}")
 
@@ -172,19 +184,40 @@ def update_note_tags(note_id: str, tags: list) -> dict:
     if end_idx is None:
         raise ValueError(f"Note has an unterminated frontmatter block: {note_id}")
 
-    new_tags_line = f"tags: [{', '.join(tags)}]"
-    replaced = False
-    for i in range(1, end_idx):
-        if lines[i].split(":", 1)[0].strip() == "tags":
-            lines[i] = new_tags_line
-            replaced = True
-            break
-    if not replaced:
-        lines.insert(end_idx, new_tags_line)
-        end_idx += 1
+    frontmatter_lines = lines[1:end_idx]
+    body_lines = lines[end_idx + 1:]
 
-    file_path.write_text("\n".join(lines), encoding="utf-8")
-    return get_note(note_id)
+    def _upsert(key: str, value_line: str):
+        for i, line in enumerate(frontmatter_lines):
+            if line.split(":", 1)[0].strip() == key:
+                frontmatter_lines[i] = value_line
+                return
+        frontmatter_lines.append(value_line)
+
+    for key in _SCALAR_FRONTMATTER_FIELDS:
+        if key in updates:
+            _upsert(key, f"{key}: {updates[key]}")
+
+    if "tags" in updates:
+        _upsert("tags", f"tags: [{', '.join(updates['tags'])}]")
+
+    if "content" in updates:
+        body_lines = updates["content"].strip("\n").split("\n")
+
+    new_text = "\n".join(["---", *frontmatter_lines, "---", *body_lines]).rstrip("\n") + "\n"
+    file_path.write_text(new_text, encoding="utf-8")
+
+    if "topic" in updates and updates["topic"] != file_path.parent.name:
+        new_topic = updates["topic"]
+        if new_topic not in list_topics():
+            raise ValueError(f"Unknown topic folder: {new_topic}")
+        new_path = NOTES_DIR / new_topic / file_path.name
+        if new_path.exists():
+            raise FileExistsError(f"A note already exists at notes/{new_topic}/{file_path.name}")
+        file_path.rename(new_path)
+        file_path = new_path
+
+    return get_note(_note_id_for(file_path))
 
 
 def _format_frontmatter(fields: dict) -> str:

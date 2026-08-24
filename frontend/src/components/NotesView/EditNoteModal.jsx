@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
 import TagPicker from '../TagPicker';
-import { mockTopics, mockTypes, mockTags } from '../../mockData/mockData';
+import { mockTypes } from '../../mockData/mockData';
 import './NotesView.css';
 
-function EditNoteModal({ note, onSave, onCancel }) {
+function EditNoteModal({ note, topics, tags: availableTags, onSave, onCancel }) {
   const [formData, setFormData] = useState({
     title: note.title || '',
+    author: note.author || '',
     source: note.source || '',
-    url: note.url || '',
     date: note.date || new Date().toISOString().split('T')[0],
     type: note.type || 'article',
     topicFolder: note.topic || '',
     tags: note.tags || [],
-    content: note.preview || ''
+    content: note.content ?? note.preview ?? ''
   });
 
   const [showNewTopicModal, setShowNewTopicModal] = useState(false);
   const [newTopicName, setNewTopicName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -40,10 +42,16 @@ function EditNoteModal({ note, onSave, onCancel }) {
     }
   };
 
-  const handleSave = () => {
-    // Mock save - in real app, would call API
-    console.log('Saving note:', formData);
-    onSave(formData);
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await onSave(formData);
+    } catch (err) {
+      setSaveError(err.message || 'Failed to save note');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -78,29 +86,27 @@ function EditNoteModal({ note, onSave, onCancel }) {
               />
             </div>
 
+            {/* Author or speaker */}
+            <div className="form-group">
+              <label htmlFor="author">Author or speaker</label>
+              <input
+                id="author"
+                type="text"
+                value={formData.author}
+                onChange={(e) => handleChange('author', e.target.value)}
+                placeholder="e.g., Don Norman"
+              />
+            </div>
+
             {/* Source */}
             <div className="form-group">
-              <label htmlFor="source">
-                Source <span className="required">*</span>
-              </label>
+              <label htmlFor="source">Source (book, podcast, publication, URL or video)</label>
               <input
                 id="source"
                 type="text"
                 value={formData.source}
                 onChange={(e) => handleChange('source', e.target.value)}
-                placeholder="e.g., Author, Publication"
-              />
-            </div>
-
-            {/* URL */}
-            <div className="form-group">
-              <label htmlFor="url">URL</label>
-              <input
-                id="url"
-                type="url"
-                value={formData.url}
-                onChange={(e) => handleChange('url', e.target.value)}
-                placeholder="https://example.com"
+                placeholder="e.g., Design of Everyday Things, or https://..."
               />
             </div>
 
@@ -144,7 +150,7 @@ function EditNoteModal({ note, onSave, onCancel }) {
                   onChange={(e) => handleChange('topicFolder', e.target.value)}
                 >
                   <option value="">Select a topic</option>
-                  {mockTopics.map(topic => (
+                  {topics.map(topic => (
                     <option key={topic} value={topic}>{topic}</option>
                   ))}
                 </select>
@@ -164,7 +170,7 @@ function EditNoteModal({ note, onSave, onCancel }) {
               <TagPicker
                 selectedTags={formData.tags}
                 onChange={handleTagsChange}
-                availableTags={mockTags}
+                availableTags={availableTags}
               />
             </div>
 
@@ -184,11 +190,12 @@ function EditNoteModal({ note, onSave, onCancel }) {
 
         {/* Footer */}
         <div className="edit-modal-footer">
-          <button className="btn btn-secondary" onClick={onCancel}>
+          {saveError && <p className="save-error">{saveError}</p>}
+          <button className="btn btn-secondary" onClick={onCancel} disabled={saving}>
             Cancel
           </button>
-          <button className="btn btn-primary" onClick={handleSave}>
-            Save Changes
+          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving…' : 'Save Changes'}
           </button>
         </div>
       </div>

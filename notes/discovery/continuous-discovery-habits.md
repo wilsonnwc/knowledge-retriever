@@ -1,12 +1,12 @@
 ---
 type: book
-source: "Continuous Discovery Habits — Teresa Torres"
-url: "https://www.amazon.com/dp/B094PVB97X"
+source: 
 date: 2026-08-05
 tags: [foundational-knowledge]
 projects: [leapspace-interview-prep]
+title: Continuous Discovery Habits
+author: Teresa Torres
 ---
-
 A practical system for running product discovery continuously, not as a one-off research phase — covers reframing decisions, story-based interviewing, opportunity solution trees, prioritization under uncertainty, ideation, and assumption testing.
 
 ## Reframing Decisions

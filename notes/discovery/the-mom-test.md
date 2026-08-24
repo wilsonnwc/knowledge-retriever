@@ -1,10 +1,11 @@
 ---
 type: book
-source: "The Mom Test — Rob Fitzpatrick"
+source: 
 date: 2026-06-21
 tags: [foundational-knowledge]
+title: The Mom Test
+author: Rob Fitzpatrick
 ---
-
 "3 simple rules of the Mom Test:
 1. Talk about their life instead of your idea
 2. Ask about specifics in the past instead of generics or opinions about the future
@@ -71,4 +72,10 @@ Tips:
 
 ---
 
-> **Why this matters:** The Mom Test is a foundational book on user research interviews — specifically how to avoid false positives and get genuine signal from customers without them just telling you what you want to hear.
+Learning that your beliefs are wrong is frustrating, but it's progress. It's bringing you ever closer to the truth of a real problem and a good market.
+
+> **Why this matters:** Embrace disconfirmed hypotheses; they're closer to truth than comfortable beliefs.
+
+---
+
+> **Why this matters (overall):** The Mom Test is a foundational book on user research interviews — specifically how to avoid false positives and get genuine signal from customers without them just telling you what you want to hear. Its core discipline (talk about their past behavior, not future hypotheticals) and its core mindset (a disconfirmed hypothesis is progress, not failure) reinforce each other.

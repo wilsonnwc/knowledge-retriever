@@ -1,14 +1,13 @@
 ---
 title: Guidelines for Human-AI Interaction Design
-source: Microsoft Research Blog
-url: https://www.microsoft.com/en-us/research/blog/guidelines-for-human-ai-interaction-design/
+source: Microsoft Research Blog (https://www.microsoft.com/en-us/research/blog/guidelines-for-human-ai-interaction-design/)
 type: article
 topic: design
-tags: [foundational-knowledge, job-application]
+tags: [job-application]
 projects: [leapspace-interview-prep]
 date: 2026-08-09
+author: 
 ---
-
 # Human-AI Interaction Design Guidelines
 
 ## INITIALLY

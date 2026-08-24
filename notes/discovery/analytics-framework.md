@@ -1,11 +1,10 @@
 ---
 type: article
-source: "Analytics Framework (source unknown)"
-url:
+source: 
 date: 2026-08-02
 tags: [foundational-knowledge]
+title: Analytics Framework
 ---
-
 **Feature analytics matter as much as user analytics.** Track not just whether users adopt a feature, but whether they use it as expected.
 
 **Core set of analytics to track:**

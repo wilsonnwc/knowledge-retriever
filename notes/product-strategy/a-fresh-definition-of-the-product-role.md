@@ -1,12 +1,12 @@
 ---
 type: article
-source: "Marty Cagan — SVPG"
-url: "https://www.svpg.com/a-fresh-definition-of-the-product-role/"
+source: SVPG (https://www.svpg.com/a-fresh-definition-of-the-product-role)
 date: 2026-08-10
 tags: [job-application, opinions]
 projects: [leapspace-interview-prep]
+title: A Fresh Definition of The Product Role
+author: Marty Cagan
 ---
-
 Ben describes three distinct skills of effective product people:
 
 First, lots of people recognize pain, and maybe have ideas for addressing that pain, but not everyone is able to see the more general problem to be solved behind that pain or idea. I have been doing this for so long (several decades) that it's second nature for me, and it's easy to forget that not everyone is able to spot these opportunities.

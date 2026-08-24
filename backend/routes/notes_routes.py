@@ -4,11 +4,13 @@ Notes management routes.
 Endpoints:
 - GET /api/notes — List all notes with metadata
 - GET /api/notes/{note_id} — Fetch full markdown content
-- PATCH /api/notes/{note_id} — Update tags for a note
+- PATCH /api/notes/{note_id} — Update a note's fields (frontmatter, tags,
+  content, topic)
 - GET /api/topics — List available topic folders
 - GET /api/tags — List all tags in use
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -17,7 +19,12 @@ from flask import Blueprint, request, jsonify
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import notes_store  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
+from embed import embed_all_notes  # noqa: E402
+
 notes_bp = Blueprint('notes', __name__, url_prefix='/api')
+
+_UPDATABLE_FIELDS = {"title", "author", "source", "date", "type", "tags", "content", "topic"}
 
 
 @notes_bp.route('/notes', methods=['GET'])
@@ -56,33 +63,57 @@ def get_note(note_id):
 
 
 @notes_bp.route('/notes/<path:note_id>', methods=['PATCH'])
-def update_note_tags(note_id):
+def update_note(note_id):
     """
-    Update tags for a note.
+    Update a note's fields. Only the keys present in the request body are
+    changed — everything else on the note is left as-is.
 
-    Expected JSON:
+    Expected JSON (all keys optional, at least one required):
     {
-      "tags": ["job-application", "revisit", "favourite"]
+      "title": "...", "author": "...", "source": "...", "date": "...",
+      "type": "...", "topic": "ai-products", "tags": [...], "content": "..."
     }
+
+    Editing content re-embeds the note (so semantic search stays
+    accurate) if OPENAI_API_KEY is set — otherwise the save succeeds
+    with a warning, same pattern as /api/import/confirm.
     """
     data = request.get_json(silent=True) or {}
-    tags = data.get('tags')
-    if tags is None or not isinstance(tags, list):
+    updates = {k: v for k, v in data.items() if k in _UPDATABLE_FIELDS}
+
+    if not updates:
         return jsonify({
             "status": "error",
-            "message": "Expected JSON body with a 'tags' array",
+            "message": "Expected at least one of: " + ", ".join(sorted(_UPDATABLE_FIELDS)),
             "code": "invalid_request"
         }), 400
 
+    if "tags" in updates and not isinstance(updates["tags"], list):
+        return jsonify({"status": "error", "message": "'tags' must be an array", "code": "invalid_request"}), 400
+
     try:
-        note = notes_store.update_note_tags(note_id, tags)
-    except ValueError as e:
-        return jsonify({"status": "error", "message": str(e), "code": "invalid_note_id"}), 400
+        note = notes_store.update_note(note_id, updates)
+    except (ValueError, FileExistsError) as e:
+        return jsonify({"status": "error", "message": str(e), "code": "invalid_request"}), 400
 
     if note is None:
         return jsonify({"status": "error", "message": "Note not found", "code": "not_found"}), 404
 
-    return jsonify({"status": "success", **note}), 200
+    warning = None
+    if "content" in updates:
+        if not os.getenv("OPENAI_API_KEY"):
+            warning = ("Note saved but NOT re-embedded — OPENAI_API_KEY is missing from .env. "
+                       "Add it and run `python3 scripts/embed.py` to keep semantic search accurate.")
+        else:
+            try:
+                embed_all_notes()
+            except Exception as e:
+                warning = f"Note saved but re-embedding failed — run scripts/embed.py manually: {e}"
+
+    response = {"status": "success", **note}
+    if warning:
+        response["warning"] = warning
+    return jsonify(response), 200
 
 
 @notes_bp.route('/topics', methods=['GET'])

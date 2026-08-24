@@ -1,11 +1,11 @@
 ---
 type: book
-source: "The Design of Everyday Things — Don Norman"
-url:
+source: 
 date: 2026-08-02
-tags: [foundational-knowledge, favourite]
+tags: [favourite]
+title: The Design of Everyday Things
+author: Don Norman
 ---
-
 Comprehensive collection of key concepts from Don Norman's foundational work on design.
 
 ---
@@ -137,6 +137,14 @@ One measure of resilience is the ability to create foresight—to anticipate the
 Checklists are powerful tools, proven to increase the accuracy of behavior and reduce error, particularly slips and memory lapses. They are especially important in situations with multiple, complex requirements, and even more so where there are interruptions. With multiple people involved, it is essential that lines of responsibility be clearly spelled out. It is always better to have two people do checklists together as a team: one to read the instruction, the other to execute it.
 
 > **Why this matters:** Checklists are underrated operational tools; pair-execution is critical when stakes are high.
+
+---
+
+## Part 5: On Process Reality
+
+The day a product development process starts, it is behind schedule and above budget.
+
+> **Why this matters:** Accept this as reality, not failure. Plan accordingly.
 
 ---
 

@@ -1,11 +1,11 @@
 ---
 type: article
-source: Product Sense Definition
-url: https://www.nngroup.com/articles/product-sense-definition/
+source: https://www.nngroup.com/articles/product-sense-definition/
 date: 2026-08-01
 tags: [foundational-knowledge, job-application]
+title: Product Sense Definition
+author: Tanner Kohler, NNGroup
 ---
-
 The most widely cited definition of product sense comes from Jules Walter in Lenny's Newsletter from 2022:
 
 Product sense is the skill of consistently being able to craft products (or make changes to existing products) that have the intended impact on their users. Product sense relies on (1) empathy to discover meaningful user needs and (2) creativity to come up with solutions that effectively address those needs.

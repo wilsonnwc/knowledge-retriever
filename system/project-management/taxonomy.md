@@ -26,6 +26,7 @@ These become the subfolders inside `notes/`. Aim for 8–12. Broad enough to sta
 - product-organisation
 - communication
 - leadership
+- product-management-basics
 ```
 
 ---

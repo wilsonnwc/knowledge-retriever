@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
-import { mockNotes } from '../../mockData/mockData';
 import NotesDetailPanel from './NotesDetailPanel';
 import './NotesView.css';
 
-function NotesListView({ onImportClick, onEditNote }) {
+function NotesListView({ notes, loading, error, onImportClick, onEditNote }) {
   const [selectedNoteId, setSelectedNoteId] = useState(null);
   const [filterTopic, setFilterTopic] = useState('');
   const [filterTag, setFilterTag] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Get unique topics and tags for filters
-  const allTopics = [...new Set(mockNotes.map(n => n.topic))];
-  const allTags = [...new Set(mockNotes.flatMap(n => n.tags))];
+  const allTopics = [...new Set(notes.map(n => n.topic))];
+  const allTags = [...new Set(notes.flatMap(n => n.tags))];
 
   // Filter notes based on search and filters
-  const filteredNotes = mockNotes.filter(note => {
+  const filteredNotes = notes.filter(note => {
     const matchesSearch = note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          note.source.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTopic = !filterTopic || note.topic === filterTopic;
@@ -22,7 +21,7 @@ function NotesListView({ onImportClick, onEditNote }) {
     return matchesSearch && matchesTopic && matchesTag;
   });
 
-  const selectedNote = mockNotes.find(n => n.id === selectedNoteId);
+  const selectedNote = notes.find(n => n.id === selectedNoteId);
 
   return (
     <div className="notes-view">
@@ -70,45 +69,72 @@ function NotesListView({ onImportClick, onEditNote }) {
 
         {/* Notes table */}
         <div className="notes-table-container">
-          <table className="notes-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Source</th>
-                <th>Date</th>
-                <th>Topic</th>
-                <th>Tags</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredNotes.map(note => (
-                <tr
-                  key={note.id}
-                  className={`note-row ${selectedNoteId === note.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedNoteId(note.id)}
-                >
-                  <td className="title-cell">{note.title}</td>
-                  <td className="source-cell">{note.source}</td>
-                  <td className="date-cell">{note.date}</td>
-                  <td className="topic-cell">
-                    <span className="topic-badge">{note.topic}</span>
-                  </td>
-                  <td className="tags-cell">
-                    <div className="tags-list">
-                      {note.tags.map(tag => (
-                        <span key={tag} className="tag-mini">{tag}</span>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {filteredNotes.length === 0 && (
+          {loading && (
             <div className="empty-state">
-              <p>No notes found</p>
+              <p>Loading notes…</p>
             </div>
+          )}
+
+          {error && !loading && (
+            <div className="empty-state">
+              <p>Couldn't load notes: {error}</p>
+              <p>Make sure the backend is running (<code>python3 backend/app.py</code>).</p>
+            </div>
+          )}
+
+          {!loading && !error && (
+            <>
+              <table className="notes-table">
+                <colgroup>
+                  <col style={{ width: '22%' }} />
+                  <col style={{ width: '13%' }} />
+                  <col style={{ width: '20%' }} />
+                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '13%' }} />
+                  <col style={{ width: '23%' }} />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Author/Speaker</th>
+                    <th>Source</th>
+                    <th>Date</th>
+                    <th>Topic</th>
+                    <th>Tags</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredNotes.map(note => (
+                    <tr
+                      key={note.id}
+                      className={`note-row ${selectedNoteId === note.id ? 'selected' : ''}`}
+                      onClick={() => setSelectedNoteId(note.id)}
+                    >
+                      <td className="title-cell" title={note.title}>{note.title}</td>
+                      <td className="author-cell" title={note.author}>{note.author}</td>
+                      <td className="source-cell" title={note.source}>{note.source}</td>
+                      <td className="date-cell">{note.date}</td>
+                      <td className="topic-cell">
+                        <span className="topic-badge">{note.topic}</span>
+                      </td>
+                      <td className="tags-cell">
+                        <div className="tags-list">
+                          {note.tags.map(tag => (
+                            <span key={tag} className="tag-mini">{tag}</span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {filteredNotes.length === 0 && (
+                <div className="empty-state">
+                  <p>No notes found</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

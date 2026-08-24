@@ -1,11 +1,12 @@
 ---
 type: podcast
-source: "Building production AI agents — Nan Yu & Jacob Shumway from Linear"
+source: Peter Yang's podcast
 date: 2026-08-10
 tags: [revisit, job-application]
 projects: [leapspace-interview-prep]
+title: Building production AI agents
+author: Nan Yu & Jacob Shumway from Linear
 ---
-
 Foundational insights on building AI agents that work in production, from Linear's experience shipping agent workflows.
 
 ## How Agents Work

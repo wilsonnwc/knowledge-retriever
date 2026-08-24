@@ -1,11 +1,11 @@
 ---
 type: article
-source: "Stakeholder Management Framework (source unknown)"
-url:
+source: SPVG (https://www.svpg.com/stakeholder-management/)
 date: 2026-08-02
-tags: [foundational-knowledge]
+tags: []
+title: Stakeholder Management
+author: Marty Cagan
 ---
-
 Not everyone trying to have a say in the product is a key stakeholder—they could be just part of the community.
 
 Those who have veto power, or can prevent a product from launching, are the true stakeholders:

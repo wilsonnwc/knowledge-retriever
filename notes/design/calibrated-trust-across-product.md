@@ -1,14 +1,13 @@
 ---
 title: Calibrated Trust Across the Product Experience
-source: Google PAIR Guidebook
-url: https://pair.withgoogle.com/guidebook/chapters/trust-and-explanations/calibrated-trust-across-the-product-experience
+source: Google PAIR Guidebook (https://pair.withgoogle.com/guidebook/chapters/trust-and-explanations/calibrated-trust-across-the-product-experience)
 type: article
 topic: design
-tags: [foundational-knowledge, job-application, trust-calibration, confidence-signals]
+tags: [foundational-knowledge, job-application]
 projects: [leapspace-interview-prep]
 date: 2026-08-09
+author: 
 ---
-
 # Calibrated Trust Across the Product Experience
 
 ## Establish Trust from the Beginning

@@ -91,6 +91,7 @@
 
 .notes-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   background: white;
 }
@@ -137,6 +138,15 @@
   color: var(--color-accent);
 }
 
+.title-cell,
+.author-cell,
+.source-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.author-cell,
 .source-cell {
   color: #666;
   font-size: 14px;
@@ -523,6 +533,14 @@
 
 .edit-modal-footer .btn {
   flex-shrink: 0;
+}
+
+.save-error {
+  color: #d32f2f;
+  font-size: 0.9em;
+  margin: 0;
+  margin-right: auto;
+  align-self: center;
 }
 
 /* Responsive Design */

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Sidebar from './components/Sidebar/Sidebar';
 import MainChat from './components/MainChat/MainChat';
 import NotesListView from './components/NotesView/NotesListView';
 import EditNoteModal from './components/NotesView/EditNoteModal';
-import { mockNotes } from './mockData/mockData';
+import * as api from './api/client';
 import { mockConversations } from './mockData/mockConversations';
 
 let nextMessageId = 1000;
@@ -64,8 +64,29 @@ function App() {
   const [importData, setImportData] = useState(blankImportData());
   const [completedImports, setCompletedImports] = useState([]);
 
-  // Notes state
+  // Notes state — real data from the Flask backend
+  const [notes, setNotes] = useState([]);
+  const [notesLoading, setNotesLoading] = useState(true);
+  const [notesError, setNotesError] = useState(null);
+  const [topics, setTopics] = useState([]);
+  const [tags, setTags] = useState([]);
   const [editingNoteId, setEditingNoteId] = useState(null);
+  const [editingNoteDetail, setEditingNoteDetail] = useState(null);
+  const [editingNoteLoading, setEditingNoteLoading] = useState(false);
+  const [editingNoteError, setEditingNoteError] = useState(null);
+
+  useEffect(() => {
+    setNotesLoading(true);
+    Promise.all([api.fetchNotes(), api.fetchTopics(), api.fetchTags()])
+      .then(([notesData, topicsData, tagsData]) => {
+        setNotes(notesData);
+        setTopics(topicsData);
+        setTags(tagsData);
+        setNotesError(null);
+      })
+      .catch((err) => setNotesError(err.message))
+      .finally(() => setNotesLoading(false));
+  }, []);
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
 
@@ -187,13 +208,45 @@ function App() {
   };
 
   // --- Notes handlers ---
-  const handleEditNote = (noteId) => setEditingNoteId(noteId);
-  const handleSaveEditedNote = (updatedData) => {
-    console.log('Note saved:', updatedData);
-    setEditingNoteId(null);
+  const handleEditNote = (noteId) => {
+    setEditingNoteId(noteId);
+    setEditingNoteDetail(null);
+    setEditingNoteError(null);
+    setEditingNoteLoading(true);
+    api
+      .fetchNote(noteId)
+      .then((note) => setEditingNoteDetail(note))
+      .catch((err) => setEditingNoteError(err.message))
+      .finally(() => setEditingNoteLoading(false));
   };
 
-  const editingNote = editingNoteId ? mockNotes.find((n) => n.id === editingNoteId) : null;
+  const handleCancelEditNote = () => {
+    setEditingNoteId(null);
+    setEditingNoteDetail(null);
+    setEditingNoteError(null);
+  };
+
+  const handleSaveEditedNote = (formData) => {
+    const updates = {
+      title: formData.title,
+      author: formData.author,
+      source: formData.source,
+      date: formData.date,
+      type: formData.type,
+      topic: formData.topicFolder,
+      tags: formData.tags,
+      content: formData.content
+    };
+    return api.updateNote(editingNoteId, updates).then((updatedNote) => {
+      if (updatedNote.warning) {
+        // eslint-disable-next-line no-alert
+        alert(updatedNote.warning);
+      }
+      setNotes((prev) => prev.map((n) => (n.id === editingNoteId ? { ...n, ...updatedNote } : n)));
+      setEditingNoteId(null);
+      setEditingNoteDetail(null);
+    });
+  };
 
   return (
     <div className="app">
@@ -230,12 +283,38 @@ function App() {
 
         {view === 'notes' && (
           <div className="page-scroll">
-            <NotesListView onImportClick={handleImportClick} onEditNote={handleEditNote} />
+            <NotesListView
+              notes={notes}
+              loading={notesLoading}
+              error={notesError}
+              onImportClick={handleImportClick}
+              onEditNote={handleEditNote}
+            />
           </div>
         )}
 
-        {editingNote && (
-          <EditNoteModal note={editingNote} onSave={handleSaveEditedNote} onCancel={() => setEditingNoteId(null)} />
+        {editingNoteId && (editingNoteLoading || editingNoteError) && (
+          <div className="edit-modal-overlay">
+            <div className="edit-modal">
+              {editingNoteLoading && <p style={{ padding: 24 }}>Loading note…</p>}
+              {editingNoteError && !editingNoteLoading && (
+                <div style={{ padding: 24 }}>
+                  <p>Couldn't load this note: {editingNoteError}</p>
+                  <button className="btn btn-secondary" onClick={handleCancelEditNote}>Close</button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {editingNoteDetail && (
+          <EditNoteModal
+            note={editingNoteDetail}
+            topics={topics}
+            tags={tags}
+            onSave={handleSaveEditedNote}
+            onCancel={handleCancelEditNote}
+          />
         )}
       </div>
     </div>
