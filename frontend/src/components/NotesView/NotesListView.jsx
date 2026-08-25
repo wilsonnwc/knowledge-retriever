@@ -1,12 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NotesDetailPanel from './NotesDetailPanel';
+import * as api from '../../api/client';
 import './NotesView.css';
 
 function NotesListView({ notes, loading, error, onImportClick, onEditNote }) {
   const [selectedNoteId, setSelectedNoteId] = useState(null);
+  const [selectedContent, setSelectedContent] = useState(null);
+  const [selectedContentLoading, setSelectedContentLoading] = useState(false);
+  const [selectedContentError, setSelectedContentError] = useState(null);
   const [filterTopic, setFilterTopic] = useState('');
   const [filterTag, setFilterTag] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Fetch full content for whichever note is selected — the list only
+  // carries a short truncated preview, not the full body.
+  useEffect(() => {
+    if (!selectedNoteId) {
+      setSelectedContent(null);
+      return;
+    }
+    setSelectedContentLoading(true);
+    setSelectedContentError(null);
+    api
+      .fetchNote(selectedNoteId)
+      .then((note) => setSelectedContent(note.content))
+      .catch((err) => setSelectedContentError(err.message))
+      .finally(() => setSelectedContentLoading(false));
+  }, [selectedNoteId]);
 
   // Get unique topics and tags for filters
   const allTopics = [...new Set(notes.map(n => n.topic))];
@@ -21,7 +41,10 @@ function NotesListView({ notes, loading, error, onImportClick, onEditNote }) {
     return matchesSearch && matchesTopic && matchesTag;
   });
 
-  const selectedNote = notes.find(n => n.id === selectedNoteId);
+  const selectedNoteSummary = notes.find(n => n.id === selectedNoteId);
+  const selectedNote = selectedNoteSummary && selectedContent !== null
+    ? { ...selectedNoteSummary, content: selectedContent }
+    : selectedNoteSummary;
 
   return (
     <div className="notes-view">
@@ -108,7 +131,10 @@ function NotesListView({ notes, loading, error, onImportClick, onEditNote }) {
                     <tr
                       key={note.id}
                       className={`note-row ${selectedNoteId === note.id ? 'selected' : ''}`}
-                      onClick={() => setSelectedNoteId(note.id)}
+                      onClick={() => {
+                        setSelectedNoteId(note.id);
+                        setSelectedContent(null);
+                      }}
                     >
                       <td className="title-cell" title={note.title}>{note.title}</td>
                       <td className="author-cell" title={note.author}>{note.author}</td>
@@ -143,6 +169,8 @@ function NotesListView({ notes, loading, error, onImportClick, onEditNote }) {
       {selectedNote && (
         <NotesDetailPanel
           note={selectedNote}
+          contentLoading={selectedContentLoading}
+          contentError={selectedContentError}
           onClose={() => setSelectedNoteId(null)}
           onEdit={onEditNote}
         />

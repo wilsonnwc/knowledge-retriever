@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import MarkdownLite from '../MarkdownLite';
 import './ImportFlow.css';
 
 function PreviewScreen({ content, onUpdate, onNext, onBack }) {
@@ -51,20 +52,7 @@ function PreviewScreen({ content, onUpdate, onNext, onBack }) {
           </div>
         ) : (
           <div className="preview-content markdown-preview">
-            {editedContent.split('\n').map((line, idx) => {
-              if (line.startsWith('# ')) {
-                return <h1 key={idx}>{line.substring(2)}</h1>;
-              } else if (line.startsWith('## ')) {
-                return <h2 key={idx}>{line.substring(3)}</h2>;
-              } else if (line.startsWith('### ')) {
-                return <h3 key={idx}>{line.substring(4)}</h3>;
-              } else if (line.startsWith('- ')) {
-                return <li key={idx}>{line.substring(2)}</li>;
-              } else if (line.trim()) {
-                return <p key={idx}>{line}</p>;
-              }
-              return <br key={idx} />;
-            })}
+            <MarkdownLite content={editedContent} />
           </div>
         )}
       </div>

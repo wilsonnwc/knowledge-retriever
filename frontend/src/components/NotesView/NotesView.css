@@ -226,11 +226,15 @@
   right: 0;
   bottom: 0;
   left: 0;
-  background: rgba(0, 0, 0, 0);
   display: flex;
   justify-content: flex-end;
   z-index: 100;
   animation: slideIn 0.3s ease-out;
+  /* Not a modal backdrop — clicking a different row while the panel is
+     open should swap its content directly, not close it. Only the panel
+     itself should catch clicks; everything else passes through to the
+     table underneath. */
+  pointer-events: none;
 }
 
 @keyframes slideIn {
@@ -245,7 +249,7 @@
 }
 
 .detail-panel {
-  width: 550px;
+  width: 50%;
   height: 100%;
   background: white;
   border-left: 1px solid var(--color-border);
@@ -253,6 +257,7 @@
   display: flex;
   flex-direction: column;
   animation: panelSlide 0.3s ease-out;
+  pointer-events: auto;
 }
 
 @keyframes panelSlide {
@@ -309,11 +314,19 @@
 
 .panel-content {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: hidden;
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 24px;
+  min-height: 0;
+}
+
+.content-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* Metadata Section */
@@ -325,14 +338,17 @@
 
 .metadata-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: baseline;
+  gap: 8px;
   font-size: 14px;
 }
 
 .metadata-label {
   color: #666;
   font-weight: 500;
+  min-width: 110px;
+  flex-shrink: 0;
 }
 
 .metadata-value {
@@ -363,12 +379,11 @@
   align-items: center;
 }
 
-.tags-header h3 {
+.tags-section h3 {
   font-size: 14px;
   font-weight: 600;
   color: #000;
   margin: 0;
-  text-transform: uppercase;
 }
 
 .tags-display {
@@ -406,24 +421,61 @@
 }
 
 /* Content Section */
-.content-section h3 {
+.content-status {
   font-size: 14px;
-  font-weight: 600;
-  color: #000;
-  margin: 0 0 12px 0;
-  text-transform: uppercase;
+  color: #666;
+}
+
+.content-error {
+  color: #d32f2f;
 }
 
 .content-preview {
+  flex: 1;
+  overflow-y: auto;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 6px;
-  padding: 12px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: #666;
-  max-height: 200px;
-  overflow-y: auto;
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.content-preview h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 16px 0 8px 0;
+}
+
+.content-preview h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 12px 0 6px 0;
+}
+
+.content-preview h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 10px 0 4px 0;
+}
+
+.content-preview p {
+  margin-bottom: 12px;
+}
+
+.content-preview ul,
+.content-preview ol {
+  margin: 0 0 12px 0;
+  padding-left: 20px;
+}
+
+.content-preview li {
+  margin-bottom: 6px;
+}
+
+.content-preview strong {
+  font-weight: 700;
 }
 
 /* Panel Footer */

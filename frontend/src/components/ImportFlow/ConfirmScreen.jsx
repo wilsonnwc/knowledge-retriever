@@ -26,7 +26,7 @@ function ConfirmScreen({ data, onConfirm, onBack }) {
       <div className="confirm-container">
         <div className="confirm-section">
           <h2>Content Preview</h2>
-          <div className="content-preview">
+          <div className="confirm-content-preview">
             {data.content.substring(0, 300)}...
           </div>
         </div>
