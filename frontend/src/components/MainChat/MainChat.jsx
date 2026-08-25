@@ -79,12 +79,18 @@ function MainChat({
   onGoToArticle,
   importScreen,
   importData,
+  importExtracting,
+  importExtractError,
+  savedNotePath,
+  topics,
+  tags,
   onFileUpload,
   onContentUpdate,
   onFrontmatterUpdate,
   onConfirm,
   onImportBack,
-  onImportNext
+  onImportNext,
+  onGoToNotes
 }) {
   const isSearchLanding = mode === 'search' && !activeConversation;
   const isImportLanding = mode === 'import' && importScreen === 'upload' && !importData.content;
@@ -103,7 +109,7 @@ function MainChat({
                 <p className="chat-input-hint">Searches your saved notes only — not the web.</p>
               </>
             ) : (
-              <UploadScreen onUpload={onFileUpload} />
+              <UploadScreen onUpload={onFileUpload} extracting={importExtracting} extractError={importExtractError} />
             )}
           </div>
         </div>
@@ -129,6 +135,8 @@ function MainChat({
           {importScreen === 'frontmatter' && (
             <FrontmatterScreen
               data={importData}
+              topics={topics}
+              tags={tags}
               onUpdate={onFrontmatterUpdate}
               onNext={() => onImportNext('confirm')}
               onBack={() => onImportBack('preview')}
@@ -143,8 +151,9 @@ function MainChat({
           )}
           {importScreen === 'success' && (
             <SuccessScreen
-              notePath={`notes/${importData.topicFolder}/${importData.title.toLowerCase().replace(/\s+/g, '-')}.md`}
+              notePath={savedNotePath}
               onNew={() => onModeChange('import', true)}
+              onGoToNotes={onGoToNotes}
             />
           )}
         </div>

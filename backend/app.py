@@ -37,6 +37,14 @@ from routes.import_routes import import_bp  # noqa: E402
 app.register_blueprint(notes_bp)
 app.register_blueprint(import_bp)
 
+# Lazy trash purge: this is a local single-user app with no background
+# scheduler, so "empty trash weekly" means "purge anything old enough,
+# next time the app happens to start" rather than a real cron job.
+import notes_store  # noqa: E402
+purged = notes_store.purge_expired_trash()
+if purged:
+    print(f"🗑️  Purged {len(purged)} note(s) from trash older than {notes_store.TRASH_RETENTION_DAYS} days")
+
 
 # Health check endpoint
 @app.route('/api/health', methods=['GET'])

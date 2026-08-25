@@ -6,6 +6,9 @@ Endpoints:
 - GET /api/notes/{note_id} — Fetch full markdown content
 - PATCH /api/notes/{note_id} — Update a note's fields (frontmatter, tags,
   content, topic)
+- DELETE /api/notes/{note_id} — Move a note to trash
+- GET /api/trash — List trashed notes
+- POST /api/trash/{note_id}/restore — Restore a trashed note
 - GET /api/topics — List available topic folders
 - GET /api/tags — List all tags in use
 """
@@ -20,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import notes_store  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
-from embed import embed_all_notes  # noqa: E402
+from embed import embed_all_notes, delete_note_embeddings, embed_single_note  # noqa: E402
 
 notes_bp = Blueprint('notes', __name__, url_prefix='/api')
 
@@ -109,6 +112,61 @@ def update_note(note_id):
                 embed_all_notes()
             except Exception as e:
                 warning = f"Note saved but re-embedding failed — run scripts/embed.py manually: {e}"
+
+    response = {"status": "success", **note}
+    if warning:
+        response["warning"] = warning
+    return jsonify(response), 200
+
+
+@notes_bp.route('/notes/<path:note_id>', methods=['DELETE'])
+def delete_note(note_id):
+    """
+    Moves a note to trash (notes/.trash/<topic>/<filename>) rather than
+    deleting it outright, and immediately removes its embeddings so it
+    stops appearing in semantic search. The file itself is only purged
+    for good after TRASH_RETENTION_DAYS — see notes_store.purge_expired_trash().
+    """
+    try:
+        trashed_id = notes_store.trash_note(note_id)
+    except ValueError as e:
+        return jsonify({"status": "error", "message": str(e), "code": "invalid_request"}), 400
+
+    if trashed_id is None:
+        return jsonify({"status": "error", "message": "Note not found", "code": "not_found"}), 404
+
+    delete_note_embeddings(note_id)
+
+    return jsonify({"status": "success", "trashed_id": trashed_id}), 200
+
+
+@notes_bp.route('/trash', methods=['GET'])
+def list_trash():
+    """Lists notes currently sitting in trash, most recently trashed first."""
+    return jsonify({"status": "success", "notes": notes_store.list_trash()}), 200
+
+
+@notes_bp.route('/trash/<path:note_id>/restore', methods=['POST'])
+def restore_note(note_id):
+    """Moves a trashed note back to notes/<topic>/<filename> and re-embeds
+    just that one note (not a full rebuild)."""
+    try:
+        note = notes_store.restore_note(note_id)
+    except (ValueError, FileExistsError) as e:
+        return jsonify({"status": "error", "message": str(e), "code": "invalid_request"}), 400
+
+    if note is None:
+        return jsonify({"status": "error", "message": "Trashed note not found", "code": "not_found"}), 404
+
+    warning = None
+    if not os.getenv("OPENAI_API_KEY"):
+        warning = ("Note restored but NOT re-embedded — OPENAI_API_KEY is missing from .env. "
+                   "Add it and run `python3 scripts/embed.py` to make it searchable again.")
+    else:
+        try:
+            embed_single_note(note_id)
+        except Exception as e:
+            warning = f"Note restored but re-embedding failed — run scripts/embed.py manually: {e}"
 
     response = {"status": "success", **note}
     if warning:

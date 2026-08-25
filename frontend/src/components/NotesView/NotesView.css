@@ -34,6 +34,28 @@
   flex-shrink: 0;
 }
 
+.btn-trash-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: #666;
+  font-size: 0.9em;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.btn-trash-fab:hover {
+  color: #333;
+  border-color: #ccc;
+}
+
 /* Filters and search */
 .notes-filters {
   padding: 16px 24px;
@@ -527,8 +549,14 @@
   border-top: 1px solid var(--color-border);
   background: var(--color-bg);
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.edit-modal-footer-right {
+  display: flex;
+  align-items: center;
   gap: 12px;
-  justify-content: flex-end;
 }
 
 .edit-modal-footer .btn {
@@ -539,8 +567,27 @@
   color: #d32f2f;
   font-size: 0.9em;
   margin: 0;
-  margin-right: auto;
   align-self: center;
+}
+
+.btn-delete-link {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 0.85em;
+  padding: 8px 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btn-delete-link:hover:not(:disabled) {
+  color: #d32f2f;
+  text-decoration: underline;
+}
+
+.btn-delete-link:disabled {
+  color: #ccc;
+  cursor: default;
 }
 
 /* Responsive Design */

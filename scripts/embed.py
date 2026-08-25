@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 sys.path.insert(0, str(Path(__file__).parent))
-from chunking import chunk_all_notes
+from chunking import chunk_all_notes, chunk_note
 
 load_dotenv()
 
@@ -83,6 +83,40 @@ def embed_all_notes():
     collection.upsert(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
 
     print(f"Done. Collection now has {collection.count()} chunks.")
+
+
+def delete_note_embeddings(note_id: str):
+    """Removes one note's chunks from the collection. This is a local
+    metadata-filtered delete, not an API call — no OpenAI cost, so there's
+    no reason to batch/delay it (unlike re-embedding, which does cost)."""
+    collection = get_chroma_collection()
+    collection.delete(where={"source_file": note_id})
+
+
+def embed_single_note(note_id: str):
+    """Re-embeds one note (e.g. after restoring it from trash) without
+    touching the rest of the collection — cheaper than a full rebuild."""
+    file_path = NOTES_DIR / note_id
+    chunks = chunk_note(file_path, NOTES_DIR)
+    if not chunks:
+        return
+
+    openai_client = get_openai_client()
+    collection = get_chroma_collection()
+
+    ids, documents, metadatas = [], [], []
+    for i, c in enumerate(chunks):
+        ids.append(f"{c.source_file}::{i}")
+        documents.append(chunk_text_for_embedding(c))
+        metadatas.append({
+            "source_file": c.source_file,
+            "section_title": c.section_title,
+            **{k: v for k, v in c.frontmatter.items() if v},
+        })
+
+    response = openai_client.embeddings.create(model=EMBEDDING_MODEL, input=documents)
+    embeddings = [d.embedding for d in response.data]
+    collection.upsert(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
 
 
 if __name__ == "__main__":

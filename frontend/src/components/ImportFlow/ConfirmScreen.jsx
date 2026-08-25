@@ -1,7 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './ImportFlow.css';
 
 function ConfirmScreen({ data, onConfirm, onBack }) {
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+
+  const handleConfirm = async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await onConfirm();
+    } catch (err) {
+      setSaveError(err.message || 'Failed to save note');
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="screen confirm-screen">
       <div className="screen-header">
@@ -25,8 +39,12 @@ function ConfirmScreen({ data, onConfirm, onBack }) {
               <span className="value">{data.title}</span>
             </div>
             <div className="metadata-item">
+              <span className="label">Author/Speaker:</span>
+              <span className="value">{data.author || '(none)'}</span>
+            </div>
+            <div className="metadata-item">
               <span className="label">Source:</span>
-              <span className="value">{data.source}</span>
+              <span className="value">{data.source || '(none)'}</span>
             </div>
             <div className="metadata-item">
               <span className="label">Date:</span>
@@ -51,16 +69,18 @@ function ConfirmScreen({ data, onConfirm, onBack }) {
 
         <div className="confirm-info">
           <p>✓ Content is ready to save</p>
-          <p>✓ File will be saved to: <code>notes/{data.topicFolder}/{data.title.toLowerCase().replace(/\s+/g, '-')}.md</code></p>
+          <p>✓ Will be saved under the <strong>{data.topicFolder}</strong> topic</p>
         </div>
+
+        {saveError && <p className="upload-error">{saveError}</p>}
       </div>
 
       <div className="button-group">
-        <button className="btn btn-secondary" onClick={onBack}>
+        <button className="btn btn-secondary" onClick={onBack} disabled={saving}>
           ← Back
         </button>
-        <button className="btn btn-primary btn-large" onClick={onConfirm}>
-          ✓ Save Note
+        <button className="btn btn-primary btn-large" onClick={handleConfirm} disabled={saving}>
+          {saving ? 'Saving…' : '✓ Save Note'}
         </button>
       </div>
     </div>

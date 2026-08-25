@@ -3,7 +3,7 @@ import TagPicker from '../TagPicker';
 import { mockTypes } from '../../mockData/mockData';
 import './NotesView.css';
 
-function EditNoteModal({ note, topics, tags: availableTags, onSave, onCancel }) {
+function EditNoteModal({ note, topics, tags: availableTags, onSave, onDelete, onCancel }) {
   const [formData, setFormData] = useState({
     title: note.title || '',
     author: note.author || '',
@@ -19,6 +19,7 @@ function EditNoteModal({ note, topics, tags: availableTags, onSave, onCancel }) 
   const [newTopicName, setNewTopicName] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -51,6 +52,18 @@ function EditNoteModal({ note, topics, tags: availableTags, onSave, onCancel }) 
       setSaveError(err.message || 'Failed to save note');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Move "${formData.title || note.source || 'this note'}" to trash?`)) return;
+    setDeleting(true);
+    setSaveError(null);
+    try {
+      await onDelete();
+    } catch (err) {
+      setSaveError(err.message || 'Failed to delete note');
+      setDeleting(false);
     }
   };
 
@@ -190,13 +203,18 @@ function EditNoteModal({ note, topics, tags: availableTags, onSave, onCancel }) 
 
         {/* Footer */}
         <div className="edit-modal-footer">
-          {saveError && <p className="save-error">{saveError}</p>}
-          <button className="btn btn-secondary" onClick={onCancel} disabled={saving}>
-            Cancel
+          <button className="btn-delete-link" onClick={handleDelete} disabled={saving || deleting}>
+            {deleting ? 'Moving to trash…' : 'Delete note'}
           </button>
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving…' : 'Save Changes'}
-          </button>
+          <div className="edit-modal-footer-right">
+            {saveError && <p className="save-error">{saveError}</p>}
+            <button className="btn btn-secondary" onClick={onCancel} disabled={saving || deleting}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving || deleting}>
+              {saving ? 'Saving…' : 'Save Changes'}
+            </button>
+          </div>
         </div>
       </div>
 

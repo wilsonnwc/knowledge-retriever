@@ -44,10 +44,41 @@ export function updateNote(noteId, updates) {
   });
 }
 
+export function deleteNote(noteId) {
+  return request(`/notes/${encodeNoteId(noteId)}`, { method: 'DELETE' });
+}
+
+export function fetchTrash() {
+  return request('/trash').then((data) => data.notes);
+}
+
+export function restoreNote(trashId) {
+  return request(`/trash/${encodeNoteId(trashId)}/restore`, { method: 'POST' });
+}
+
 export function fetchTopics() {
   return request('/topics').then((data) => data.topics);
 }
 
 export function fetchTags() {
   return request('/tags').then((data) => data.tags);
+}
+
+export function importExtract(fileType, content) {
+  return request('/import', {
+    method: 'POST',
+    body: JSON.stringify({ file_type: fileType, content })
+  });
+}
+
+export function importConfirm({ content, frontmatterUpdates, topicFolder, tags }) {
+  return request('/import/confirm', {
+    method: 'POST',
+    body: JSON.stringify({
+      content,
+      frontmatter_updates: frontmatterUpdates,
+      topic_folder: topicFolder,
+      tags
+    })
+  });
 }

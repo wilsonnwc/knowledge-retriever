@@ -1,7 +1,7 @@
 import React from 'react';
 import './ImportFlow.css';
 
-function SuccessScreen({ notePath, onNew }) {
+function SuccessScreen({ notePath, onNew, onGoToNotes }) {
   return (
     <div className="screen success-screen">
       <div className="success-container">
@@ -26,7 +26,7 @@ function SuccessScreen({ notePath, onNew }) {
       </div>
 
       <div className="button-group">
-        <button className="btn btn-secondary">
+        <button className="btn btn-secondary" onClick={onGoToNotes}>
           ← Go to Notes
         </button>
         <button className="btn btn-primary" onClick={onNew}>

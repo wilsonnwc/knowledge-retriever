@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { mockTopics, mockTypes, mockTags } from '../../mockData/mockData';
+import { mockTypes } from '../../mockData/mockData';
 import TagPicker from '../TagPicker';
 import './ImportFlow.css';
 
-function FrontmatterScreen({ data, onUpdate, onNext, onBack }) {
+function FrontmatterScreen({ data, topics, tags: availableTags, onUpdate, onNext, onBack }) {
   const [formData, setFormData] = useState({
     title: data.title || '',
+    author: data.author || '',
     source: data.source || '',
     date: data.date || new Date().toISOString().split('T')[0],
     type: data.type || 'article',
@@ -44,10 +45,6 @@ function FrontmatterScreen({ data, onUpdate, onNext, onBack }) {
       alert('Title is required');
       return;
     }
-    if (!formData.source.trim()) {
-      alert('Source is required');
-      return;
-    }
     if (!formData.topicFolder) {
       alert('Topic folder is required');
       return;
@@ -57,7 +54,7 @@ function FrontmatterScreen({ data, onUpdate, onNext, onBack }) {
     onNext();
   };
 
-  const isFormValid = formData.title && formData.source && formData.topicFolder;
+  const isFormValid = formData.title && formData.topicFolder;
 
   return (
     <div className="screen frontmatter-screen">
@@ -81,17 +78,27 @@ function FrontmatterScreen({ data, onUpdate, onNext, onBack }) {
           />
         </div>
 
+        {/* Author or speaker */}
+        <div className="form-group">
+          <label htmlFor="author">Author or speaker</label>
+          <input
+            id="author"
+            type="text"
+            value={formData.author}
+            onChange={(e) => handleChange('author', e.target.value)}
+            placeholder="e.g., Don Norman"
+          />
+        </div>
+
         {/* Source */}
         <div className="form-group">
-          <label htmlFor="source">
-            Source <span className="required">*</span>
-          </label>
+          <label htmlFor="source">Source (book, podcast, publication, URL or video)</label>
           <input
             id="source"
             type="text"
             value={formData.source}
             onChange={(e) => handleChange('source', e.target.value)}
-            placeholder="e.g., Author, Publication, URL"
+            placeholder="e.g., Design of Everyday Things, or https://..."
           />
         </div>
 
@@ -135,7 +142,7 @@ function FrontmatterScreen({ data, onUpdate, onNext, onBack }) {
               onChange={(e) => handleChange('topicFolder', e.target.value)}
             >
               <option value="">Select a topic</option>
-              {mockTopics.map(topic => (
+              {topics.map(topic => (
                 <option key={topic} value={topic}>{topic}</option>
               ))}
             </select>
@@ -154,7 +161,7 @@ function FrontmatterScreen({ data, onUpdate, onNext, onBack }) {
           <TagPicker
             selectedTags={formData.tags}
             onChange={handleTagsChange}
-            availableTags={mockTags}
+            availableTags={availableTags}
           />
         </div>
       </div>

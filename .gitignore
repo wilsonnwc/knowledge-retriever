@@ -6,3 +6,6 @@ system/chroma_db/
 
 # Test-run outputs from --research-goal, regenerated each real run
 system/goals/
+
+# Trashed notes are ephemeral (7-day auto-purge) — never commit them
+notes/.trash/

@@ -19,16 +19,19 @@ rather than silently "fixing" real data.
 
 import re
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
 NOTES_DIR = PROJECT_ROOT / "notes"
+TRASH_DIR = NOTES_DIR / ".trash"
+TRASH_RETENTION_DAYS = 7
 
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 from chunking import parse_frontmatter  # noqa: E402
 
 # Folders that exist under notes/ but aren't topic folders.
-_NON_TOPIC_ENTRIES = {"template.md"}
+_NON_TOPIC_ENTRIES = {"template.md", ".trash"}
 
 
 def _parse_list_field(raw: str) -> list:
@@ -71,7 +74,7 @@ def list_topics() -> list:
         return []
     return sorted(
         p.name for p in NOTES_DIR.iterdir()
-        if p.is_dir()
+        if p.is_dir() and p.name not in _NON_TOPIC_ENTRIES
     )
 
 
@@ -112,7 +115,7 @@ def list_notes(topic: str = None, tag: str = None) -> list:
 
     notes = []
     for file_path in NOTES_DIR.rglob("*.md"):
-        if file_path.name in _NON_TOPIC_ENTRIES:
+        if file_path.name in _NON_TOPIC_ENTRIES or ".trash" in file_path.relative_to(NOTES_DIR).parts:
             continue
         summary = _note_summary(file_path)
         if topic and summary["topic"] != topic:
@@ -261,3 +264,102 @@ def save_new_note(topic_folder: str, frontmatter_fields: dict, content: str) -> 
     target_path.write_text(file_text, encoding="utf-8")
 
     return _note_id_for(target_path)
+
+
+def _set_frontmatter_line(file_path: Path, key: str, value: str = None):
+    """Adds/updates/removes a single frontmatter line in place. value=None
+    removes the line entirely (used to strip trashed_at on restore)."""
+    lines = file_path.read_text(encoding="utf-8").split("\n")
+    end_idx = next(i for i in range(1, len(lines)) if lines[i].strip() == "---")
+    frontmatter_lines = lines[1:end_idx]
+    body_lines = lines[end_idx + 1:]
+
+    frontmatter_lines = [l for l in frontmatter_lines if l.split(":", 1)[0].strip() != key]
+    if value is not None:
+        frontmatter_lines.append(f"{key}: {value}")
+
+    new_text = "\n".join(["---", *frontmatter_lines, "---", *body_lines]).rstrip("\n") + "\n"
+    file_path.write_text(new_text, encoding="utf-8")
+
+
+def trash_note(note_id: str) -> str:
+    """Moves a note's file into notes/.trash/<topic>/<filename>, tagging it
+    with a trashed_at timestamp so purge_expired_trash() knows its age.
+    Returns the note's trash id (same relative path, rooted at .trash/)."""
+    file_path = _find_note_path(note_id)
+    if not file_path.exists() or not file_path.is_file():
+        return None
+
+    trash_path = TRASH_DIR / note_id
+    trash_path.parent.mkdir(parents=True, exist_ok=True)
+    file_path.rename(trash_path)
+    _set_frontmatter_line(trash_path, "trashed_at", datetime.now(timezone.utc).isoformat())
+
+    return note_id
+
+
+def list_trash() -> list:
+    if not TRASH_DIR.exists():
+        return []
+
+    trashed = []
+    for file_path in TRASH_DIR.rglob("*.md"):
+        summary = _note_summary(file_path)
+        summary["id"] = str(file_path.relative_to(TRASH_DIR))
+        summary["path"] = f"notes/.trash/{summary['id']}"
+        summary["topic"] = file_path.parent.relative_to(TRASH_DIR).as_posix()
+        content = file_path.read_text(encoding="utf-8")
+        frontmatter, _ = parse_frontmatter(content)
+        summary["trashed_at"] = _clean_scalar(frontmatter.get("trashed_at", ""))
+        trashed.append(summary)
+
+    trashed.sort(key=lambda n: n["trashed_at"], reverse=True)
+    return trashed
+
+
+def restore_note(trash_id: str) -> dict:
+    """Moves a note back from notes/.trash/<topic>/<filename> to its
+    original notes/<topic>/<filename> location, stripping trashed_at."""
+    trash_path = (TRASH_DIR / trash_id).resolve()
+    if TRASH_DIR.resolve() not in trash_path.parents:
+        raise ValueError("Invalid trash id")
+    if not trash_path.exists() or not trash_path.is_file():
+        return None
+
+    restored_path = NOTES_DIR / trash_id
+    if restored_path.exists():
+        raise FileExistsError(f"A note already exists at notes/{trash_id} — can't restore over it")
+
+    restored_path.parent.mkdir(parents=True, exist_ok=True)
+    trash_path.rename(restored_path)
+    _set_frontmatter_line(restored_path, "trashed_at", None)
+
+    return get_note(trash_id)
+
+
+def purge_expired_trash(days: int = TRASH_RETENTION_DAYS) -> list:
+    """Permanently deletes trashed notes older than `days`. Called lazily
+    (on backend startup) rather than on a schedule — this is a local
+    single-user tool with no background worker, so "purge weekly" means
+    "purge anything old enough, next time the app happens to start."
+    Returns the note ids that were purged, so callers can also drop their
+    embeddings (already removed at trash-time, but kept here for safety)."""
+    if not TRASH_DIR.exists():
+        return []
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    purged = []
+    for file_path in TRASH_DIR.rglob("*.md"):
+        content = file_path.read_text(encoding="utf-8")
+        frontmatter, _ = parse_frontmatter(content)
+        trashed_at = _clean_scalar(frontmatter.get("trashed_at", ""))
+        try:
+            trashed_dt = datetime.fromisoformat(trashed_at)
+        except ValueError:
+            continue
+        if trashed_dt < cutoff:
+            note_id = str(file_path.relative_to(TRASH_DIR))
+            file_path.unlink()
+            purged.append(note_id)
+
+    return purged

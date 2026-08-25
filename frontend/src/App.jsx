@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar/Sidebar';
 import MainChat from './components/MainChat/MainChat';
 import NotesListView from './components/NotesView/NotesListView';
 import EditNoteModal from './components/NotesView/EditNoteModal';
+import TrashView from './components/NotesView/TrashView';
 import * as api from './api/client';
 import { mockConversations } from './mockData/mockConversations';
 
@@ -43,6 +44,7 @@ const blankImportData = () => ({
   content: '',
   fileType: '',
   title: '',
+  author: '',
   source: '',
   date: new Date().toISOString().split('T')[0],
   type: 'article',
@@ -51,7 +53,7 @@ const blankImportData = () => ({
 });
 
 function App() {
-  const [view, setView] = useState('chat'); // chat, notes
+  const [view, setView] = useState('chat'); // chat, notes, trash
   const [mode, setMode] = useState('search'); // search, import
 
   // Search/chat state
@@ -63,6 +65,9 @@ function App() {
   const [importScreen, setImportScreen] = useState('upload');
   const [importData, setImportData] = useState(blankImportData());
   const [completedImports, setCompletedImports] = useState([]);
+  const [importExtracting, setImportExtracting] = useState(false);
+  const [importExtractError, setImportExtractError] = useState(null);
+  const [savedNotePath, setSavedNotePath] = useState('');
 
   // Notes state — real data from the Flask backend
   const [notes, setNotes] = useState([]);
@@ -74,6 +79,11 @@ function App() {
   const [editingNoteDetail, setEditingNoteDetail] = useState(null);
   const [editingNoteLoading, setEditingNoteLoading] = useState(false);
   const [editingNoteError, setEditingNoteError] = useState(null);
+
+  // Trash state — fetched lazily, only when the Trash view is opened
+  const [trash, setTrash] = useState([]);
+  const [trashLoading, setTrashLoading] = useState(false);
+  const [trashError, setTrashError] = useState(null);
 
   useEffect(() => {
     setNotesLoading(true);
@@ -171,8 +181,27 @@ function App() {
 
   // --- Import handlers ---
   const handleFileUpload = (content, fileType) => {
-    setImportData((prev) => ({ ...prev, content, fileType }));
-    setImportScreen('preview');
+    setImportExtracting(true);
+    setImportExtractError(null);
+    api
+      .importExtract(fileType, content)
+      .then((response) => {
+        const suggestions = {};
+        (response.frontmatter_prompts || []).forEach((p) => {
+          suggestions[p.field] = p.value;
+        });
+        setImportData((prev) => ({
+          ...prev,
+          content: response.preview,
+          fileType,
+          title: suggestions.title || prev.title,
+          source: suggestions.source || prev.source,
+          type: suggestions.type || prev.type
+        }));
+        setImportScreen('preview');
+      })
+      .catch((err) => setImportExtractError(err.message))
+      .finally(() => setImportExtracting(false));
   };
 
   const handleContentUpdate = (content) => {
@@ -184,13 +213,35 @@ function App() {
   };
 
   const handleImportConfirm = () => {
-    // Mock save
-    console.log('Saving note:', importData);
-    setImportScreen('success');
-    setCompletedImports((prev) => [
-      { id: `import-${nextImportId++}`, title: importData.title, data: importData, updatedAt: new Date().toISOString() },
-      ...prev
-    ]);
+    return api
+      .importConfirm({
+        content: importData.content,
+        frontmatterUpdates: {
+          title: importData.title,
+          author: importData.author,
+          source: importData.source,
+          date: importData.date,
+          type: importData.type
+        },
+        topicFolder: importData.topicFolder,
+        tags: importData.tags
+      })
+      .then((response) => {
+        if (response.warning) {
+          // eslint-disable-next-line no-alert
+          alert(response.warning);
+        }
+        const noteId = response.note_path.replace(/^notes\//, '');
+        return api.fetchNote(noteId).then((fullNote) => {
+          setNotes((prev) => [fullNote, ...prev]);
+          setSavedNotePath(response.note_path);
+          setImportScreen('success');
+          setCompletedImports((prev) => [
+            { id: `import-${nextImportId++}`, title: importData.title, data: importData, updatedAt: new Date().toISOString() },
+            ...prev
+          ]);
+        });
+      });
   };
 
   // --- Mode toggle (also handles "start another import" from SuccessScreen) ---
@@ -205,6 +256,11 @@ function App() {
   const handleImportClick = () => {
     setView('chat');
     handleModeChange('import', true);
+  };
+
+  const handleGoToNotes = () => {
+    setView('notes');
+    setMode('search');
   };
 
   // --- Notes handlers ---
@@ -248,6 +304,39 @@ function App() {
     });
   };
 
+  const handleDeleteNote = () => {
+    return api.deleteNote(editingNoteId).then(() => {
+      setNotes((prev) => prev.filter((n) => n.id !== editingNoteId));
+      setEditingNoteId(null);
+      setEditingNoteDetail(null);
+    });
+  };
+
+  // --- Trash handlers ---
+  const handleTrashClick = () => {
+    setView('trash');
+    setTrashLoading(true);
+    setTrashError(null);
+    api
+      .fetchTrash()
+      .then(setTrash)
+      .catch((err) => setTrashError(err.message))
+      .finally(() => setTrashLoading(false));
+  };
+
+  const handleBackFromTrash = () => setView('notes');
+
+  const handleRestoreNote = (trashId) => {
+    return api.restoreNote(trashId).then((restoredNote) => {
+      if (restoredNote.warning) {
+        // eslint-disable-next-line no-alert
+        alert(restoredNote.warning);
+      }
+      setTrash((prev) => prev.filter((n) => n.id !== trashId));
+      setNotes((prev) => [...prev, restoredNote]);
+    });
+  };
+
   return (
     <div className="app">
       <Sidebar
@@ -272,12 +361,18 @@ function App() {
             onGoToArticle={handleGoToArticleFromChat}
             importScreen={importScreen}
             importData={importData}
+            importExtracting={importExtracting}
+            importExtractError={importExtractError}
+            savedNotePath={savedNotePath}
+            topics={topics}
+            tags={tags}
             onFileUpload={handleFileUpload}
             onContentUpdate={handleContentUpdate}
             onFrontmatterUpdate={handleFrontmatterUpdate}
             onConfirm={handleImportConfirm}
             onImportBack={setImportScreen}
             onImportNext={setImportScreen}
+            onGoToNotes={handleGoToNotes}
           />
         )}
 
@@ -289,6 +384,19 @@ function App() {
               error={notesError}
               onImportClick={handleImportClick}
               onEditNote={handleEditNote}
+            />
+            <button className="btn-trash-fab" onClick={handleTrashClick}>🗑️ Trash</button>
+          </div>
+        )}
+
+        {view === 'trash' && (
+          <div className="page-scroll">
+            <TrashView
+              trash={trash}
+              loading={trashLoading}
+              error={trashError}
+              onRestore={handleRestoreNote}
+              onBack={handleBackFromTrash}
             />
           </div>
         )}
@@ -313,6 +421,7 @@ function App() {
             topics={topics}
             tags={tags}
             onSave={handleSaveEditedNote}
+            onDelete={handleDeleteNote}
             onCancel={handleCancelEditNote}
           />
         )}
