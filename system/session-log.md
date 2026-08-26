@@ -38,6 +38,33 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 25 — 2026-08-26/27 (design only — no code)
+
+**Phase/step completed:** Design session, no implementation. Worked out an end-to-end plan for evolving this project into a **learning operating system** — a hub where `ai-chief-of-staff`'s daily intake is ranked against the user's knowledge state and skill gaps, rather than a static topic hierarchy. Written up in `system/learning-os-plan.md` (canonical) and as a 3-column reviewable page at https://claude.ai/code/artifact/67345e9a-61a6-4b96-82b1-bb27b3dadf65 — technical / plain-English / decision-and-trade-off, with toggles for "Plain English only" and "Decisions only".
+
+**Where to pick up next:** **One open question blocks scoping phase 0** — should there be a single shared eval harness across knowledge-retriever and ai-chief-of-staff, or does each keep its own? (Asked twice, still unanswered. Real refactoring either way: this project measures precision@5 and structural validity; chief-of-staff measures MARE.) Three lesser open items: which host (Fly/Railway/Render), whether to keep the email digest as a notification linking into the hosted Today page, and whether the hub keeps the `knowledge-retriever` name. Then phase 0: repair the eval debt + extract the service layer.
+
+**Key decisions made (full reasoning in the plan doc):**
+- **Extend this project into the hub** rather than start a sixth project — identity shifts from "RAG demo" to "learning OS".
+- **Build the MCP server now**, not later — closes a confirmed skill gap (ICIS role), and MCP tools call the service layer directly rather than proxying through Flask, so there's one source of truth.
+- **Storage split three ways by data shape:** notes → git-as-storage (free, versioned, syncs both laptops, and the user edits notes locally in an IDE so a server disk would silently diverge); Chroma → treated as a rebuildable cache, not durable state; event log → managed Postgres free tier, because it's the one dataset that cannot be recreated.
+- **Conflict resolution: policy + gate + escalation, explicitly NOT agent debate** — debate is expensive, slow, and very hard to evaluate; a written arbitration policy encodes product judgment in something inspectable, versionable and testable.
+- **A main orchestrator agent whose tools are the sub-agents**, with a constrained/enumerable action space so every routing decision stays loggable and testable.
+- **Free-text dismiss reasons at launch, not pre-set category chips** — pre-set categories would encode guesses about failure modes; they must be discovered from real data via error analysis.
+- **Implicit labels (triage clicks) as primary**, explicit 1–5 scoring demoted to a monthly calibration sample — daily manual scoring is exactly the time cost the product exists to remove.
+- **Cloudflare Access before anything is published** — the current API has no auth at all and `DELETE /api/notes/{id}` is wide open.
+- **Eval debt promoted from deferred to prerequisite** — the Novelty agent's value rests entirely on retrieval quality, and 20/28 locked queries are currently broken.
+
+**Learnings:**
+- The user's `skills-to-learn.md` already contained this integration as a flagged-not-started item (line 40), and each skill entry already had a gap, a source, a planned closing action and sometimes a self-test — i.e. a skill ladder already existed in prose and only needed structure. Reading the actual artifact reframed the whole design from "invent something" to "execute something already identified".
+- The user's eval practice to date is **entirely top-down** (28 pre-written queries, structural validation, a framework-derived UX checklist). Bottom-up error analysis — open coding real traces into discovered failure modes, then one binary judge per mode, validated against human labels — is genuinely new practice rather than repetition.
+- Choosing *not* to build the fashionable pattern (agent debate) with an articulated reason is a stronger interview signal than building it. The deciding factor was evaluability: debate would have been the one mechanism in the system that couldn't be measured.
+- A three-column doc (technical / plain-English / decision) is a good format for a non-engineer reviewing an engineering plan — and setting the plain-English column in a serif face while the technical column stays sans means the typeface itself signals the register when the columns stack on mobile.
+
+**Open questions to come back to:**
+- **Shared eval harness across both projects, or one per project?** — blocking phase 0 scope.
+- Which host; keep the email digest as a notification?; does the hub keep the `knowledge-retriever` name?
+---
 ### Session 24 — 2026-08-25
 
 **Phase/step completed:** Built the dedicated Notes read view (QA backlog item #1) and iterated it through several rounds of screenshot feedback into a polished state. The detail panel now fetches and shows a note's full content (not the 220-char truncated preview) via a new shared `MarkdownLite` component (headers, real `<ul>`/`<ol>` list grouping, `**bold**` inline spans — reused in the Import wizard's preview too, replacing its old duplicated inline rendering logic). Panel is 50%-width so it never covers the Title column at 1280px, and clicking a different row while the panel is open now swaps its content directly instead of closing-then-requiring-a-second-click (fixed by making the overlay `pointer-events: none` so background clicks pass through — only the panel itself still captures clicks). Then a full visual-consistency pass: metadata labels now align in a fixed-width column instead of each hugging its own label length, "Tags" heading matches Type/Date/Topic's capitalization and size (was falling back to unstyled browser-default `<h3>` because the CSS targeted a wrapper class the JSX never actually used), the duplicate Source display (once as a raw un-linked subtitle under the title, again properly linkified in metadata) was collapsed to one — subtitle now shows Author instead — and two small link-rendering bugs were fixed (greedy URL regex swallowing a trailing `)` into the link; brackets around a URL not matching the link's color).
