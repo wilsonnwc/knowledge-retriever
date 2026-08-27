@@ -38,6 +38,30 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 26 — 2026-08-28 (design only — no code)
+
+**Phase/step completed:** Design session, no implementation. Q&A pass over the Session 25 Learning OS plan, resolving all four items that were blocking Phase 0 scoping. Updated `system/learning-os-plan.md` and the reviewable artifact in place — no new document created.
+
+**Where to pick up next:** All four blocking questions from Session 25 are resolved (see below) — Phase 0 (repair eval debt + extract the service layer) is now genuinely unblocked and can start next session.
+
+**Key decisions made (full reasoning in the plan doc):**
+- **Naming: "Knowledge Library"** — doc/artifact only for now. Physical folder/repo rename deliberately deferred to the Phase 0 refactor, since that phase already touches every file path.
+- **Hosting: Render (app) + Neon (event-log Postgres)** — chosen over Google Cloud Run (more generous free tier, closer to real production practice, but more setup friction) after re-researching current 2026 pricing rather than trusting stale priors. Fly.io and Railway ruled out (no real free tier in 2026); Vercel ruled out despite being the usual default (10s execution timeout breaks a stateful Flask app); PythonAnywhere ruled out (free tier whitelists outbound internet, risking calls to the Anthropic API and Neon). Render's own free Postgres add-on was flagged as a trap — it expires after 30 days, which directly conflicts with the event log's "cannot be recreated" requirement — hence pairing with Neon specifically for that piece.
+- **Eval harness: shared testing process, separate scorecards** — knowledge-retriever and ai-chief-of-staff share the mechanics of trusting/maintaining a test (locked test sets, judge validation, monthly calibration) as a library, but each keeps its own metric (precision@5 vs. MARE). Chosen over a fully merged harness (risks a lowest-common-denominator abstraction) and fully separate (reinvents the same scaffolding a third time for conference-recorder).
+- **Email digest + Today page: retrieve-first with graceful fallback** — email becomes a lightweight notification linking into the Today page; the page attempts full-content retrieval for every item and falls back to a clear "couldn't retrieve, read at source" message on failure (paywalls, blocked scraping). Chosen over full mirroring with no fallback and over link-only (which would starve the event log of detail).
+- **Agent naming convention**: every agent gets an explicit `Agent` suffix (Novelty Agent, Gap Agent, Verifier Agent, etc.) throughout the plan doc and artifact, for unambiguous scanning.
+- **Cost cascade made concrete, per-agent**: Novelty/Gap Agents need no LLM call at all for their core score (embedding-similarity math is free); Orchestrator Agent proposed at Haiku 4.5 (structured, enumerable routing); Authority/Note-Drafter/Build-Task Planner Agents at Sonnet 5; Verifier Agent at Sonnet 5, escalating to Opus 5 only on genuine disagreement. Flagged as provisional pending real measurement in Phase 5, not a locked spec.
+- **Why the Verifier Agent isn't just the Orchestrator's job**: routing and checking are split by design, mirroring why CI runs tests in a separate stage from the build — so a bad outcome traces to either a routing mistake or a fact-checking mistake, never an ambiguous mix.
+- **New eval metrics**: draft acceptance rate + edit distance on the Note-Drafter Agent's output, since the propose/accept/edit/discard click is already a free, rich label that wasn't being captured as one.
+
+**Learnings:**
+- Hosting research from a prior training cutoff was stale enough to matter: Fly.io and Railway both dropped meaningful free tiers since 2024, and the user's own usual default (Vercel) turned out to be actively wrong for this shape of app (10s serverless timeout vs. a stateful Flask + MCP server) — worth re-checking current pricing/limits rather than trusting recalled facts whenever a real infrastructure decision is on the table.
+- A "shared vs. separate" framing is often a false binary — the useful answer split the *mechanics* of testing (shareable) from the *metrics themselves* (genuinely project-specific), rather than picking one pole. Same shape as the "shared platform, team-specific graders" pattern real ML platform orgs use.
+- Explaining a technical tradeoff via a plain-language analogy (two students being graded on different tests) surfaced the real design principle faster than the jargon-first version had — worth defaulting to concrete analogies before technical vocabulary when introducing a new tradeoff, not just when asked to simplify after the fact.
+
+**Open questions to come back to:**
+- None blocking Phase 0. Two backlog items, not scheduled: physical repo rename (bundle into Phase 0), and an "unknown-unknown pending study topics" capture mechanism raised as a future idea (see plan doc Section H).
+---
 ### Session 25 — 2026-08-26/27 (design only — no code)
 
 **Phase/step completed:** Design session, no implementation. Worked out an end-to-end plan for evolving this project into a **learning operating system** — a hub where `ai-chief-of-staff`'s daily intake is ranked against the user's knowledge state and skill gaps, rather than a static topic hierarchy. Written up in `system/learning-os-plan.md` (canonical) and as a 3-column reviewable page at https://claude.ai/code/artifact/67345e9a-61a6-4b96-82b1-bb27b3dadf65 — technical / plain-English / decision-and-trade-off, with toggles for "Plain English only" and "Decisions only".
