@@ -185,6 +185,8 @@ def chunk_all_notes(notes_dir: Path) -> list[Chunk]:
     for note_file in sorted(notes_dir.rglob("*.md")):
         if note_file.name == "template.md":
             continue
+        if ".trash" in note_file.relative_to(notes_dir).parts:
+            continue
         chunks.extend(chunk_note(note_file, notes_dir))
     return chunks
 
@@ -195,7 +197,7 @@ if __name__ == "__main__":
 
     all_chunks = chunk_all_notes(notes_dir)
 
-    print(f"Chunked {len(list(notes_dir.rglob('*.md'))) - 1} notes into {len(all_chunks)} chunks.\n")
+    print(f"Chunked {len({c.source_file for c in all_chunks})} notes into {len(all_chunks)} chunks.\n")
 
     # Spot-check: show every note that got split into more than one chunk
     from collections import defaultdict

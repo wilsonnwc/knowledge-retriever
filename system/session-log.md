@@ -38,6 +38,43 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 27 — 2026-08-30 (Phase 0 started, in progress)
+
+**Phase/step completed:** Phase 0 of the Learning OS build sequence (`system/learning-os-plan.md` Section G) started. The "repair eval debt" half is ~90% done — three real code bugs found and fixed, keyword-search precision@5 recovered from a broken 54% to 75%, with the remaining gap diagnosed but not yet applied (pending explicit go-ahead, since it edits the locked `test_queries.json`). The "extract the service layer" half of Phase 0 not yet started.
+
+**Where to pick up next:**
+1. Apply the 5 pending `expected_source` corrections to `system/evaluation/test_queries.json` (Q9, Q9b, Q10b, Q13, Q13b — see "What worked" below for the exact diagnosis) and re-run `system/evaluation/run_evaluation.py` to confirm the eval lands at/near the historic 82% ceiling.
+2. Then move to the other Phase 0 deliverable: extract `notes_store`/`embed`/`skills_store`/`events_store` into the shared service layer (Section B of the plan doc).
+3. Uncommitted changes are sitting in the working tree — `requirements.txt`, `scripts/chat.py`, `scripts/chunking.py` — commit before starting anything else next session.
+
+**What worked — three real bugs found and fixed, in order:**
+- **Bug 1 — `notes/.trash/` was still being searched.** `search_notes()` and `chunk_all_notes()` both did an unfiltered `rglob("*.md")`, so trashed notes (meant to be excluded) were polluting both keyword search and the Chroma embedding pipeline. `backend/notes_store.py` already excluded `.trash` elsewhere in the codebase — reused that exact pattern in both places. Fixed 54%→57%.
+- **Bug 2 — whole-file match counting structurally favored long, multi-topic files.** Confirmed by comparing file lengths: `product-management-in-practice.md` (120 lines, post-Session-22-consolidation) was winning almost every query regardless of topic, purely by being ~4-10x longer than the narrow single-topic files it was competing against. Fixed by scoring at the section/chunk level instead of the whole file — reusing `chunk_all_notes()` from `scripts/chunking.py`, the same chunker already built for the Chroma embedding pipeline, rather than writing new splitting logic. This one initially made things *worse* (57%→50%) before the next fix — see "What didn't work" below.
+- **Bug 3 — no IDF weighting; a hand-rolled stopword list was only a partial fix.** A quick stopword-list patch (57% after Bug 1) only got back to where Bug 1 alone had already been — because a fixed English stopword list can catch generic filler ("what," "should") but can't catch a word like "product" that's ubiquitous specifically within *this* 27-note PM corpus. Web research (see Sources below) confirmed current best practice is the opposite of a stopword list: keep every word, weight it by IDF (inverse document frequency) so common words are automatically discounted, corpus-relative, with no fixed list to maintain. Replaced the hand-rolled scorer entirely with `rank_bm25` (`BM25Okapi`), the standard lexical-ranking algorithm, applied over the same chunks from Bug 2's fix. **Precision@5: 54% → 75% (21/28).**
+
+**Remaining 7 failures, diagnosed:**
+- **2 genuine, already-known limits (Q4, Q6):** identical to the exact failures already documented in `system/evaluation/results/DIAGNOSIS.md` from the original Session 17 baseline — "organize" vs. "organising" (spelling variant), "PM" vs. "product manager" (abbreviation). Real synonymy gaps keyword search can't close by design; already earmarked there as the reason semantic search exists. Nothing to fix.
+- **5 stale test labels, not retrieval failures (Q9, Q9b, Q10b, Q13, Q13b):** checked each — the correct file (`product-management-in-practice.md`) is actually being retrieved, often at rank 1-2, but `expected_source` still carries parenthetical qualifiers like `(Communication)`/`(Stakeholder)` left over from before the Session 22 consolidation merged those into one file, so the literal-substring match never fires even though the retrieval is correct. Same root pattern as `DIAGNOSIS.md`'s already-documented "Bug 2: Test Data Errors." **This is the actual eval debt** the plan doc's Phase 0 line was about — now correctly isolated as a pure test-data problem, cleanly separated from the three real code bugs above. Fix identified, not yet applied (pending go-ahead per the file's own lock policy).
+
+**What didn't work / got stuck on:**
+- The chunk-level scoring fix (Bug 2) was structurally correct but made the number *worse* on its own (57%→50%) before Bug 3's fix, because splitting files into more, smaller chunks gave more independent chances for a stray stopword coincidence to flip a close race — concretely, Q10's correct answer lost by exactly one point to a chunk that happened to also contain the word "should." Two fixes can each be locally correct and still combine to make things worse if the first increases the *opportunities* for the second flaw to bite.
+- The plan doc's original diagnosis of the eval debt ("20 of 28 queries reference renamed/deleted files") turned out to describe the wrong mechanism — `run_evaluation.py` never checks file existence at all, only substring-matches against retrieval output, so a stale filename reference would never crash, just silently never match. The real, measured mechanism (length bias, then missing IDF) was different and more specific once actually investigated.
+
+**Learnings:**
+- Re-running the real eval instead of trusting a written diagnosis (even one you wrote yourself) is the move — the plan doc's own explanation of the eval debt was a reasonable guess made without re-running the script, and turned out to be a different, more specific bug once actually measured.
+- "Keep stopwords, weight by IDF" is current search best practice, reversing the older "strip stopwords" convention — a fixed stopword list is generic-English-only and structurally can't catch corpus-specific ubiquitous words, where IDF catches both the same way because it measures rarity directly from the actual corpus rather than a maintained list.
+- BM25 (via the small, dependency-light `rank_bm25` library) bundles three things — IDF weighting, term-frequency saturation (diminishing returns on repeated mentions, resists keyword-stuffing), and document-length normalization — that we were otherwise about to hand-roll one patch at a time. Reaching for the standard, well-tested algorithm resolved all three problems from today in one pass, and is a stronger interview story than a custom heuristic ("I used BM25, the standard lexical-ranking algorithm" vs. "I wrote my own word-counting logic").
+- Chunk-level scoring and BM25's own length normalization are complementary, not redundant: BM25's normalization assumes relevance scales roughly with a whole document's length, which doesn't hold for a merged multi-topic note where only one section is actually on-topic — chunking handles that specific case, BM25 handles the rest.
+
+**Sources consulted (web research on keyword-search best practices):**
+- [BM25: keyword search ranking algorithm explained](https://zeroentropy.dev/concepts/bm25/)
+- [Stop Stopping — Vectara](https://www.vectara.com/blog/stop-stopping)
+- [rank_bm25 — GitHub](https://github.com/dorianbrown/rank_bm25)
+- [BM25 vs TF-IDF: Which Ranks Text Better and Why?](https://medium.com/mlworks/why-bm25-algorithm-over-tf-idf-67bc009d20de)
+
+**Also this session, before the eval-debt deep dive:** discussed how to sequence Phase 0 and whether to parallelize work across two terminals. Recommendation given: Phase 0's refactor is a single-file-tree task (real parallel risk = merge conflicts, not saved time), but standing up Neon Postgres + the `events_store` schema (Phase 2's data layer) has zero file overlap and zero dependency on the refactor finishing — proposed as the one genuinely independent Track B. User chose to stay single-terminal for this session; the two-terminal option remains available for a future session.
+
+---
 ### Session 26 — 2026-08-28 (design only — no code)
 
 **Phase/step completed:** Design session, no implementation. Q&A pass over the Session 25 Learning OS plan, resolving all four items that were blocking Phase 0 scoping. Updated `system/learning-os-plan.md` and the reviewable artifact in place — no new document created.

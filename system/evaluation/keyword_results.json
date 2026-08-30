@@ -1,0 +1,441 @@
+{
+  "test_set_size": 28,
+  "precision_at_5": 0.75,
+  "queries_correct": 21,
+  "by_difficulty": {
+    "easy": {
+      "total": 3,
+      "found": 3
+    },
+    "hard": {
+      "total": 16,
+      "found": 12
+    },
+    "medium": {
+      "total": 9,
+      "found": 6
+    }
+  },
+  "results": [
+    {
+      "query_id": 1,
+      "query": "What makes good strategy vs bad strategy?",
+      "expected": "bad-strategy or three-parts-of-good-strategy",
+      "retrieved": [
+        "good-strategy-bad-strategy",
+        "product-management-in-practice",
+        "hard-thing-about-hard-things",
+        "calibrated-trust-across-product",
+        "the-mom-test"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "easy"
+    },
+    {
+      "query_id": "1b",
+      "query": "What should my strategy be?",
+      "expected": "bad-strategy or three-parts-of-good-strategy or Product Management in Practice (Strategy)",
+      "retrieved": [
+        "product-management-in-practice",
+        "good-strategy-bad-strategy",
+        "hard-thing-about-hard-things",
+        "calibrated-trust-across-product",
+        "design-of-everyday-things"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 2,
+      "query": "How do I talk to customers about their problems?",
+      "expected": "the-mom-test",
+      "retrieved": [
+        "the-mom-test",
+        "continuous-discovery-habits",
+        "hard-thing-about-hard-things",
+        "product-management-in-practice",
+        "product-sense-definition"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "easy"
+    },
+    {
+      "query_id": "2b",
+      "query": "Tell me about customer research",
+      "expected": "the-mom-test or analytics-framework or accepting-negative-findings",
+      "retrieved": [
+        "continuous-discovery-habits",
+        "the-mom-test",
+        "hard-thing-about-hard-things",
+        "artificial-competence",
+        "product-management-in-practice"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 3,
+      "query": "How should I handle user mistakes in design?",
+      "expected": "design-of-everyday-things",
+      "retrieved": [
+        "human-ai-interaction-guidelines",
+        "design-of-everyday-things",
+        "pm-playbook-shipping-ai-features",
+        "the-mom-test",
+        "hard-thing-about-hard-things"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": "3b",
+      "query": "What's important in product design?",
+      "expected": "design-of-everyday-things",
+      "retrieved": [
+        "design-of-everyday-things",
+        "generalists-comeback",
+        "lean-start-up",
+        "hard-thing-about-hard-things",
+        "good-strategy-bad-strategy"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 4,
+      "query": "What's the best way to organize a knowledge base?",
+      "expected": "Information architecture",
+      "retrieved": [
+        "hard-thing-about-hard-things",
+        "product-management-in-practice",
+        "good-strategy-bad-strategy",
+        "design-of-everyday-things",
+        "continuous-discovery-habits"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": "4b",
+      "query": "How should I organize things?",
+      "expected": "design-of-everyday-things",
+      "retrieved": [
+        "product-management-in-practice",
+        "the-mom-test",
+        "hard-thing-about-hard-things",
+        "design-of-everyday-things",
+        "pm-playbook-shipping-ai-features"
+      ],
+      "found_in_top5": true,
+      "rank": 4,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 5,
+      "query": "How do I know what will matter to my stakeholders?",
+      "expected": "identifying-key-stakeholders or stakeholder-communication-approach",
+      "retrieved": [
+        "product-management-in-practice",
+        "hard-thing-about-hard-things",
+        "four-questions-execs-ask",
+        "the-mom-test",
+        "stakeholder-communication-approach"
+      ],
+      "found_in_top5": true,
+      "rank": 5,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": "5b",
+      "query": "Tell me about stakeholders",
+      "expected": "identifying-key-stakeholders or stakeholder-communication-approach or human-relational-intelligence or Product Management in Practice (Stakeholder) or four-questions-execs-ask",
+      "retrieved": [
+        "stakeholder-communication-approach",
+        "product-management-in-practice",
+        "identifying-key-stakeholders",
+        "artificial-competence",
+        "generalists-comeback"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": 6,
+      "query": "How should I spend my time as a PM?",
+      "expected": "pm-managing-time",
+      "retrieved": [
+        "calibrated-trust-across-product",
+        "product-management-in-practice",
+        "pm-playbook-shipping-ai-features",
+        "continuous-discovery-habits",
+        "hard-thing-about-hard-things"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": "6b",
+      "query": "What should I focus on as a product manager?",
+      "expected": "pm-managing-time or Product Management in Practice (Strategy)",
+      "retrieved": [
+        "pm-managing-time",
+        "product-management-in-practice",
+        "hard-thing-about-hard-things",
+        "product-sense-definition",
+        "continuous-discovery-habits"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 7,
+      "query": "How do I stop users from making mistakes?",
+      "expected": "design-of-everyday-things",
+      "retrieved": [
+        "four-questions-execs-ask",
+        "human-ai-interaction-guidelines",
+        "the-mom-test",
+        "hard-thing-about-hard-things",
+        "design-of-everyday-things"
+      ],
+      "found_in_top5": true,
+      "rank": 5,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": "7b",
+      "query": "What's important about errors?",
+      "expected": "design-of-everyday-things",
+      "retrieved": [
+        "calibrated-trust-across-product",
+        "generalists-comeback",
+        "good-strategy-bad-strategy",
+        "design-of-everyday-things",
+        "hard-thing-about-hard-things"
+      ],
+      "found_in_top5": true,
+      "rank": 4,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": 8,
+      "query": "What's the difference between strategy and goals?",
+      "expected": "bad-strategy",
+      "retrieved": [
+        "good-strategy-bad-strategy",
+        "product-management-in-practice",
+        "continuous-discovery-habits",
+        "calibrated-trust-across-product",
+        "generalists-comeback"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": "8b",
+      "query": "Explain strategy",
+      "expected": "bad-strategy or three-parts-of-good-strategy or Product Management in Practice (Strategy)",
+      "retrieved": [
+        "analytics-framework",
+        "good-strategy-bad-strategy",
+        "product-management-in-practice",
+        "hard-thing-about-hard-things",
+        "building-production-ai-agents-linear"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "easy"
+    },
+    {
+      "query_id": 9,
+      "query": "How should teams make decisions together?",
+      "expected": "communication or pm-managing-time",
+      "retrieved": [
+        "product-management-in-practice",
+        "continuous-discovery-habits",
+        "human-ai-interaction-guidelines",
+        "design-of-everyday-things",
+        "calibrated-trust-across-product"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": "9b",
+      "query": "What makes good teamwork?",
+      "expected": "Product Management in Practice (Communication) or Product Management in Practice (general)",
+      "retrieved": [
+        "hard-thing-about-hard-things",
+        "design-of-everyday-things",
+        "good-strategy-bad-strategy",
+        "pm-playbook-shipping-ai-features",
+        "product-management-in-practice"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 10,
+      "query": "What should a product roadmap show?",
+      "expected": "four-questions-execs-ask",
+      "retrieved": [
+        "product-management-in-practice",
+        "four-questions-execs-ask",
+        "human-relational-intelligence",
+        "pm-playbook-shipping-ai-features",
+        "continuous-discovery-habits"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": "10b",
+      "query": "Tell me about roadmaps",
+      "expected": "four-questions-execs-ask or Product Management in Practice (Stakeholder)",
+      "retrieved": [
+        "product-management-in-practice",
+        "artificial-competence",
+        "continuous-discovery-habits",
+        "hard-thing-about-hard-things",
+        "the-mom-test"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": 11,
+      "query": "How should I run A/B tests for AI features?",
+      "expected": "pm-playbook-shipping-ai-features",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "hard-thing-about-hard-things",
+        "human-ai-interaction-guidelines",
+        "continuous-discovery-habits",
+        "magical-experiences"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": "11b",
+      "query": "How do I test if an AI feature works?",
+      "expected": "pm-playbook-shipping-ai-features or the-mom-test",
+      "retrieved": [
+        "four-questions-execs-ask",
+        "product-management-in-practice",
+        "the-mom-test",
+        "magical-experiences",
+        "design-of-everyday-things"
+      ],
+      "found_in_top5": true,
+      "rank": 3,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 12,
+      "query": "What's different about building AI products versus traditional software?",
+      "expected": "pm-playbook-shipping-ai-features or magical-experiences",
+      "retrieved": [
+        "pm-playbook-shipping-ai-features",
+        "product-sense-definition",
+        "a-fresh-definition-of-the-product-role",
+        "calibrated-trust-across-product",
+        "generalists-comeback"
+      ],
+      "found_in_top5": true,
+      "rank": 1,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": "12b",
+      "query": "Tell me about AI products",
+      "expected": "pm-playbook-shipping-ai-features or magical-experiences or product-sense-definition",
+      "retrieved": [
+        "hard-thing-about-hard-things",
+        "product-sense-definition",
+        "artificial-competence",
+        "calibrated-trust-across-product",
+        "product-management-in-practice"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 13,
+      "query": "What communication skills should a product manager develop?",
+      "expected": "Product Management in Practice (Communication) or creating-clarity",
+      "retrieved": [
+        "pm-managing-time",
+        "continuous-discovery-habits",
+        "design-of-everyday-things",
+        "product-management-in-practice",
+        "hard-thing-about-hard-things"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": "13b",
+      "query": "How do I communicate better?",
+      "expected": "Product Management in Practice (Communication) or Product Management in Practice (Stakeholder)",
+      "retrieved": [
+        "the-mom-test",
+        "product-management-in-practice",
+        "design-of-everyday-things",
+        "hard-thing-about-hard-things",
+        "artificial-competence"
+      ],
+      "found_in_top5": false,
+      "rank": null,
+      "difficulty": "hard"
+    },
+    {
+      "query_id": 14,
+      "query": "How do I know if a problem is worth solving?",
+      "expected": "the-mom-test",
+      "retrieved": [
+        "a-fresh-definition-of-the-product-role",
+        "continuous-discovery-habits",
+        "the-mom-test",
+        "product-management-in-practice",
+        "hard-thing-about-hard-things"
+      ],
+      "found_in_top5": true,
+      "rank": 3,
+      "difficulty": "medium"
+    },
+    {
+      "query_id": "14b",
+      "query": "Which problems should I focus on?",
+      "expected": "the-mom-test or Product Management in Practice (Stakeholder)",
+      "retrieved": [
+        "pm-managing-time",
+        "the-mom-test",
+        "design-of-everyday-things",
+        "pm-playbook-shipping-ai-features",
+        "hard-thing-about-hard-things"
+      ],
+      "found_in_top5": true,
+      "rank": 2,
+      "difficulty": "hard"
+    }
+  ]
+}

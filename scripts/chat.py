@@ -15,6 +15,9 @@ from dotenv import load_dotenv
 import anthropic
 import chromadb
 from openai import OpenAI
+from rank_bm25 import BM25Okapi
+
+from chunking import chunk_all_notes
 
 # Load API key from .env
 load_dotenv()
@@ -142,10 +145,33 @@ def _note_projects(content: str) -> list:
     return [p.strip() for p in match.group(1).split(",") if p.strip()]
 
 
+def _tokenize(text: str) -> list:
+    """Lowercase, strip punctuation so "goals?" matches "goals". No
+    stopword removal — BM25's IDF weighting discounts common words on
+    its own, corpus-relative, with no fixed list to maintain. A fixed
+    English stopword list can only ever catch generic filler ("what",
+    "should"); it can't catch a word like "product" that's ubiquitous
+    in *this* PM notes corpus specifically. IDF catches both, the same
+    way, because it measures rarity directly from the actual notes."""
+    return re.findall(r"[a-z0-9']+", text.lower())
+
+
 def search_notes(query: str, project: str = None) -> tuple:
     """
-    Keyword search across all notes with section-aware preview.
-    Respects ## section boundaries for consolidated files.
+    Keyword search across all notes, ranked with BM25 (via rank_bm25)
+    over per-section chunks (reusing chunk_all_notes(), the same chunker
+    the Chroma embedding pipeline uses).
+
+    Chunking handles what BM25's own length normalization can't: a long,
+    multi-topic note (e.g. several merged sections) shouldn't lose *or*
+    win purely because of its total length — scoring each section on its
+    own lets a short, focused note compete fairly against one section of
+    a longer one, and lets the preview show the section that actually
+    matched. BM25 itself replaces naive "does this word appear anywhere"
+    counting with the standard formula: rare words weighted higher than
+    common ones (IDF), repeated mentions counting with diminishing
+    returns rather than linearly (term-frequency saturation), and
+    normalization for each chunk's own length.
 
     Returns (context_string, top_note_path). top_note_path is the
     relative path (str) of the highest-ranked match, or None if there
@@ -156,59 +182,38 @@ def search_notes(query: str, project: str = None) -> tuple:
     if not NOTES_DIR.exists():
         return "[No notes directory found]", None
 
-    relevant_items = []
-    # Strip punctuation so "goals?" matches "goals" in content
-    query_words = re.findall(r"[a-z0-9']+", query.lower())
-
-    for note_file in NOTES_DIR.rglob("*.md"):
-        with open(note_file, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        if project and project not in _note_projects(content):
-            continue
-
-        # Count keyword matches
-        matches = sum(1 for word in query_words if word in content.lower())
-        if matches > 0:
-            # Extract a section-aware preview: frontmatter + intro + first section
-            lines = content.split("\n")
-            preview_lines = []
-            section_count = 0
-
-            # Pull content: frontmatter (---), intro text, and first full section
-            for i, line in enumerate(lines):
-                preview_lines.append(line)
-
-                # Count section headers (##)
-                if line.startswith("## "):
-                    section_count += 1
-                    # Stop after capturing the first section
-                    if section_count > 1:
-                        break
-
-                # Safety limit: don't pull entire file even if no second header
-                if i > 120:
-                    break
-
-            relevant_items.append({
-                "file": note_file.name,
-                "path": note_file.relative_to(NOTES_DIR),
-                "matches": matches,
-                "preview": "\n".join(preview_lines)
-            })
-
-    # Sort by match count
-    relevant_items.sort(key=lambda x: x["matches"], reverse=True)
-
-    if not relevant_items:
+    chunks = [
+        c for c in chunk_all_notes(NOTES_DIR)
+        if not project or project in _note_projects(f"projects: {c.frontmatter.get('projects', '')}")
+    ]
+    if not chunks:
         return "[No matching notes found]", None
 
-    # Build context
-    context_parts = []
-    for item in relevant_items[:5]:  # Top 5 matches
-        context_parts.append(f"=== {item['path']} ===\n{item['preview']}\n")
+    # Rebuilt on every call — fine at this corpus size (~30 notes); revisit
+    # (cache the index) if the corpus grows enough for this to be slow.
+    bm25 = BM25Okapi([_tokenize(c.text) for c in chunks])
+    scores = bm25.get_scores(_tokenize(query))
 
-    top_note_path = str(relevant_items[0]["path"])
+    best_by_file = {}  # source_file -> (score, chunk)
+    for chunk, score in zip(chunks, scores):
+        if score <= 0:
+            continue
+        current = best_by_file.get(chunk.source_file)
+        if current is None or score > current[0]:
+            best_by_file[chunk.source_file] = (score, chunk)
+
+    if not best_by_file:
+        return "[No matching notes found]", None
+
+    # Sort by each file's best-matching section
+    ranked = sorted(best_by_file.items(), key=lambda kv: kv[1][0], reverse=True)
+
+    context_parts = []
+    for source_file, (score, chunk) in ranked[:5]:  # Top 5 matches
+        preview = f"## {chunk.section_title}\n{chunk.text}" if chunk.section_title else chunk.text
+        context_parts.append(f"=== {source_file} ===\n{preview}\n")
+
+    top_note_path = ranked[0][0]
     return "\n".join(context_parts), top_note_path
 
 
