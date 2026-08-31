@@ -18,6 +18,7 @@ rather than silently "fixing" real data.
 """
 
 import re
+import secrets
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -242,10 +243,24 @@ def _format_frontmatter(fields: dict) -> str:
     return "\n".join(lines)
 
 
+def _generate_note_id() -> str:
+    """Short random id, stamped once at creation and never touched again.
+    Not used as a lookup key anywhere yet — the filename/path is still
+    the real identity everywhere in this codebase today. This exists so
+    a future citation system (e.g. the planned Verifier Agent, or any
+    other durable reference into a specific note) has something stable
+    to point at instead of a path that can change whenever notes get
+    reorganized — see system/session-log.md Session 28 for the full
+    reasoning on why a full path-to-id migration wasn't done now."""
+    return secrets.token_hex(4)
+
+
 def save_new_note(topic_folder: str, frontmatter_fields: dict, content: str) -> str:
     """Writes a new note to notes/{topic_folder}/{slug}.md. Raises
     ValueError if topic_folder isn't an existing taxonomy folder, or if
-    the target file already exists (never silently overwrite)."""
+    the target file already exists (never silently overwrite). Stamps a
+    stable `id:` field (see _generate_note_id) unless the caller already
+    supplied one."""
     if topic_folder not in list_topics():
         raise ValueError(f"Unknown topic folder: {topic_folder}")
 
@@ -259,6 +274,7 @@ def save_new_note(topic_folder: str, frontmatter_fields: dict, content: str) -> 
     if target_path.exists():
         raise FileExistsError(f"A note already exists at notes/{topic_folder}/{slug}.md")
 
+    frontmatter_fields = {"id": _generate_note_id(), **frontmatter_fields}
     frontmatter_block = _format_frontmatter(frontmatter_fields)
     file_text = f"{frontmatter_block}\n\n{content.strip()}\n"
     target_path.write_text(file_text, encoding="utf-8")

@@ -1,4 +1,5 @@
 ---
+id:  # optional — stable short id, auto-generated on save; don't hand-edit or reuse across notes
 type: book | article | quote | own-note | podcast | video
 title:  # optional — distinct display name for this note; only needed when it shares a source with another note
 author:  # optional — who wrote/said it

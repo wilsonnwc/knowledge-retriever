@@ -1,7 +1,7 @@
 {
   "test_set_size": 28,
-  "precision_at_5": 0.75,
-  "queries_correct": 21,
+  "precision_at_5": 0.9285714285714286,
+  "queries_correct": 26,
   "by_difficulty": {
     "easy": {
       "total": 3,
@@ -9,18 +9,18 @@
     },
     "hard": {
       "total": 16,
-      "found": 12
+      "found": 15
     },
     "medium": {
       "total": 9,
-      "found": 6
+      "found": 8
     }
   },
   "results": [
     {
       "query_id": 1,
       "query": "What makes good strategy vs bad strategy?",
-      "expected": "bad-strategy or three-parts-of-good-strategy",
+      "expected": "good-strategy-bad-strategy",
       "retrieved": [
         "good-strategy-bad-strategy",
         "product-management-in-practice",
@@ -35,7 +35,7 @@
     {
       "query_id": "1b",
       "query": "What should my strategy be?",
-      "expected": "bad-strategy or three-parts-of-good-strategy or Product Management in Practice (Strategy)",
+      "expected": "good-strategy-bad-strategy or product-management-in-practice",
       "retrieved": [
         "product-management-in-practice",
         "good-strategy-bad-strategy",
@@ -44,7 +44,7 @@
         "design-of-everyday-things"
       ],
       "found_in_top5": true,
-      "rank": 2,
+      "rank": 1,
       "difficulty": "hard"
     },
     {
@@ -65,7 +65,7 @@
     {
       "query_id": "2b",
       "query": "Tell me about customer research",
-      "expected": "the-mom-test or analytics-framework or accepting-negative-findings",
+      "expected": "the-mom-test or analytics-framework or continuous-discovery-habits",
       "retrieved": [
         "continuous-discovery-habits",
         "the-mom-test",
@@ -74,7 +74,7 @@
         "product-management-in-practice"
       ],
       "found_in_top5": true,
-      "rank": 2,
+      "rank": 1,
       "difficulty": "hard"
     },
     {
@@ -155,7 +155,7 @@
     {
       "query_id": "5b",
       "query": "Tell me about stakeholders",
-      "expected": "identifying-key-stakeholders or stakeholder-communication-approach or human-relational-intelligence or Product Management in Practice (Stakeholder) or four-questions-execs-ask",
+      "expected": "identifying-key-stakeholders or stakeholder-communication-approach or human-relational-intelligence or product-management-in-practice or four-questions-execs-ask",
       "retrieved": [
         "stakeholder-communication-approach",
         "product-management-in-practice",
@@ -185,7 +185,7 @@
     {
       "query_id": "6b",
       "query": "What should I focus on as a product manager?",
-      "expected": "pm-managing-time or Product Management in Practice (Strategy)",
+      "expected": "pm-managing-time or product-management-in-practice",
       "retrieved": [
         "pm-managing-time",
         "product-management-in-practice",
@@ -245,7 +245,7 @@
     {
       "query_id": "8b",
       "query": "Explain strategy",
-      "expected": "bad-strategy or three-parts-of-good-strategy or Product Management in Practice (Strategy)",
+      "expected": "good-strategy-bad-strategy or product-management-in-practice",
       "retrieved": [
         "analytics-framework",
         "good-strategy-bad-strategy",
@@ -260,7 +260,7 @@
     {
       "query_id": 9,
       "query": "How should teams make decisions together?",
-      "expected": "communication or pm-managing-time",
+      "expected": "product-management-in-practice or pm-managing-time",
       "retrieved": [
         "product-management-in-practice",
         "continuous-discovery-habits",
@@ -268,14 +268,14 @@
         "design-of-everyday-things",
         "calibrated-trust-across-product"
       ],
-      "found_in_top5": false,
-      "rank": null,
+      "found_in_top5": true,
+      "rank": 1,
       "difficulty": "hard"
     },
     {
       "query_id": "9b",
       "query": "What makes good teamwork?",
-      "expected": "Product Management in Practice (Communication) or Product Management in Practice (general)",
+      "expected": "product-management-in-practice",
       "retrieved": [
         "hard-thing-about-hard-things",
         "design-of-everyday-things",
@@ -283,8 +283,8 @@
         "pm-playbook-shipping-ai-features",
         "product-management-in-practice"
       ],
-      "found_in_top5": false,
-      "rank": null,
+      "found_in_top5": true,
+      "rank": 5,
       "difficulty": "hard"
     },
     {
@@ -305,7 +305,7 @@
     {
       "query_id": "10b",
       "query": "Tell me about roadmaps",
-      "expected": "four-questions-execs-ask or Product Management in Practice (Stakeholder)",
+      "expected": "four-questions-execs-ask or product-management-in-practice",
       "retrieved": [
         "product-management-in-practice",
         "artificial-competence",
@@ -313,8 +313,8 @@
         "hard-thing-about-hard-things",
         "the-mom-test"
       ],
-      "found_in_top5": false,
-      "rank": null,
+      "found_in_top5": true,
+      "rank": 1,
       "difficulty": "medium"
     },
     {
@@ -380,7 +380,7 @@
     {
       "query_id": 13,
       "query": "What communication skills should a product manager develop?",
-      "expected": "Product Management in Practice (Communication) or creating-clarity",
+      "expected": "product-management-in-practice",
       "retrieved": [
         "pm-managing-time",
         "continuous-discovery-habits",
@@ -388,14 +388,14 @@
         "product-management-in-practice",
         "hard-thing-about-hard-things"
       ],
-      "found_in_top5": false,
-      "rank": null,
+      "found_in_top5": true,
+      "rank": 4,
       "difficulty": "medium"
     },
     {
       "query_id": "13b",
       "query": "How do I communicate better?",
-      "expected": "Product Management in Practice (Communication) or Product Management in Practice (Stakeholder)",
+      "expected": "product-management-in-practice",
       "retrieved": [
         "the-mom-test",
         "product-management-in-practice",
@@ -403,8 +403,8 @@
         "hard-thing-about-hard-things",
         "artificial-competence"
       ],
-      "found_in_top5": false,
-      "rank": null,
+      "found_in_top5": true,
+      "rank": 2,
       "difficulty": "hard"
     },
     {
@@ -425,7 +425,7 @@
     {
       "query_id": "14b",
       "query": "Which problems should I focus on?",
-      "expected": "the-mom-test or Product Management in Practice (Stakeholder)",
+      "expected": "the-mom-test or product-management-in-practice",
       "retrieved": [
         "pm-managing-time",
         "the-mom-test",

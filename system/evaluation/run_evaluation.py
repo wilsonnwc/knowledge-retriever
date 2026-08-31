@@ -13,6 +13,45 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
 
 from chat import search_notes
 
+NOTES_DIR = Path(__file__).parent.parent.parent / "notes"
+
+
+def validate_expected_sources(queries, notes_dir):
+    """
+    Tripwire, not auto-fix: check every expected_source option against
+    real note filenames on disk, before trusting any score below. Catches
+    a stale reference (a note renamed/merged/deleted after a query was
+    written — exactly what happened after the Session 22 consolidation)
+    the moment someone next runs the eval, instead of it silently
+    rotting until a suspiciously low score forces a manual dig-in. See
+    system/session-log.md Session 27/28 for the fuller reasoning on why
+    this is a tripwire rather than a full path-stable-id migration.
+    """
+    real_filenames = [
+        p.stem.lower() for p in notes_dir.rglob("*.md")
+        if p.name != "template.md" and ".trash" not in p.relative_to(notes_dir).parts
+    ]
+
+    warnings = []
+    for q in queries:
+        options = [o.strip() for o in q["expected_source"].split(" or ")]
+        for opt in options:
+            if not any(opt.lower() in fname for fname in real_filenames):
+                warnings.append(f"  Q{q['id']}: expected_source option {opt!r} matches no real note file")
+
+    print("\n" + "="*70)
+    print("EXPECTED_SOURCE STALENESS CHECK")
+    print("="*70)
+    if warnings:
+        print(f"⚠ {len(warnings)} option(s) match no real file — may be stale, verify before trusting scores below:\n")
+        for w in warnings:
+            print(w)
+    else:
+        print("✓ Every expected_source option resolves to a real note file.")
+
+    return warnings
+
+
 def evaluate():
     """Run evaluation on test queries."""
 
@@ -23,6 +62,8 @@ def evaluate():
 
     queries = data["test_queries"]
     results = []
+
+    validate_expected_sources(queries, NOTES_DIR)
 
     print("\n" + "="*70)
     print("KEYWORD SEARCH EVALUATION")

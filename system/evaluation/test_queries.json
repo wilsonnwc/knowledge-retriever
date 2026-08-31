@@ -1,12 +1,12 @@
 {
   "locked": true,
   "locked_date": "2026-08-02",
-  "locked_note": "Corrected keyword search baseline: 82% precision@5 (23/28). Do not edit expected_source or add/remove queries without also re-running the keyword baseline for comparison. Use this exact set, unchanged, for Phase 4 semantic search comparison.",
+  "locked_note": "Corrected keyword search baseline: 82% precision@5 (23/28). Do not edit expected_source or add/remove queries without also re-running the keyword baseline for comparison. Use this exact set, unchanged, for Phase 4 semantic search comparison. 2026-08-31: corrected 5 expected_source values (Q9, Q9b, Q10b, Q13, Q13b) left stale by the Session 22 note consolidation — see system/session-log.md Session 27/28 for the diagnosis. Re-ran the baseline after. Same day, added an automated staleness tripwire to run_evaluation.py (validate_expected_sources) which caught 10 further stale-but-harmless options across Q1, Q1b, Q2b, Q5b, Q6b, Q8b, Q13, Q14b — corrected those too, same session.",
   "test_queries": [
     {
       "id": 1,
       "query": "What makes good strategy vs bad strategy?",
-      "expected_source": "bad-strategy or three-parts-of-good-strategy",
+      "expected_source": "good-strategy-bad-strategy",
       "expected_concept": "three parts of strategy or anti-patterns",
       "specificity": "specific",
       "difficulty": "easy",
@@ -15,7 +15,7 @@
     {
       "id": "1b",
       "query": "What should my strategy be?",
-      "expected_source": "bad-strategy or three-parts-of-good-strategy or Product Management in Practice (Strategy)",
+      "expected_source": "good-strategy-bad-strategy or product-management-in-practice",
       "expected_concept": "any content on strategy",
       "specificity": "vague",
       "difficulty": "hard",
@@ -33,7 +33,7 @@
     {
       "id": "2b",
       "query": "Tell me about customer research",
-      "expected_source": "the-mom-test or analytics-framework or accepting-negative-findings",
+      "expected_source": "the-mom-test or analytics-framework or continuous-discovery-habits",
       "expected_concept": "any customer research methodology",
       "specificity": "vague",
       "difficulty": "hard",
@@ -87,7 +87,7 @@
     {
       "id": "5b",
       "query": "Tell me about stakeholders",
-      "expected_source": "identifying-key-stakeholders or stakeholder-communication-approach or human-relational-intelligence or Product Management in Practice (Stakeholder) or four-questions-execs-ask",
+      "expected_source": "identifying-key-stakeholders or stakeholder-communication-approach or human-relational-intelligence or product-management-in-practice or four-questions-execs-ask",
       "expected_concept": "any stakeholder-related content",
       "specificity": "vague",
       "difficulty": "medium",
@@ -105,7 +105,7 @@
     {
       "id": "6b",
       "query": "What should I focus on as a product manager?",
-      "expected_source": "pm-managing-time or Product Management in Practice (Strategy)",
+      "expected_source": "pm-managing-time or product-management-in-practice",
       "expected_concept": "any PM priority/focus advice",
       "specificity": "vague",
       "difficulty": "hard",
@@ -141,7 +141,7 @@
     {
       "id": "8b",
       "query": "Explain strategy",
-      "expected_source": "bad-strategy or three-parts-of-good-strategy or Product Management in Practice (Strategy)",
+      "expected_source": "good-strategy-bad-strategy or product-management-in-practice",
       "expected_concept": "any strategy definition or framework",
       "specificity": "vague",
       "difficulty": "easy",
@@ -150,7 +150,7 @@
     {
       "id": 9,
       "query": "How should teams make decisions together?",
-      "expected_source": "communication or pm-managing-time",
+      "expected_source": "product-management-in-practice or pm-managing-time",
       "expected_concept": "team decision-making methodology",
       "specificity": "specific",
       "difficulty": "hard",
@@ -159,7 +159,7 @@
     {
       "id": "9b",
       "query": "What makes good teamwork?",
-      "expected_source": "Product Management in Practice (Communication) or Product Management in Practice (general)",
+      "expected_source": "product-management-in-practice",
       "expected_concept": "any team-related principle",
       "specificity": "vague",
       "difficulty": "hard",
@@ -177,7 +177,7 @@
     {
       "id": "10b",
       "query": "Tell me about roadmaps",
-      "expected_source": "four-questions-execs-ask or Product Management in Practice (Stakeholder)",
+      "expected_source": "four-questions-execs-ask or product-management-in-practice",
       "expected_concept": "any roadmap-related content",
       "specificity": "vague",
       "difficulty": "medium",
@@ -222,7 +222,7 @@
     {
       "id": 13,
       "query": "What communication skills should a product manager develop?",
-      "expected_source": "Product Management in Practice (Communication) or creating-clarity",
+      "expected_source": "product-management-in-practice",
       "expected_concept": "PM communication best practices",
       "specificity": "specific",
       "difficulty": "medium",
@@ -231,7 +231,7 @@
     {
       "id": "13b",
       "query": "How do I communicate better?",
-      "expected_source": "Product Management in Practice (Communication) or Product Management in Practice (Stakeholder)",
+      "expected_source": "product-management-in-practice",
       "expected_concept": "any communication or clarity principle",
       "specificity": "vague",
       "difficulty": "hard",
@@ -249,7 +249,7 @@
     {
       "id": "14b",
       "query": "Which problems should I focus on?",
-      "expected_source": "the-mom-test or Product Management in Practice (Stakeholder)",
+      "expected_source": "the-mom-test or product-management-in-practice",
       "expected_concept": "any prioritization or validation principle",
       "specificity": "vague",
       "difficulty": "hard",
