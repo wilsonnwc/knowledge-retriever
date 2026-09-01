@@ -38,6 +38,24 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 30b — 2026-09-01 (prevent the Chroma path bug from recurring — complete)
+
+**Phase/step completed:** After the fix earlier this session, asked directly: does this stop the same bug from happening again, or did it just patch today's instance? Answer was no — nothing had changed to prevent a future refactor from re-diverging the two path definitions, and a second, different risk (forgetting to re-run `embed.py` after an edit) was still completely uncaught. Built both fixes, since they close two different failure modes of the same underlying "index silently disagrees with reality" problem.
+
+**What worked:**
+- **Structural fix:** created `scripts/config.py` holding `PROJECT_ROOT`, `NOTES_DIR`, `CHROMA_DIR`, `COLLECTION_NAME`, `EMBEDDING_MODEL` as the single definition. `embed.py`, `retrieval_service.py`, and `chat.py` all now import from it instead of each redefining their own copies. Verified they're not just equal but the *same object* (`embed.CHROMA_DIR is config.CHROMA_DIR` → `True`) — the two can no longer be edited independently during a future refactor, which is exactly the mechanism that caused the 3-week bug.
+- **Staleness tripwire:** added `check_index_freshness()` to `retrieval_service.py`, following the same tripwire-over-auto-fix pattern already established in `run_evaluation.py`'s `validate_expected_sources()`. Compares the real note files on disk (via `chunk_all_notes()`, reusing its existing filtering rather than re-writing it) against what's actually embedded in Chroma, in both directions — notes never embedded, and embedded entries for notes that no longer exist. Wired into `chat.py`'s CLI entry point, printing any warnings before the branches that actually query the index (skipped for `--new-project`/`--archive-project`, which don't touch it).
+- **Proved the tripwire actually works**, not just that it looked right: added a real temporary note, ran the check, got exactly the expected warning naming the file, deleted the note, confirmed the warning cleared.
+- Re-ran the locked eval after the refactor: still 93% (26/28), unchanged.
+
+**Learnings:**
+- A fix that resolves today's symptom and a fix that prevents the failure mode are different pieces of work, and doing the first doesn't imply the second — worth asking "does this stop it from happening again?" explicitly rather than assuming a bug fix already covers it.
+- Two different fixes were needed because there were two different ways the same "index disagrees with reality" failure could occur again: a code-level mismatch (two files defining the same constant, only one gets updated in a refactor) and a human-workflow mismatch (edit a note, forget to re-run `embed.py`). The structural fix (single source of truth) only closes the first; only the tripwire (an actual comparison against ground truth at runtime) closes the second.
+
+**Open questions to come back to:**
+- The tripwire runs once at CLI startup — worth surfacing the same check somewhere in the Flask backend once Search/Chat is wired (e.g. a warning banner or a `/api/health`-style check), so this protection isn't CLI-only.
+
+---
 ### Session 30 — 2026-09-01 (service-layer extraction — complete)
 
 **Phase/step completed:** Extracted the three functions Search/Chat actually needs (`search_notes`, `search_notes_semantic`, `suggest_related`) out of `scripts/chat.py` into a new `scripts/retrieval_service.py`, so Flask can import them too. Chose the narrow scope over the plan doc's full Section B shape: `skills_store`/`events_store` don't exist yet and nothing calls them, so building stubs now would be building ahead of actual need. Also left `research_goal`/`scope_goal` in `chat.py` untouched — they call `print()`/`input()` for interactive terminal use (`scope_goal` literally blocks on `input()` mid-run), which would hang a web request; moving them is separate future work for whenever the MCP server or a goal-research UI feature needs them, not needed for Search/Chat.

@@ -20,14 +20,9 @@ from openai import OpenAI
 from rank_bm25 import BM25Okapi
 
 from chunking import chunk_all_notes
+from config import NOTES_DIR, CHROMA_DIR, COLLECTION_NAME, EMBEDDING_MODEL
 
 load_dotenv()
-
-PROJECT_ROOT = Path(__file__).parent.parent
-NOTES_DIR = PROJECT_ROOT / "notes"
-CHROMA_DIR = PROJECT_ROOT / "system" / "_data" / "chroma_db"
-COLLECTION_NAME = "notes"
-EMBEDDING_MODEL = "text-embedding-3-small"
 
 
 def _note_projects(content: str) -> list:
@@ -159,6 +154,47 @@ def search_notes_semantic(query: str, project: str = None) -> tuple:
         return "[No matching notes found]", None
 
     return "\n".join(context_parts), top_note_path
+
+
+def check_index_freshness() -> list:
+    """
+    Compares the notes actually on disk against what's embedded in Chroma —
+    the same tripwire-over-auto-fix pattern already used in
+    run_evaluation.py's validate_expected_sources() for stale eval labels.
+    Cheap to check; warn rather than silently trust.
+
+    Catches both directions of drift: a note that exists on disk but was
+    never (re-)embedded, and an embedded entry for a note that no longer
+    exists (renamed, deleted, or moved to trash). This is exactly the
+    class of bug that went undetected for three weeks in the 2026-08-09
+    path-mismatch incident — the index and the notes silently disagreed,
+    and nothing ever checked. Returns a list of human-readable warning
+    strings; an empty list means the index is fresh.
+    """
+    if not CHROMA_DIR.exists():
+        return ["No Chroma index found — run scripts/embed.py first."]
+    if not NOTES_DIR.exists():
+        return ["No notes directory found."]
+
+    on_disk = {c.source_file for c in chunk_all_notes(NOTES_DIR)}
+
+    chroma_client = chromadb.PersistentClient(path=str(CHROMA_DIR))
+    collection = chroma_client.get_or_create_collection(name=COLLECTION_NAME)
+    all_meta = collection.get(include=["metadatas"])
+    embedded = {m["source_file"] for m in all_meta["metadatas"] if m.get("source_file")}
+
+    warnings = []
+    missing = sorted(on_disk - embedded)
+    if missing:
+        preview = ", ".join(missing[:5]) + (f", +{len(missing) - 5} more" if len(missing) > 5 else "")
+        warnings.append(f"{len(missing)} note(s) on disk but not embedded — run scripts/embed.py: {preview}")
+
+    stale = sorted(embedded - on_disk)
+    if stale:
+        preview = ", ".join(stale[:5]) + (f", +{len(stale) - 5} more" if len(stale) > 5 else "")
+        warnings.append(f"{len(stale)} embedded entries reference notes no longer on disk — run scripts/embed.py: {preview}")
+
+    return warnings
 
 
 def suggest_related(note_path: str, top_n: int = 3) -> str:

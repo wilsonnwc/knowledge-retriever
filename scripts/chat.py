@@ -14,7 +14,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 import anthropic
 
-from retrieval_service import search_notes, search_notes_semantic, suggest_related
+from retrieval_service import search_notes, search_notes_semantic, suggest_related, check_index_freshness
+from config import PROJECT_ROOT, NOTES_DIR
 
 # Load API key from .env
 load_dotenv()
@@ -26,8 +27,6 @@ if not api_key:
 client = anthropic.Anthropic(api_key=api_key)
 
 # Paths
-PROJECT_ROOT = Path(__file__).parent.parent
-NOTES_DIR = PROJECT_ROOT / "notes"
 PROMPTS_DIR = PROJECT_ROOT / "prompts"
 SYSTEM_PROMPT_PATH = PROMPTS_DIR / "system.txt"
 PROJECTS_PATH = PROJECT_ROOT / "system" / "_data" / "projects.md"
@@ -708,6 +707,12 @@ if __name__ == "__main__":
     parser.add_argument("--suggest-related", metavar="NOTE_PATH", help="Suggest notes related to NOTE_PATH")
     parser.add_argument("--research-goal", metavar="GOAL", nargs='?', const=True, help="Run a multi-round gap-finding loop against a stated goal (optional: provide goal, or enter interactively)")
     args = parser.parse_args()
+
+    # Only the branches that actually query the Chroma index need the
+    # freshness check — project management doesn't touch it.
+    if not (args.new_project or args.archive_project):
+        for warning in check_index_freshness():
+            print(f"⚠️  {warning}")
 
     if args.new_project:
         new_project(args.new_project)

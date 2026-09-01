@@ -20,14 +20,9 @@ from openai import OpenAI
 
 sys.path.insert(0, str(Path(__file__).parent))
 from chunking import chunk_all_notes, chunk_note
+from config import NOTES_DIR, CHROMA_DIR, COLLECTION_NAME, EMBEDDING_MODEL
 
 load_dotenv()
-
-PROJECT_ROOT = Path(__file__).parent.parent
-NOTES_DIR = PROJECT_ROOT / "notes"
-CHROMA_DIR = PROJECT_ROOT / "system" / "_data" / "chroma_db"
-COLLECTION_NAME = "notes"
-EMBEDDING_MODEL = "text-embedding-3-small"
 
 
 def get_openai_client() -> OpenAI:
