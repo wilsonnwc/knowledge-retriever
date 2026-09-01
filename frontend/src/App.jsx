@@ -6,39 +6,9 @@ import NotesListView from './components/NotesView/NotesListView';
 import EditNoteModal from './components/NotesView/EditNoteModal';
 import TrashView from './components/NotesView/TrashView';
 import * as api from './api/client';
-import { mockConversations } from './mockData/mockConversations';
 
 let nextMessageId = 1000;
 let nextImportId = 1;
-
-function mockAssistantReply(userText) {
-  // Mock-only stand-in for a real backend call — canned response with fake sources.
-  return {
-    id: `m${nextMessageId++}`,
-    role: 'assistant',
-    text: `Here's what your notes say about "${userText}" — this is a mocked response while the UI is being built; real answers will come from your embedded notes once the backend is wired up.`,
-    sourcesSummary: '2 relevant articles found from your database.',
-    sourcesElaboration:
-      "Both notes touch on evaluating decisions by how easily they can be undone — one from an AI-product angle, one from a design-principles angle.",
-    sources: [
-      {
-        noteId: 1,
-        title: 'Building production AI agents',
-        path: 'notes/ai-products/building-production-ai-agents-linear.md',
-        before: 'The team obsesses over speed to signal, not perfection.',
-        chunk: 'Every agent workflow decision is treated as a reversible bet.',
-        after: 'Ship the smallest version, measure, and only invest further once the signal is real.'
-      },
-      {
-        noteId: 2,
-        title: 'The Design of Everyday Things',
-        path: 'notes/design/design-of-everyday-things.md',
-        chunk:
-          'Good design is actually a lot harder to notice than poor design, in part because good designs fit our needs so well that the design is invisible.'
-      }
-    ]
-  };
-}
 
 const blankImportData = () => ({
   content: '',
@@ -57,9 +27,12 @@ function App() {
   const [mode, setMode] = useState('search'); // search, import
 
   // Search/chat state
-  const [conversations, setConversations] = useState(mockConversations);
+  const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [openArticleId, setOpenArticleId] = useState(null);
+  const [openArticleContent, setOpenArticleContent] = useState(null);
+  const [openArticleContentLoading, setOpenArticleContentLoading] = useState(false);
+  const [openArticleContentError, setOpenArticleContentError] = useState(null);
 
   // Import state
   const [importScreen, setImportScreen] = useState('upload');
@@ -99,6 +72,32 @@ function App() {
   }, []);
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
+
+  // Fetch full content for whichever article a chat source's "Go to
+  // article" was clicked on — same pattern NotesListView uses for its own
+  // detail panel, since this reuses that same real Read view (Session 19
+  // Q1: no separate mock renderer for chat-triggered article views).
+  useEffect(() => {
+    if (!openArticleId) {
+      setOpenArticleContent(null);
+      setOpenArticleContentError(null);
+      return;
+    }
+    setOpenArticleContentLoading(true);
+    api
+      .fetchNote(openArticleId)
+      .then((fullNote) => {
+        setOpenArticleContent(fullNote.content);
+        setOpenArticleContentError(null);
+      })
+      .catch((err) => setOpenArticleContentError(err.message))
+      .finally(() => setOpenArticleContentLoading(false));
+  }, [openArticleId]);
+
+  const openArticleSummary = notes.find((n) => n.id === openArticleId);
+  const openArticleNote = openArticleSummary && openArticleContent !== null
+    ? { ...openArticleSummary, content: openArticleContent }
+    : openArticleSummary;
 
   // --- Sidebar actions ---
   const handleNewChat = () => {
@@ -149,7 +148,8 @@ function App() {
   const handleSend = (text) => {
     let convId = activeConversationId;
     const userMessage = { id: `m${nextMessageId++}`, role: 'user', text };
-    const assistantMessage = mockAssistantReply(text);
+    const assistantMessageId = `m${nextMessageId++}`;
+    const placeholderMessage = { id: assistantMessageId, role: 'assistant', text: 'Thinking…', loading: true };
 
     if (!convId) {
       convId = `conv-${Date.now()}`;
@@ -157,20 +157,48 @@ function App() {
         id: convId,
         title: text,
         updatedAt: new Date().toISOString(),
-        messages: [userMessage, assistantMessage]
+        messages: [userMessage, placeholderMessage]
       };
       setConversations((prev) => [newConv, ...prev]);
       setActiveConversationId(convId);
-      return;
+    } else {
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === convId
+            ? { ...conv, messages: [...conv.messages, userMessage, placeholderMessage], updatedAt: new Date().toISOString() }
+            : conv
+        )
+      );
     }
 
-    setConversations((prev) =>
-      prev.map((conv) =>
-        conv.id === convId
-          ? { ...conv, messages: [...conv.messages, userMessage, assistantMessage], updatedAt: new Date().toISOString() }
-          : conv
-      )
-    );
+    const replaceAssistantMessage = (fields) => {
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === convId
+            ? {
+                ...conv,
+                messages: conv.messages.map((m) =>
+                  m.id === assistantMessageId ? { id: assistantMessageId, role: 'assistant', ...fields } : m
+                )
+              }
+            : conv
+        )
+      );
+    };
+
+    api
+      .search(text)
+      .then((data) => {
+        replaceAssistantMessage({
+          text: data.text,
+          sourcesSummary: data.sourcesSummary,
+          sourcesElaboration: data.sourcesElaboration,
+          sources: data.sources
+        });
+      })
+      .catch((err) => {
+        replaceAssistantMessage({ text: `Sorry, something went wrong: ${err.message}` });
+      });
   };
 
   const handleGoToArticleFromChat = (noteId) => {
@@ -355,10 +383,12 @@ function App() {
             onModeChange={handleModeChange}
             activeConversation={activeConversation}
             onSend={handleSend}
-            openArticleId={openArticleId}
+            openArticleNote={openArticleNote}
+            openArticleContentLoading={openArticleContentLoading}
+            openArticleContentError={openArticleContentError}
             onOpenArticle={setOpenArticleId}
             onCloseArticle={() => setOpenArticleId(null)}
-            onGoToArticle={handleGoToArticleFromChat}
+            onEditArticle={handleGoToArticleFromChat}
             importScreen={importScreen}
             importData={importData}
             importExtracting={importExtracting}

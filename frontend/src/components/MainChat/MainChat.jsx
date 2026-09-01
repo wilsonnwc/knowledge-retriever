@@ -4,7 +4,7 @@ import '../ImportFlow/ImportFlow.css';
 import './MainChat.css';
 import ChatThread from '../SearchChat/ChatThread';
 import ChatInput from '../SearchChat/ChatInput';
-import ArticleModal from '../SearchChat/ArticleModal';
+import NotesDetailPanel from '../NotesView/NotesDetailPanel';
 import UploadScreen from '../ImportFlow/UploadScreen';
 import PreviewScreen from '../ImportFlow/PreviewScreen';
 import FrontmatterScreen from '../ImportFlow/FrontmatterScreen';
@@ -73,10 +73,12 @@ function MainChat({
   onModeChange,
   activeConversation,
   onSend,
-  openArticleId,
+  openArticleNote,
+  openArticleContentLoading,
+  openArticleContentError,
   onOpenArticle,
   onCloseArticle,
-  onGoToArticle,
+  onEditArticle,
   importScreen,
   importData,
   importExtracting,
@@ -159,11 +161,13 @@ function MainChat({
         </div>
       )}
 
-      {openArticleId && (
-        <ArticleModal
-          noteId={openArticleId}
+      {openArticleNote && (
+        <NotesDetailPanel
+          note={openArticleNote}
+          contentLoading={openArticleContentLoading}
+          contentError={openArticleContentError}
           onClose={onCloseArticle}
-          onGoToArticle={onGoToArticle}
+          onEdit={onEditArticle}
         />
       )}
     </div>

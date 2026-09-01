@@ -38,6 +38,33 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 31 — 2026-09-01 (Search/Chat wired to real search — complete)
+
+**Phase/step completed:** Closed the UI backlog item that's been open since Session 18: Search/Chat now returns real answers from real semantic search over real notes, instead of one hardcoded mock response. This is the "wire Search/Chat" step decided in Session 29's sequencing call, now that the service layer (Session 30) and the Chroma path bug (Session 30/30b) were both already fixed.
+
+**Where to pick up next:** Manual browser verification — servers are left running (Flask on :5050, React dev server on :3000) for a hands-on walkthrough, since browser automation wasn't available in this environment. MCP server (Learning OS Phase 1) is next after that's confirmed working.
+
+**What worked:**
+- **Backend:** refactored `search_notes_semantic()` to build on a new `semantic_search_matches()` — one Chroma query returning structured per-source data (path/text/topic), instead of duplicating the query logic in a second function. `search_notes_semantic()` is now a thin wrapper over it, kept for CLI/`research_goal()` backward compatibility. Verified identical top-result behavior and topic derivation (folder name, matching `notes_store`'s own convention — a note's `topic` isn't a frontmatter field).
+- New `backend/routes/search_routes.py`: `POST /api/search` — runs semantic search, calls Claude for the actual answer (same model/prompt pattern `chat.py`'s CLI already uses, so no new cost decision), and builds `sourcesSummary`/`sourcesElaboration` as templated arithmetic over the real matches (Session 19 Q2's decision) rather than a second LLM call.
+- Tested the live endpoint directly with curl before touching any frontend code: real query → real Claude-generated answer grounded in the actual retrieved notes, correct per-source titles/paths, empty-query correctly rejected with 400, a real note's `noteId` from search results round-trips successfully through `GET /api/notes/<id>` (the actual "Go to article" click-through path) — verified end to end via curl, not assumed.
+- **Frontend:** `App.jsx`'s `handleSend` now calls the real endpoint asynchronously (with a "Thinking…" placeholder message swapped for the real one on response, and an inline error message on failure) instead of the synchronous fake `mockAssistantReply()`. Removed the pre-seeded fake conversation history (`mockConversations`) — real conversations start empty now.
+- **Session 19 Q1 implemented:** "Go to article" now opens the real `NotesDetailPanel` (Session 24's actual Read view — full untruncated content via `MarkdownLite`) instead of `ArticleModal.jsx`'s separate mock-only renderer. Added the same content-fetch-on-open pattern `NotesListView` already uses. Deleted `ArticleModal.jsx` and the now-fully-orphaned `mockConversations.js` (Q1 explicitly said delete the duplicate renderer; removing its only usage made the mock data file dead too — same cleanup, not separate scope).
+- Discovered along the way that the assistant's real answers contain markdown (`#`, `**`) which the chat bubble was rendering as raw text — wired in the existing `MarkdownLite` component (already used for Notes/Import) rather than leaving broken-looking asterisks in a shipped feature.
+- Production build compiles clean (bundle size *shrank* — dead mock code removed). Locked eval re-confirmed unchanged at 93%.
+
+**What didn't work / got stuck on:**
+- Browser automation (Chrome extension) wasn't connected in this environment, so the actual click-through UI couldn't be visually verified by me. Verified everything reachable via curl/build instead (endpoint behavior, click-through note-fetch chain, clean compile) — real gap is a human eyeballing the running app, flagged directly rather than claimed as done.
+
+**Learnings:**
+- The mock UI's exact data shape (`sourcesSummary`/`sourcesElaboration`/`sources[]` with `noteId`/`title`/`path`/`chunk`) was a real, useful spec — reading `App.jsx`'s `mockAssistantReply()` before writing the endpoint meant the backend response shape matched on the first try, no guessing needed on the frontend side after.
+- The "before/chunk/after" sentence-highlighting the mock showed would have required new logic (which sentence in a paragraph is "the" match) that `search_notes_semantic()` doesn't give for free — asked directly rather than silently building it or silently skipping it, and shipped the simpler whole-passage version, consistent with the same "ship simple, upgrade if real use demands it" call already made for the sources-elaboration text in Q2.
+
+**Open questions to come back to:**
+- The freshness tripwire (Session 30b) still only runs on CLI startup, not from Flask — worth adding a check to `/api/health` or similar now that a real search endpoint exists.
+- Before/after sentence highlighting, if the plain-passage version feels too long/unfocused in real use.
+
+---
 ### Session 30b — 2026-09-01 (prevent the Chroma path bug from recurring — complete)
 
 **Phase/step completed:** After the fix earlier this session, asked directly: does this stop the same bug from happening again, or did it just patch today's instance? Answer was no — nothing had changed to prevent a future refactor from re-diverging the two path definitions, and a second, different risk (forgetting to re-run `embed.py` after an edit) was still completely uncaught. Built both fixes, since they close two different failure modes of the same underlying "index silently disagrees with reality" problem.

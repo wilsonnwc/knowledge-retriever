@@ -71,6 +71,13 @@ export function importExtract(fileType, content) {
   });
 }
 
+export function search(query) {
+  return request('/search', {
+    method: 'POST',
+    body: JSON.stringify({ query })
+  });
+}
+
 export function importConfirm({ content, frontmatterUpdates, topicFolder, tags }) {
   return request('/import/confirm', {
     method: 'POST',

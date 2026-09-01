@@ -33,9 +33,11 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file upload
 # Register route blueprints
 from routes.notes_routes import notes_bp  # noqa: E402
 from routes.import_routes import import_bp  # noqa: E402
+from routes.search_routes import search_bp  # noqa: E402
 
 app.register_blueprint(notes_bp)
 app.register_blueprint(import_bp)
+app.register_blueprint(search_bp)
 
 # Lazy trash purge: this is a local single-user app with no background
 # scheduler, so "empty trash weekly" means "purge anything old enough,

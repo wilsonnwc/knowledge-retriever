@@ -121,8 +121,30 @@ def search_notes_semantic(query: str, project: str = None) -> tuple:
     project name inside it. Over-fetch before filtering so a project filter
     can't drop below 5 results just because non-matching chunks ranked higher.
     """
+    matches = semantic_search_matches(query, project=project)
+    if not matches:
+        return "[No matching notes found]" if CHROMA_DIR.exists() else "[No Chroma index found — run scripts/embed.py first]", None
+
+    context_parts = [f"=== {m['path']} ===\n{m['text']}\n" for m in matches]
+    return "\n".join(context_parts), matches[0]["path"]
+
+
+def semantic_search_matches(query: str, project: str = None) -> list:
+    """
+    The structured core of semantic search: one Chroma round-trip, returned
+    as a list of per-source dicts (path, text, topic, section_title) rather
+    than the flattened "=== path ===" string search_notes_semantic() builds
+    for the CLI/Claude-prompt use case. search_notes_semantic() is now a
+    thin wrapper over this — kept so both callers share one retrieval call
+    instead of each querying Chroma independently (the earlier version of
+    this function did exactly that duplication).
+
+    Same over-fetch-then-filter behavior as before: project filtering
+    happens client-side since embed.py stores `projects` as a raw string,
+    not a list Chroma's `where` can exact-match against.
+    """
     if not CHROMA_DIR.exists():
-        return "[No Chroma index found — run scripts/embed.py first]", None
+        return []
 
     openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     chroma_client = chromadb.PersistentClient(path=str(CHROMA_DIR))
@@ -136,24 +158,25 @@ def search_notes_semantic(query: str, project: str = None) -> tuple:
     results = collection.query(query_embeddings=[query_embedding], n_results=n_results)
 
     if not results["ids"] or not results["ids"][0]:
-        return "[No matching notes found]", None
+        return []
 
-    context_parts = []
-    top_note_path = None
+    matches = []
     for doc, meta in zip(results["documents"][0], results["metadatas"][0]):
         if project and project not in _note_projects(f"projects: {meta.get('projects', '')}"):
             continue
-        source_path = meta.get("source_file", "unknown")
-        if top_note_path is None:
-            top_note_path = source_path
-        context_parts.append(f"=== {source_path} ===\n{doc}\n")
-        if len(context_parts) == 5:
+        path = meta.get("source_file", "unknown")
+        matches.append({
+            "path": path,
+            "text": doc,
+            # topic isn't a frontmatter field, it's the note's parent
+            # folder — same convention notes_store.list_notes() uses.
+            "topic": Path(path).parent.name if path != "unknown" else None,
+            "section_title": meta.get("section_title"),
+        })
+        if len(matches) == 5:
             break
 
-    if not context_parts:
-        return "[No matching notes found]", None
-
-    return "\n".join(context_parts), top_note_path
+    return matches
 
 
 def check_index_freshness() -> list:
