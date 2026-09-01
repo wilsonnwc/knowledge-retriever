@@ -38,6 +38,24 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 33 — 2026-09-01 (Projects/Goals sequencing decided, no code — session ended here)
+
+**Phase/step completed:** User asked where the sidebar's disabled "Projects" and "Goals" buttons get picked up. Traced it to `system/ui-build-plan.md`'s original phasing — Phase 1B ("next sprint" after Import) — which silently fell out of the sequence during the Learning OS pivot and was never explicitly re-addressed. Decided the order: **Projects UI next, then MCP server, Goals UI deferred.**
+
+**Where to pick up next:** Start the Projects UI. Backend: new Flask route(s) exposing `load_projects`/`new_project`/`archive_project` from `chat.py` (currently CLI-only, same shape of job as the Search/Chat wiring — light adaptation of `print`/`sys.exit` CLI-errors into JSON errors). Frontend: a simple list/create/archive view replacing the sidebar's disabled "📁 Projects" placeholder, presumably wired to a `--project` filter on Search/Chat too (not yet scoped in detail).
+
+**What worked:**
+- Sizing the two deferred items concretely instead of guessing: read `chat.py`'s actual project-management functions (clean, small, no blocking I/O) versus `research_goal`'s `scope_goal()` (blocks on `input()` mid-run for interactive narrowing — a real, unscoped design problem, not just plumbing). Same "measure before deciding" discipline this project keeps returning to.
+- Recognized the Projects/Goals gap as the same *shape* of problem Session 29 caught for Search/Chat — a planned item silently deprioritized by a later pivot, never explicitly re-decided — rather than treating it as a brand-new question.
+
+**Learnings:**
+- The same "did this drift, or was it decided?" question is worth asking generally whenever an old plan document's phase list doesn't match what's actually being built — not just the one time it was first noticed.
+
+**Open questions to come back to:**
+- Projects UI isn't scoped in detail yet — e.g. whether create/archive needs its own screen or fits in the sidebar, and whether the existing `--project` filter on `search_notes`/`search_notes_semantic` should be wired into Search/Chat's query at the same time.
+- Same deferred polish items as Session 32: freshness tripwire not yet surfaced via Flask; before/after snippet highlighting still deferred.
+
+---
 ### Session 32 — 2026-09-01 (Search/Chat manual testing: 3 real bugs found and fixed)
 
 **Phase/step completed:** First hands-on manual test of Session 31's Search/Chat wiring surfaced three real issues, all fixed and verified this session.
