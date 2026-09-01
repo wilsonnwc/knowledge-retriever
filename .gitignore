@@ -2,10 +2,10 @@
 .DS_Store
 __pycache__/
 *.pyc
-system/chroma_db/
+system/_data/chroma_db/
 
 # Test-run outputs from --research-goal, regenerated each real run
-system/goals/
+system/_data/goals/
 
 # Trashed notes are ephemeral (7-day auto-purge) — never commit them
 notes/.trash/

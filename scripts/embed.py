@@ -25,7 +25,7 @@ load_dotenv()
 
 PROJECT_ROOT = Path(__file__).parent.parent
 NOTES_DIR = PROJECT_ROOT / "notes"
-CHROMA_DIR = PROJECT_ROOT / "system" / "chroma_db"
+CHROMA_DIR = PROJECT_ROOT / "system" / "_data" / "chroma_db"
 COLLECTION_NAME = "notes"
 EMBEDDING_MODEL = "text-embedding-3-small"
 

@@ -38,6 +38,58 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 30 — 2026-09-01 (service-layer extraction — complete)
+
+**Phase/step completed:** Extracted the three functions Search/Chat actually needs (`search_notes`, `search_notes_semantic`, `suggest_related`) out of `scripts/chat.py` into a new `scripts/retrieval_service.py`, so Flask can import them too. Chose the narrow scope over the plan doc's full Section B shape: `skills_store`/`events_store` don't exist yet and nothing calls them, so building stubs now would be building ahead of actual need. Also left `research_goal`/`scope_goal` in `chat.py` untouched — they call `print()`/`input()` for interactive terminal use (`scope_goal` literally blocks on `input()` mid-run), which would hang a web request; moving them is separate future work for whenever the MCP server or a goal-research UI feature needs them, not needed for Search/Chat.
+
+**Where to pick up next:** Wire the Flask backend to `retrieval_service` (new route(s) under `backend/routes/`) and connect the React Search/Chat UI to it, using the Session 19 UX decisions already locked (real Read view, templated sources elaboration, no new API cost).
+
+**What worked:**
+- `chat.py` and `retrieval_service.py` both compile clean; `chat.py` imports without error in the project's `.venv`.
+- Confirmed the shared-module model actually works: `chat.search_notes.__module__` resolves to `retrieval_service`, proving Flask and the CLI would now read the exact same function, not two copies.
+- Re-ran the locked eval (`run_evaluation.py`, which imports `search_notes` via `from chat import search_notes` — unchanged, since `chat.py` now re-exports it): **93% (26/28), identical to Session 28's result**, same two known failures (Q4, Q6). Zero behavior change on the keyword-search path, proven, not assumed.
+- CLI argument parsing (`chat.py --help`) still works.
+- **Found and fixed a real, longer-running bug: `scripts/embed.py` and the search functions had been pointed at two different directories since 2026-08-09.** A "reorganize system/ for clarity" commit that day moved runtime data into a new `system/_data/` folder and updated `chat.py`'s `CHROMA_DIR` constant to match — but never touched `embed.py`, which kept writing every embedding to the old `system/chroma_db/` path. `.gitignore` was also still pointed at the old path (same root slip), so the abandoned `_data/chroma_db/` directory's stale, uncommitted-on-purpose binary got tracked and committed instead. Net effect: **`search_notes_semantic()`/`suggest_related()` have been silently serving a frozen snapshot of your notes from before 2026-08-09 for over three weeks** — missing every note added or edited since, including the Session 22 consolidation — while every real `embed.py` run kept writing to a directory nothing ever read from again. It surfaced today only because that abandoned snapshot also threw a hard `chromadb.db.migrations.InconsistentHashError` on this machine; without that crash, it would have kept silently returning stale-but-plausible results indefinitely.
+- **Fix applied:** pointed `embed.py`'s `CHROMA_DIR` at the same `system/_data/chroma_db/` path the readers already use; fixed `.gitignore` to match the real path (also caught the same stale-path bug on `system/goals/` → `system/_data/goals/`, 11 files, already flagged as "regenerated, not source" in this file's own template notes); untracked both from git; deleted the old and the stale directories; rebuilt fresh via `embed.py` (74 chunks from all 26 current notes, cost: a fraction of a cent). **Verified end to end:** `search_notes_semantic('how should I spend my time as a PM')` now correctly returns `pm-managing-time.md` as the top match; `suggest_related()` on it returns sensible neighbors. No automated eval covers the semantic path (only keyword search has a locked test set), so this manual, targeted verification is the real check here.
+
+**What didn't work / got stuck on:**
+- First diagnosis (written, then corrected within the same session) blamed the Session 25/26 Learning-OS reorg and treated this as purely a git-tracking/corruption issue. Tracing `git log -p` on both files' `CHROMA_DIR` definitions showed the actual divergence was three weeks earlier (2026-08-09) and the actual mechanism was a plain path mismatch between writer and reader, not (only) git corrupting a tracked binary. Correcting a diagnosis before it calcifies into the record, rather than after, is the point of writing it down at all.
+
+**Learnings:**
+- Proving "my change didn't cause this" by running the same call against stashed-original code, rather than just assuming a coincidence, is the same discipline as Session 27's "re-run the real eval instead of trusting a diagnosis you haven't verified" — and it's what correctly ruled out today's extraction as the cause in under a minute.
+- The scarier version of this bug wasn't the crash — it was the three weeks *before* the crash, where the exact same mismatch was silently returning plausible-looking, actually-stale results with no error at all. A hard crash that surfaces a silent-staleness bug is a lucky break, not a coincidence to be annoyed at.
+- When a path constant is defined in more than one file, that's the actual defect, independent of which specific value is "correct" — `git log -p` on both definitions took two minutes and settled it precisely (one file's constant moved during a refactor, the other's never did), versus guessing from which session's summary sounded closest.
+
+**Open questions to come back to:**
+- None blocking — both the extraction and the Chroma path bug are resolved and verified.
+
+---
+### Session 29 — 2026-08-31 (sequencing decision + Session 19 UX questions resolved, no code)
+
+**Phase/step completed:** No new feature built. Resolved a sequencing question that had silently drifted, plus all 3 open Session 19 UX questions blocking Search/Chat.
+
+**Where to pick up next:** Extract the service layer (`search_notes`, `search_notes_semantic`, `suggest_related`, `research_goal` out of `scripts/chat.py` into something Flask can import) — this is what actually unblocks Search/Chat, not a Learning-OS-only step. Then wire Search/Chat to the real thing using the Q1/Q2/Q3 decisions below. MCP server after that, not before.
+
+**What worked:**
+- User caught that the pre-existing UI backlog (Search/Chat still 100% mock) had been silently deprioritized behind the Learning OS plan without that ever being an explicit decision — it drifted rather than being decided.
+- Investigating the service-layer extraction surfaced *why* Search/Chat has been stuck mock this whole time: Flask has never imported anything from `chat.py` — `search_notes`, `search_notes_semantic`, `suggest_related`, `research_goal` only exist in the CLI, structurally unreachable from the web app.
+- Decided the build order: (1) extract the service layer — unblocks both the old UI backlog and the new MCP server identically; (2) wire Search/Chat to real search next, closing the UI backlog and getting daily-use value; (3) MCP server (Learning OS Phase 1) after that.
+- Resolved all 3 open Session 19 UX questions blocking Search/Chat:
+  - Q1 — "Go to article" reuses the real Session 24 Read view (`MarkdownLite` + read pattern), not `ArticleModal.jsx`'s separate mock renderer (to be deleted). Three named states: Preview, Read, Edit.
+  - Q2 — sources elaboration text is templated ("N results across topic(s), matched on: query terms"), not LLM-generated — zero new API cost, zero new eval surface, since it's arithmetic over already-known match data.
+  - Q3 — confirmed this project bills the Anthropic API directly (`ANTHROPIC_API_KEY`), unrelated to any Claude Pro subscription. Moot for the elaboration text now that Q2 went templated.
+
+**What didn't work / got stuck on:**
+- None — investigation and decision session, no code changes.
+
+**Learnings:**
+- A roadmap item can silently fall out of priority without anyone deciding that on purpose — worth periodically checking "is this still deprioritized on purpose, or did it just drift?"
+- Investigating *how* to build something (the service-layer extraction) surfaced the actual root cause of a separate, older problem (why Search/Chat was still mock) that hadn't been diagnosed before.
+
+**Open questions to come back to:**
+- None blocking — service-layer extraction is unblocked and next.
+
+---
 ### Session 28 — 2026-08-31 (Phase 0 "repair eval debt" — complete)
 
 **Phase/step completed:** Finished the "repair eval debt" half of Phase 0. Applied the 5 pending label corrections from Session 27 (Q9, Q9b, Q10b, Q13, Q13b), re-ran the eval, then decided and built two smaller pieces of follow-up scope: a `note.id` future-proofing field, and an automated staleness tripwire — which immediately found and let us fix 10 *more* stale `expected_source` options the manual fix pass hadn't touched.
