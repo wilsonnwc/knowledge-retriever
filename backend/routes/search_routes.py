@@ -7,16 +7,25 @@ surface beyond the one answer-generation call this endpoint already needs.
 "Go to article" is handled entirely by the frontend (opens the real Notes
 read view via noteId); this endpoint doesn't need to know about that.
 
+The answer streams as Server-Sent Events rather than one JSON response:
+real streaming from Claude (not a client-side animation over an
+already-complete answer) so the first text appears in under a second
+instead of after the full multi-second generation. `delta` events carry
+text chunks as they're generated; one final `done` event carries the
+sources data, which doesn't depend on streaming. `error` on failure.
+
 Endpoints:
-- POST /api/search — real-answer search, replacing the frontend's mock.
+- POST /api/search — streamed real-answer search, replacing the
+  frontend's mock.
 """
 
+import json
 import os
 import re
 import sys
 from pathlib import Path
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 import anthropic
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -82,6 +91,10 @@ def _build_sources(matches: list) -> list:
     ]
 
 
+def _sse(event: str, data: dict) -> str:
+    return f"event: {event}\ndata: {json.dumps(data)}\n\n"
+
+
 @search_bp.route('/search', methods=['POST'])
 def search():
     data = request.get_json(silent=True) or {}
@@ -91,17 +104,14 @@ def search():
 
     matches = semantic_search_matches(query)
 
-    if not matches:
-        return jsonify({
-            "status": "ok",
-            "text": "I couldn't find anything in your notes about that. Try rephrasing, or it may just not be covered yet.",
-            "sourcesSummary": None,
-            "sourcesElaboration": None,
-            "sources": [],
-        }), 200
+    def generate():
+        if not matches:
+            yield _sse("delta", {"text": "I couldn't find anything in your notes about that. Try rephrasing, or it may just not be covered yet."})
+            yield _sse("done", {"sourcesSummary": None, "sourcesElaboration": None, "sources": []})
+            return
 
-    context = "\n".join(f"=== {m['path']} ===\n{m['text']}\n" for m in matches)
-    context_message = f"""
+        context = "\n".join(f"=== {m['path']} ===\n{m['text']}\n" for m in matches)
+        context_message = f"""
 RETRIEVED NOTES (relevant to this query):
 {context}
 
@@ -112,23 +122,24 @@ USER QUERY:
 
 Please respond based on the retrieved notes above. If no relevant notes exist, say so clearly.
 """
-    try:
-        response = _get_client().messages.create(
-            model=ANSWER_MODEL,
-            max_tokens=1024,
-            system=_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": context_message}],
-        )
-        answer_text = response.content[0].text
-    except anthropic.APIError as e:
-        return jsonify({"status": "error", "message": f"Claude API error: {e}"}), 502
+        try:
+            with _get_client().messages.stream(
+                model=ANSWER_MODEL,
+                max_tokens=1024,
+                system=_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": context_message}],
+            ) as stream:
+                for text in stream.text_stream:
+                    yield _sse("delta", {"text": text})
+        except anthropic.APIError as e:
+            yield _sse("error", {"message": f"Claude API error: {e}"})
+            return
 
-    query_terms = _tokenize_for_display(query) - _DISPLAY_FILLER_WORDS
+        query_terms = _tokenize_for_display(query) - _DISPLAY_FILLER_WORDS
+        yield _sse("done", {
+            "sourcesSummary": _sources_summary(matches),
+            "sourcesElaboration": _sources_elaboration(query_terms, matches),
+            "sources": _build_sources(matches),
+        })
 
-    return jsonify({
-        "status": "ok",
-        "text": answer_text,
-        "sourcesSummary": _sources_summary(matches),
-        "sourcesElaboration": _sources_elaboration(query_terms, matches),
-        "sources": _build_sources(matches),
-    }), 200
+    return Response(generate(), mimetype="text/event-stream")

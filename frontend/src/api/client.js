@@ -71,11 +71,55 @@ export function importExtract(fileType, content) {
   });
 }
 
-export function search(query) {
-  return request('/search', {
-    method: 'POST',
-    body: JSON.stringify({ query })
-  });
+// Streams POST /search's Server-Sent Events. Not built on request() above —
+// SSE needs the raw response body reader, not response.json(). Calls
+// onDelta(text) as each chunk of the answer arrives, onDone(data) once with
+// { sourcesSummary, sourcesElaboration, sources } after the stream ends,
+// and onError(message) on any failure (network, non-OK response, or a
+// mid-stream error event from the backend).
+export async function searchStream(query, { onDelta, onDone, onError }) {
+  let response;
+  try {
+    response = await fetch(`${API_BASE}/search`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+  } catch (err) {
+    onError(`Could not reach the backend at ${API_BASE} — is it running?`);
+    return;
+  }
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    onError((data && data.message) || `Request to /search failed (${response.status})`);
+    return;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    let sepIndex;
+    while ((sepIndex = buffer.indexOf('\n\n')) !== -1) {
+      const rawEvent = buffer.slice(0, sepIndex);
+      buffer = buffer.slice(sepIndex + 2);
+
+      const eventMatch = rawEvent.match(/^event: (.+)$/m);
+      const dataMatch = rawEvent.match(/^data: (.+)$/m);
+      if (!eventMatch || !dataMatch) continue;
+
+      const data = JSON.parse(dataMatch[1]);
+      if (eventMatch[1] === 'delta') onDelta(data.text);
+      else if (eventMatch[1] === 'done') onDone(data);
+      else if (eventMatch[1] === 'error') onError(data.message);
+    }
+  }
 }
 
 export function importConfirm({ content, frontmatterUpdates, topicFolder, tags }) {

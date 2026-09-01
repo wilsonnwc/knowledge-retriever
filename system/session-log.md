@@ -38,6 +38,31 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 32 — 2026-09-01 (Search/Chat manual testing: 3 real bugs found and fixed)
+
+**Phase/step completed:** First hands-on manual test of Session 31's Search/Chat wiring surfaced three real issues, all fixed and verified this session.
+
+**What worked:**
+- **Bug 1 — chat thread wasn't scrollable with real (long) answers.** `.chat-main` was missing `min-height: 0`; as a flex item it defaulted to growing to fit the full conversation instead of respecting the viewport, so `.chat-thread`'s own `overflow-y: auto` never got a chance to activate — content past the fold was silently clipped by an ancestor's `overflow: hidden` rather than becoming scrollable. Invisible with the old short mock replies; immediate with real multi-paragraph answers. One-line fix.
+- **"Bug 2" (cards not relevant) turned out not to be a bug** — it was Bug 1 hiding the answer text that would have explained low relevance. Real evidence (a curl test returning a strongly on-topic top result for a normal query) had already suggested retrieval itself wasn't broken; fixing the scroll issue confirmed it.
+- **Real feature request: streaming.** The full answer was appearing all at once after "Thinking…", not gradually like normal LLM chat UIs. Chose real Claude streaming over a client-side typewriter animation on an already-complete answer (asked directly rather than picking silently — the fake version wouldn't reduce the actual multi-second wait before any text appears, only add a cosmetic animation after it). Backend: `POST /api/search` now returns Server-Sent Events (`delta` events with text chunks via `client.messages.stream()`, one final `done` event with the sources data, which doesn't depend on streaming). Frontend: new `api.searchStream()` reads the raw response body via a `ReadableStream` reader and hand-parses SSE framing (browsers' built-in `EventSource` can't do POST bodies, so this couldn't reuse a library). `App.jsx`'s `handleSend` accumulates deltas into the placeholder message in place.
+- **Real feature request: stop auto-scrolling to the bottom when the answer finishes.** Was jumping past the whole answer to the bottom of the 5 source cards, away from where reading should start. Fixed in `ChatThread.jsx`: scroll-to-bottom now only fires when the message *count* grows (a new user message was sent — still desirable, shows the new message + "Thinking…"), decoupled from a new one-time scroll-to-*top*-of-the-answer, triggered exactly once per message when its first streamed token arrives (tracked via a `streaming` flag + a ref `Set` of message ids already scrolled-for) — later deltas update content without moving the viewport again.
+- Also fixed along the way: the assistant's real answers contain markdown streamed in via `#`/`**` (verified directly from the live endpoint's actual SSE output) — already wired `MarkdownLite` into the chat bubble in Session 31, confirmed it still renders correctly as text streams in.
+- Verified backend streaming directly with `curl -N` before touching any frontend code (same discipline as Session 31): real SSE framing, real incremental Claude text.
+- Production build compiles clean throughout every step (checked after each file change, not just once at the end).
+
+**What didn't work / got stuck on:**
+- None new this session — all three fixes worked on the first attempt once diagnosed.
+
+**Learnings:**
+- Two visually similar complaints ("layout broken" and "results seem wrong") turned out to share one root cause — worth checking whether a simpler bug explains multiple symptoms before assuming each complaint needs its own separate fix.
+- Real streaming vs. a client-side animation over a complete response are not just a "how fancy" tradeoff — they solve genuinely different problems (perceived latency vs. purely aesthetic gradualness), which is why it was worth surfacing as an explicit decision rather than picking the cheaper-looking option unprompted.
+- Browsers' native `EventSource` API can't send a POST body, which SSE-over-POST needs here (the query has to go in the request) — hand-rolling the fetch+ReadableStream+manual-frame-parsing is the standard workaround, not a sign something was done wrong.
+
+**Open questions to come back to:**
+- Same as Session 31: the freshness tripwire is still CLI-only; before/after sentence-highlighting for source snippets still deferred.
+
+---
 ### Session 31 — 2026-09-01 (Search/Chat wired to real search — complete)
 
 **Phase/step completed:** Closed the UI backlog item that's been open since Session 18: Search/Chat now returns real answers from real semantic search over real notes, instead of one hardcoded mock response. This is the "wire Search/Chat" step decided in Session 29's sequencing call, now that the service layer (Session 30) and the Chroma path bug (Session 30/30b) were both already fixed.

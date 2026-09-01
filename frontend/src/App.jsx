@@ -171,34 +171,44 @@ function App() {
       );
     }
 
-    const replaceAssistantMessage = (fields) => {
+    // Merges fields into the assistant placeholder in place (never a full
+    // replace) so onDelta's accumulated text and onDone's sources data
+    // don't clobber each other regardless of arrival order.
+    const patchAssistantMessage = (fields) => {
       setConversations((prev) =>
         prev.map((conv) =>
           conv.id === convId
             ? {
                 ...conv,
-                messages: conv.messages.map((m) =>
-                  m.id === assistantMessageId ? { id: assistantMessageId, role: 'assistant', ...fields } : m
-                )
+                messages: conv.messages.map((m) => (m.id === assistantMessageId ? { ...m, ...fields } : m))
               }
             : conv
         )
       );
     };
 
-    api
-      .search(text)
-      .then((data) => {
-        replaceAssistantMessage({
-          text: data.text,
+    let accumulatedText = '';
+
+    api.searchStream(text, {
+      onDelta: (delta) => {
+        accumulatedText += delta;
+        // streaming:true (not just loading:false) marks the first token's
+        // arrival distinctly from later chunks, so ChatThread can scroll
+        // to the top of this answer exactly once, not on every delta.
+        patchAssistantMessage({ text: accumulatedText, loading: false, streaming: true });
+      },
+      onDone: (data) => {
+        patchAssistantMessage({
+          streaming: false,
           sourcesSummary: data.sourcesSummary,
           sourcesElaboration: data.sourcesElaboration,
           sources: data.sources
         });
-      })
-      .catch((err) => {
-        replaceAssistantMessage({ text: `Sorry, something went wrong: ${err.message}` });
-      });
+      },
+      onError: (message) => {
+        patchAssistantMessage({ text: `Sorry, something went wrong: ${message}`, loading: false, streaming: false });
+      }
+    });
   };
 
   const handleGoToArticleFromChat = (noteId) => {
