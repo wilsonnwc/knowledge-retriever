@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import TagPicker from '../TagPicker';
+import ProjectPicker from '../ProjectPicker';
 import { mockTypes } from '../../mockData/mockData';
 import './NotesView.css';
 
-function EditNoteModal({ note, topics, tags: availableTags, onSave, onDelete, onCancel }) {
+function EditNoteModal({ note, topics, tags: availableTags, activeProjects, onSave, onDelete, onCancel }) {
   const [formData, setFormData] = useState({
     title: note.title || '',
     author: note.author || '',
@@ -12,6 +13,7 @@ function EditNoteModal({ note, topics, tags: availableTags, onSave, onDelete, on
     type: note.type || 'article',
     topicFolder: note.topic || '',
     tags: note.tags || [],
+    projects: note.projects || [],
     content: note.content ?? note.preview ?? ''
   });
 
@@ -32,6 +34,13 @@ function EditNoteModal({ note, topics, tags: availableTags, onSave, onDelete, on
     setFormData(prev => ({
       ...prev,
       tags: newTags
+    }));
+  };
+
+  const handleProjectsChange = (newProjects) => {
+    setFormData(prev => ({
+      ...prev,
+      projects: newProjects
     }));
   };
 
@@ -184,6 +193,16 @@ function EditNoteModal({ note, topics, tags: availableTags, onSave, onDelete, on
                 selectedTags={formData.tags}
                 onChange={handleTagsChange}
                 availableTags={availableTags}
+              />
+            </div>
+
+            {/* Projects */}
+            <div className="form-group">
+              <label>Projects</label>
+              <ProjectPicker
+                selectedProjects={formData.projects}
+                onChange={handleProjectsChange}
+                availableProjects={activeProjects}
               />
             </div>
 

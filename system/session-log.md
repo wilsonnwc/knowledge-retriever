@@ -38,6 +38,34 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 34 — 2026-09-05 (Projects UI built end to end — complete)
+
+**Phase/step completed:** Built the full Projects feature decided in Session 33: registry CRUD (list/create/rename/archive), note-to-project tagging in the Edit modal and Import wizard, and a project filter on Search/Chat. Closes `system/ui-build-plan.md`'s long-dropped Phase 1B. Built as one continuous pass per an explicit working-style change this session (front-load acceptance criteria via a structured Q&A, then build end-to-end with verification at each layer instead of checking in after every step) rather than the tighter per-decision check-in cadence used in prior sessions.
+
+**Where to pick up next:** MCP server (Learning OS Phase 1) — the agreed next milestone. Projects UI doesn't block it.
+
+**What worked:**
+- **Single source of truth, same lesson as Session 30b:** new `backend/projects_store.py` holds `load_projects`/`save_projects`/`create_project`/`archive_project`/`rename_project` — the one copy both Flask (`projects_routes.py`) and the CLI (`chat.py`, refactored to import from it) use. `chat.py`'s CLI functions became thin wrappers translating `ValueError` into printed errors + exit codes.
+- **New capability beyond the CLI: rename**, with the cascade-vs-stable-ID design question raised explicitly rather than decided silently — chose cascade (rewrite every tagged note's `projects:` line), logged the stable-ID alternative as a deferred future-roadmap item in `CLAUDE.md` with the concrete reasoning against it now.
+- **Verified the rename cascade against real data, not a synthetic test:** renamed the actual `leapspace-interview-prep` project, confirmed only the `projects:` line changed in a real tagged note (nothing else touched), renamed back, and confirmed `git diff` on `notes/` was completely empty — proof the round-trip is byte-perfect, not just "looked right."
+- **Found and fixed a real response-shape bug before it reached the frontend:** `jsonify({"status": "success", **project})` let the project's own `status` field (active/archived) silently overwrite the wrapper's "success" marker, since both used the same key. Caught by inspecting the actual JSON, not assumed — fixed by nesting (`{"status": "success", "project": {...}}`).
+- **Reused existing patterns instead of inventing new ones:** `notes_store.update_note()` gained `projects` handling as one line mirroring the existing `tags` line exactly; the new `ProjectPicker` component mirrors `TagPicker` (minus inline creation — a project has a real registry entry a tag doesn't, so picking must be from already-registered projects, not spontaneous); `ProjectsListView` reuses `NotesView.css`'s table/form classes rather than new CSS.
+- **Full end-to-end lifecycle test, not just unit-level curl checks:** created a real project via the API, imported a real note tagged to it through the actual `/api/import/confirm` path, confirmed the note count incremented, removed the tag via `PATCH /api/notes`, confirmed the count dropped back to zero, then cleaned up (trashed the test note, removed the test project from the registry) and confirmed `git diff` on `notes/` and the registry came back completely empty.
+- Locked eval re-confirmed unchanged at 93% throughout; production build compiled clean after each phase (backend, then frontend), not just once at the end.
+
+**What didn't work / got stuck on:**
+- None new — every piece worked on the first real attempt once designed; the one bug found (response-shape key collision) was caught by inspection before it ever reached the frontend, not by a failure at runtime.
+
+**Learnings:**
+- Asking "does the rename need to touch every note, or should there be a stable ID instead?" as an explicit question — rather than picking silently — surfaced a real, concrete engineering tradeoff (registry format change, unreadable note frontmatter, a translation layer in four places) that would have been easy to hand-wave as "just add an ID for flexibility."
+- A structural fix (single source of truth) and a runtime tripwire are still two different things worth keeping straight — this feature only needed the first (no data ever silently drifts here the way the Chroma index did), because nothing here has two independent copies of the same fact.
+- Verifying a destructive-shaped operation (rename cascade, note tagging round-trip) against real data with a full undo, rather than only against disposable synthetic fixtures, is strictly more convincing evidence that it's actually safe — and cost nothing extra here since the operations were already idempotent and reversible by design.
+
+**Open questions to come back to:**
+- Same deferred items as Sessions 30b/32: freshness tripwire not yet surfaced via Flask; before/after snippet highlighting still deferred.
+- Stable project IDs — deferred, logged in `CLAUDE.md`'s roadmap, revisit only if project count/rename frequency actually grow.
+
+---
 ### Session 33 — 2026-09-01 (Projects/Goals sequencing decided, no code — session ended here)
 
 **Phase/step completed:** User asked where the sidebar's disabled "Projects" and "Goals" buttons get picked up. Traced it to `system/ui-build-plan.md`'s original phasing — Phase 1B ("next sprint" after Import) — which silently fell out of the sequence during the Learning OS pivot and was never explicitly re-addressed. Decided the order: **Projects UI next, then MCP server, Goals UI deferred.**

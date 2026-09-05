@@ -27,7 +27,7 @@ from embed import embed_all_notes, delete_note_embeddings, embed_single_note  # 
 
 notes_bp = Blueprint('notes', __name__, url_prefix='/api')
 
-_UPDATABLE_FIELDS = {"title", "author", "source", "date", "type", "tags", "content", "topic"}
+_UPDATABLE_FIELDS = {"title", "author", "source", "date", "type", "tags", "projects", "content", "topic"}
 
 
 @notes_bp.route('/notes', methods=['GET'])

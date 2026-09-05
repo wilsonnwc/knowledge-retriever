@@ -32,6 +32,23 @@ function ModeToggle({ mode, onChange }) {
   );
 }
 
+function ProjectFilterSelect({ activeProjects, value, onChange }) {
+  if (!activeProjects || activeProjects.length === 0) return null;
+  return (
+    <select
+      className="project-filter-select"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      title="Scope search to a project"
+    >
+      <option value="">All notes</option>
+      {activeProjects.map((name) => (
+        <option key={name} value={name}>{name}</option>
+      ))}
+    </select>
+  );
+}
+
 function LandingSearchForm({ onSend }) {
   const [value, setValue] = useState('');
 
@@ -86,6 +103,9 @@ function MainChat({
   savedNotePath,
   topics,
   tags,
+  activeProjects,
+  searchProject,
+  onSearchProjectChange,
   onFileUpload,
   onContentUpdate,
   onFrontmatterUpdate,
@@ -108,6 +128,13 @@ function MainChat({
               <>
                 <h1 className="chat-landing-title">How can I help you today?</h1>
                 <LandingSearchForm onSend={onSend} />
+                <div className="chat-landing-project-row">
+                  <ProjectFilterSelect
+                    activeProjects={activeProjects}
+                    value={searchProject}
+                    onChange={onSearchProjectChange}
+                  />
+                </div>
                 <p className="chat-input-hint">Searches your saved notes only — not the web.</p>
               </>
             ) : (
@@ -120,7 +147,14 @@ function MainChat({
       {!isLanding && mode === 'search' && (
         <div className="chat-main">
           <ChatThread messages={activeConversation?.messages ?? []} onOpenArticle={onOpenArticle} />
-          <ChatInput onSend={onSend} />
+          <div className="chat-input-area-wrapper">
+            <ProjectFilterSelect
+              activeProjects={activeProjects}
+              value={searchProject}
+              onChange={onSearchProjectChange}
+            />
+            <ChatInput onSend={onSend} />
+          </div>
         </div>
       )}
 
@@ -139,6 +173,7 @@ function MainChat({
               data={importData}
               topics={topics}
               tags={tags}
+              activeProjects={activeProjects}
               onUpdate={onFrontmatterUpdate}
               onNext={() => onImportNext('confirm')}
               onBack={() => onImportBack('preview')}

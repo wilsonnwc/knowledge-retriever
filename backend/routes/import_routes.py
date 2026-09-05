@@ -172,7 +172,8 @@ def confirm_import():
         "type": "article"
       },
       "topic_folder": "ai-products",
-      "tags": ["job-application", "revisit"]
+      "tags": ["job-application", "revisit"],
+      "projects": ["leapspace-interview-prep"]
     }
     """
     data = request.get_json(silent=True) or {}
@@ -180,6 +181,7 @@ def confirm_import():
     frontmatter_updates = data.get('frontmatter_updates') or {}
     topic_folder = data.get('topic_folder')
     tags = data.get('tags', [])
+    projects = data.get('projects', [])
 
     if not content or not topic_folder:
         return jsonify({
@@ -195,6 +197,11 @@ def confirm_import():
         "date": frontmatter_updates.get("date", ""),
         "tags": tags,
     }
+    # Only written when non-empty — most notes aren't tagged into a
+    # project (see taxonomy docs: "not artificially expanded"), so an
+    # untagged import shouldn't gain an empty `projects: []` line.
+    if projects:
+        frontmatter_fields["projects"] = projects
     # title is only written to frontmatter when it differs from source
     # (matches how most real notes in this project already look — see
     # notes_store.py's title-derivation fallback).

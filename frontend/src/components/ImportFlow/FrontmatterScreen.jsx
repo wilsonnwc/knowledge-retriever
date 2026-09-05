@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { mockTypes } from '../../mockData/mockData';
 import TagPicker from '../TagPicker';
+import ProjectPicker from '../ProjectPicker';
 import './ImportFlow.css';
 
-function FrontmatterScreen({ data, topics, tags: availableTags, onUpdate, onNext, onBack }) {
+function FrontmatterScreen({ data, topics, tags: availableTags, activeProjects, onUpdate, onNext, onBack }) {
   const [formData, setFormData] = useState({
     title: data.title || '',
     author: data.author || '',
@@ -11,7 +12,8 @@ function FrontmatterScreen({ data, topics, tags: availableTags, onUpdate, onNext
     date: data.date || new Date().toISOString().split('T')[0],
     type: data.type || 'article',
     topicFolder: data.topicFolder || '',
-    tags: data.tags || []
+    tags: data.tags || [],
+    projects: data.projects || []
   });
 
   const [showNewTopicModal, setShowNewTopicModal] = useState(false);
@@ -28,6 +30,13 @@ function FrontmatterScreen({ data, topics, tags: availableTags, onUpdate, onNext
     setFormData(prev => ({
       ...prev,
       tags: newTags
+    }));
+  };
+
+  const handleProjectsChange = (newProjects) => {
+    setFormData(prev => ({
+      ...prev,
+      projects: newProjects
     }));
   };
 
@@ -162,6 +171,16 @@ function FrontmatterScreen({ data, topics, tags: availableTags, onUpdate, onNext
             selectedTags={formData.tags}
             onChange={handleTagsChange}
             availableTags={availableTags}
+          />
+        </div>
+
+        {/* Projects */}
+        <div className="form-group">
+          <label>Projects</label>
+          <ProjectPicker
+            selectedProjects={formData.projects}
+            onChange={handleProjectsChange}
+            availableProjects={activeProjects}
           />
         </div>
       </div>

@@ -131,6 +131,33 @@
   font-style: normal;
 }
 
+/* Project scoping */
+.project-filter-select {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.chat-landing-project-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.chat-input-area-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-input-area-wrapper .project-filter-select {
+  align-self: center;
+  margin-bottom: 8px;
+}
+
 /* Input */
 .chat-input-area {
   border-top: 1px solid var(--color-border);

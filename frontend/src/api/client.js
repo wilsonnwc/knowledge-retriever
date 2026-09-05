@@ -77,13 +77,13 @@ export function importExtract(fileType, content) {
 // { sourcesSummary, sourcesElaboration, sources } after the stream ends,
 // and onError(message) on any failure (network, non-OK response, or a
 // mid-stream error event from the backend).
-export async function searchStream(query, { onDelta, onDone, onError }) {
+export async function searchStream(query, { project, onDelta, onDone, onError }) {
   let response;
   try {
     response = await fetch(`${API_BASE}/search`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
+      body: JSON.stringify({ query, project: project || undefined })
     });
   } catch (err) {
     onError(`Could not reach the backend at ${API_BASE} — is it running?`);
@@ -122,14 +122,40 @@ export async function searchStream(query, { onDelta, onDone, onError }) {
   }
 }
 
-export function importConfirm({ content, frontmatterUpdates, topicFolder, tags }) {
+export function importConfirm({ content, frontmatterUpdates, topicFolder, tags, projects }) {
   return request('/import/confirm', {
     method: 'POST',
     body: JSON.stringify({
       content,
       frontmatter_updates: frontmatterUpdates,
       topic_folder: topicFolder,
-      tags
+      tags,
+      projects
     })
+  });
+}
+
+export function fetchProjects() {
+  return request('/projects').then((data) => data.projects);
+}
+
+export function createProject(name) {
+  return request('/projects', {
+    method: 'POST',
+    body: JSON.stringify({ name })
+  });
+}
+
+export function renameProject(oldName, newName) {
+  return request(`/projects/${encodeURIComponent(oldName)}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ name: newName })
+  });
+}
+
+export function archiveProject(name) {
+  return request(`/projects/${encodeURIComponent(name)}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status: 'archived' })
   });
 }

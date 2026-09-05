@@ -168,8 +168,9 @@ _SCALAR_FRONTMATTER_FIELDS = ("title", "author", "source", "date", "type")
 def update_note(note_id: str, updates: dict) -> dict:
     """
     Updates any combination of a note's scalar frontmatter fields (title,
-    source, url, date, type), tags, content, and/or topic. Only keys
-    present in `updates` are changed; everything else is left untouched.
+    source, url, date, type), tags, projects, content, and/or topic. Only
+    keys present in `updates` are changed; everything else is left
+    untouched.
 
     `topic` is not itself a frontmatter field — it's derived from which
     folder the file lives in (see _note_summary) — so changing it moves
@@ -204,6 +205,9 @@ def update_note(note_id: str, updates: dict) -> dict:
 
     if "tags" in updates:
         _upsert("tags", f"tags: [{', '.join(updates['tags'])}]")
+
+    if "projects" in updates:
+        _upsert("projects", f"projects: [{', '.join(updates['projects'])}]")
 
     if "content" in updates:
         body_lines = updates["content"].strip("\n").split("\n")

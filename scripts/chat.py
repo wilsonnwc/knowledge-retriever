@@ -17,6 +17,9 @@ import anthropic
 from retrieval_service import search_notes, search_notes_semantic, suggest_related, check_index_freshness
 from config import PROJECT_ROOT, NOTES_DIR
 
+sys.path.insert(0, str(PROJECT_ROOT / "backend"))
+import projects_store  # noqa: E402
+
 # Load API key from .env
 load_dotenv()
 api_key = os.getenv("ANTHROPIC_API_KEY")
@@ -29,10 +32,7 @@ client = anthropic.Anthropic(api_key=api_key)
 # Paths
 PROMPTS_DIR = PROJECT_ROOT / "prompts"
 SYSTEM_PROMPT_PATH = PROMPTS_DIR / "system.txt"
-PROJECTS_PATH = PROJECT_ROOT / "system" / "_data" / "projects.md"
 GOALS_DIR = PROJECT_ROOT / "system" / "_data" / "goals"
-PROJECTS_START = "<!-- PROJECTS_START -->"
-PROJECTS_END = "<!-- PROJECTS_END -->"
 
 if not SYSTEM_PROMPT_PATH.exists():
     print(f"ERROR: System prompt not found at {SYSTEM_PROMPT_PATH}")
@@ -42,88 +42,36 @@ with open(SYSTEM_PROMPT_PATH, "r") as f:
     SYSTEM_PROMPT = f.read()
 
 
-def load_projects() -> dict:
-    """
-    Parse the project registry between the PROJECTS_START/END markers.
-    Returns {name: {"status": str, "line": str}} — "line" is the full
-    detail text after "name: " (e.g. "active, created 2026-08-05"),
-    preserved verbatim so rewriting one project's line never drops
-    another project's date detail.
-    """
-    if not PROJECTS_PATH.exists():
-        return {}
-
-    text = PROJECTS_PATH.read_text(encoding="utf-8")
-    start = text.find(PROJECTS_START)
-    end = text.find(PROJECTS_END)
-    if start == -1 or end == -1:
-        return {}
-
-    block = text[start + len(PROJECTS_START):end]
-    projects = {}
-    for line in block.splitlines():
-        line = line.strip()
-        if not line.startswith("- "):
-            continue
-        # Format: "- name: status, created YYYY-MM-DD[, archived YYYY-MM-DD]"
-        name, _, rest = line[2:].partition(":")
-        rest = rest.strip()
-        status, _, _ = rest.partition(",")
-        projects[name.strip()] = {"status": status.strip(), "line": rest}
-    return projects
-
-
-def save_projects(projects: dict) -> None:
-    """
-    Rewrite the registry block from {name: {"status": ..., "line": ...}}.
-    """
-    text = PROJECTS_PATH.read_text(encoding="utf-8")
-    start = text.find(PROJECTS_START) + len(PROJECTS_START)
-    end = text.find(PROJECTS_END)
-
-    body = "\n".join(f"- {name}: {info['line']}" for name, info in projects.items())
-    new_block = f"\n{body}\n" if projects else "\n"
-    PROJECTS_PATH.write_text(text[:start] + new_block + text[end:], encoding="utf-8")
-
-
 def new_project(name: str) -> None:
-    """
-    Register a new active project. Refuses to create a duplicate.
-    """
-    projects = load_projects()
-    if name in projects:
-        print(f"ERROR: project '{name}' already exists (status: {projects[name]['status']})")
+    """CLI wrapper: projects_store raises ValueError on failure (the
+    shared shelf also used by Flask); the CLI's job is turning that into
+    a printed error + exit code."""
+    try:
+        projects_store.create_project(name)
+    except ValueError as e:
+        print(f"ERROR: {e}")
         sys.exit(1)
-
-    projects[name] = {
-        "status": "active",
-        "line": f"active, created {date.today().isoformat()}",
-    }
-
-    save_projects(projects)
     print(f"Created project '{name}' (active).")
 
 
 def archive_project(name: str) -> None:
-    """
-    Flip a project's status to archived. Leaves every note's `projects:`
-    label untouched — this only affects the registry entry.
-    """
-    projects = load_projects()
-    if name not in projects:
-        print(f"ERROR: project '{name}' not found in {PROJECTS_PATH}")
+    try:
+        projects_store.archive_project(name)
+    except ValueError as e:
+        print(f"ERROR: {e}")
         sys.exit(1)
-    if projects[name]["status"] == "archived":
-        print(f"Project '{name}' is already archived.")
-        return
-
-    projects[name] = {
-        "status": "archived",
-        "line": f"archived, closed {date.today().isoformat()}",
-    }
-
-    save_projects(projects)
     print(f"Archived project '{name}'. Note labels are unchanged.")
+
+
+def rename_project(old_name: str, new_name: str) -> None:
+    """Renames the registry entry and rewrites `projects:` in every note
+    that references the old name — see projects_store.rename_project()."""
+    try:
+        projects_store.rename_project(old_name, new_name)
+    except ValueError as e:
+        print(f"ERROR: {e}")
+        sys.exit(1)
+    print(f"Renamed project '{old_name}' to '{new_name}'.")
 
 
 def _slugify(text: str) -> str:
@@ -703,6 +651,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Personal Knowledge Retriever")
     parser.add_argument("--new-project", metavar="NAME", help="Register a new active project")
     parser.add_argument("--archive-project", metavar="NAME", help="Archive an existing project")
+    parser.add_argument("--rename-project", metavar=("OLD_NAME", "NEW_NAME"), nargs=2,
+                         help="Rename a project and update every note tagged with it")
     parser.add_argument("--project", metavar="NAME", help="Scope chat search to one project")
     parser.add_argument("--suggest-related", metavar="NOTE_PATH", help="Suggest notes related to NOTE_PATH")
     parser.add_argument("--research-goal", metavar="GOAL", nargs='?', const=True, help="Run a multi-round gap-finding loop against a stated goal (optional: provide goal, or enter interactively)")
@@ -710,7 +660,7 @@ if __name__ == "__main__":
 
     # Only the branches that actually query the Chroma index need the
     # freshness check — project management doesn't touch it.
-    if not (args.new_project or args.archive_project):
+    if not (args.new_project or args.archive_project or args.rename_project):
         for warning in check_index_freshness():
             print(f"⚠️  {warning}")
 
@@ -718,6 +668,8 @@ if __name__ == "__main__":
         new_project(args.new_project)
     elif args.archive_project:
         archive_project(args.archive_project)
+    elif args.rename_project:
+        rename_project(*args.rename_project)
     elif args.suggest_related:
         print(suggest_related(args.suggest_related))
     elif args.research_goal is not None:

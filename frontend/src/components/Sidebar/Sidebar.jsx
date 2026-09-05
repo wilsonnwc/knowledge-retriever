@@ -13,7 +13,10 @@ function Sidebar({ view, onNavigate, onNewChat, historyItems, activeHistoryId, o
       </button>
 
       <nav className="sidebar-nav">
-        <button className="sidebar-nav-item disabled" disabled title="Coming soon">
+        <button
+          className={`sidebar-nav-item ${view === 'projects' ? 'active' : ''}`}
+          onClick={() => onNavigate('projects')}
+        >
           📁 Projects
         </button>
         <button

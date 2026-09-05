@@ -5,6 +5,7 @@ import MainChat from './components/MainChat/MainChat';
 import NotesListView from './components/NotesView/NotesListView';
 import EditNoteModal from './components/NotesView/EditNoteModal';
 import TrashView from './components/NotesView/TrashView';
+import ProjectsListView from './components/ProjectsView/ProjectsListView';
 import * as api from './api/client';
 
 let nextMessageId = 1000;
@@ -19,16 +20,18 @@ const blankImportData = () => ({
   date: new Date().toISOString().split('T')[0],
   type: 'article',
   topicFolder: '',
-  tags: []
+  tags: [],
+  projects: []
 });
 
 function App() {
-  const [view, setView] = useState('chat'); // chat, notes, trash
+  const [view, setView] = useState('chat'); // chat, notes, trash, projects
   const [mode, setMode] = useState('search'); // search, import
 
   // Search/chat state
   const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(null);
+  const [searchProject, setSearchProject] = useState('');
   const [openArticleId, setOpenArticleId] = useState(null);
   const [openArticleContent, setOpenArticleContent] = useState(null);
   const [openArticleContentLoading, setOpenArticleContentLoading] = useState(false);
@@ -58,6 +61,14 @@ function App() {
   const [trashLoading, setTrashLoading] = useState(false);
   const [trashError, setTrashError] = useState(null);
 
+  // Projects state — fetched eagerly (not lazily like trash) since the
+  // Edit modal, Import wizard, and Search's project selector all need the
+  // active project list too, not just the dedicated Projects view.
+  const [projects, setProjects] = useState([]);
+  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [projectsError, setProjectsError] = useState(null);
+  const activeProjectNames = projects.filter((p) => p.status === 'active').map((p) => p.name);
+
   useEffect(() => {
     setNotesLoading(true);
     Promise.all([api.fetchNotes(), api.fetchTopics(), api.fetchTags()])
@@ -69,6 +80,16 @@ function App() {
       })
       .catch((err) => setNotesError(err.message))
       .finally(() => setNotesLoading(false));
+
+    setProjectsLoading(true);
+    api
+      .fetchProjects()
+      .then((data) => {
+        setProjects(data);
+        setProjectsError(null);
+      })
+      .catch((err) => setProjectsError(err.message))
+      .finally(() => setProjectsLoading(false));
   }, []);
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
@@ -190,6 +211,7 @@ function App() {
     let accumulatedText = '';
 
     api.searchStream(text, {
+      project: searchProject,
       onDelta: (delta) => {
         accumulatedText += delta;
         // streaming:true (not just loading:false) marks the first token's
@@ -262,7 +284,8 @@ function App() {
           type: importData.type
         },
         topicFolder: importData.topicFolder,
-        tags: importData.tags
+        tags: importData.tags,
+        projects: importData.projects
       })
       .then((response) => {
         if (response.warning) {
@@ -329,6 +352,7 @@ function App() {
       type: formData.type,
       topic: formData.topicFolder,
       tags: formData.tags,
+      projects: formData.projects,
       content: formData.content
     };
     return api.updateNote(editingNoteId, updates).then((updatedNote) => {
@@ -375,6 +399,20 @@ function App() {
     });
   };
 
+  // --- Projects handlers ---
+  // Refetch the full list after every mutation rather than patching local
+  // state in place — simplest correct option, and the only one that
+  // doesn't need special-casing for rename (which changes the list's own
+  // key). Errors propagate to the caller (ProjectsListView shows them).
+  const refreshProjects = () => api.fetchProjects().then(setProjects);
+
+  const handleCreateProject = (name) => api.createProject(name).then(refreshProjects);
+
+  const handleRenameProject = (oldName, newName) =>
+    api.renameProject(oldName, newName).then(refreshProjects);
+
+  const handleArchiveProject = (name) => api.archiveProject(name).then(refreshProjects);
+
   return (
     <div className="app">
       <Sidebar
@@ -406,6 +444,9 @@ function App() {
             savedNotePath={savedNotePath}
             topics={topics}
             tags={tags}
+            activeProjects={activeProjectNames}
+            searchProject={searchProject}
+            onSearchProjectChange={setSearchProject}
             onFileUpload={handleFileUpload}
             onContentUpdate={handleContentUpdate}
             onFrontmatterUpdate={handleFrontmatterUpdate}
@@ -426,6 +467,19 @@ function App() {
               onEditNote={handleEditNote}
             />
             <button className="btn-trash-fab" onClick={handleTrashClick}>🗑️ Trash</button>
+          </div>
+        )}
+
+        {view === 'projects' && (
+          <div className="page-scroll">
+            <ProjectsListView
+              projects={projects}
+              loading={projectsLoading}
+              error={projectsError}
+              onCreate={handleCreateProject}
+              onRename={handleRenameProject}
+              onArchive={handleArchiveProject}
+            />
           </div>
         )}
 
@@ -460,6 +514,7 @@ function App() {
             note={editingNoteDetail}
             topics={topics}
             tags={tags}
+            activeProjects={activeProjectNames}
             onSave={handleSaveEditedNote}
             onDelete={handleDeleteNote}
             onCancel={handleCancelEditNote}

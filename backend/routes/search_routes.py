@@ -99,10 +99,11 @@ def _sse(event: str, data: dict) -> str:
 def search():
     data = request.get_json(silent=True) or {}
     query = (data.get("query") or "").strip()
+    project = (data.get("project") or "").strip() or None
     if not query:
         return jsonify({"status": "error", "message": "query is required"}), 400
 
-    matches = semantic_search_matches(query)
+    matches = semantic_search_matches(query, project=project)
 
     def generate():
         if not matches:
