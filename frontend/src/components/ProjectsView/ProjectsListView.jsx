@@ -92,46 +92,48 @@ function ProjectsListView({ projects, loading, error, onCreate, onRename, onArch
         </td>
         <td data-label="Notes">{project.noteCount}</td>
         <td data-label="Action">
-          {isRenaming ? (
-            <>
-              <button
-                className="btn btn-primary btn-small"
-                onClick={() => submitRename(project.name)}
-                disabled={isBusy}
-              >
-                Save
-              </button>{' '}
-              <button className="btn btn-secondary btn-small" onClick={cancelRename} disabled={isBusy}>
-                Cancel
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                className="btn btn-secondary btn-small"
-                onClick={() => onViewNotes(project.name)}
-                disabled={isBusy}
-              >
-                View Notes →
-              </button>{' '}
-              <button
-                className="btn btn-secondary btn-small"
-                onClick={() => startRename(project.name)}
-                disabled={isBusy}
-              >
-                Rename
-              </button>{' '}
-              {project.status === 'active' && (
+          <div className="row-actions">
+            {isRenaming ? (
+              <>
                 <button
-                  className="btn btn-secondary btn-small"
-                  onClick={() => handleArchive(project.name)}
+                  className="btn btn-primary btn-small"
+                  onClick={() => submitRename(project.name)}
                   disabled={isBusy}
                 >
-                  {isBusy ? 'Archiving…' : 'Archive'}
+                  Save
                 </button>
-              )}
-            </>
-          )}
+                <button className="btn btn-secondary btn-small" onClick={cancelRename} disabled={isBusy}>
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="btn btn-secondary btn-small"
+                  onClick={() => onViewNotes(project.name)}
+                  disabled={isBusy}
+                >
+                  Notes →
+                </button>
+                <button
+                  className="btn btn-secondary btn-small"
+                  onClick={() => startRename(project.name)}
+                  disabled={isBusy}
+                >
+                  Rename
+                </button>
+                {project.status === 'active' && (
+                  <button
+                    className="btn btn-secondary btn-small"
+                    onClick={() => handleArchive(project.name)}
+                    disabled={isBusy}
+                  >
+                    {isBusy ? 'Archiving…' : 'Archive'}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
         </td>
       </tr>
     );
@@ -148,7 +150,9 @@ function ProjectsListView({ projects, loading, error, onCreate, onRename, onArch
         </div>
 
         <form className="form-group" onSubmit={handleCreate}>
-          <label htmlFor="new-project-name">New project</label>
+          <label htmlFor="new-project-name" className="projects-group-heading" style={{ margin: '20px 0 8px' }}>
+            New Project
+          </label>
           <div className="topic-selector">
             <input
               id="new-project-name"

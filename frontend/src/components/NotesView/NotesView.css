@@ -31,6 +31,20 @@
   margin: 20px 16px 8px;
 }
 
+/* Wraps multi-button action cells (Projects: View/Rename/Archive; Trash:
+   Restore). Whole buttons wrap to a new line together when the row is
+   too narrow, rather than text wrapping awkwardly inside one button
+   while its siblings stay single-line and end up a different height. */
+.row-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.row-actions .btn {
+  white-space: nowrap;
+}
+
 .notes-header h1 {
   font-size: 32px;
   font-weight: 600;
@@ -511,7 +525,10 @@
   left: 0;
   background: rgba(0, 0, 0, 0.3);
   display: flex;
-  z-index: 1001;
+  /* Above the mobile sidebar (1100) and its backdrop (1050, Sidebar.css)
+     so a full-screen modal always covers the hamburger toggle instead of
+     the toggle rendering on top of the modal's own header. */
+  z-index: 1200;
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -664,7 +681,9 @@
     flex-direction: column;
   }
 
-  /* On mobile, detail panel becomes full-screen overlay */
+  /* On mobile, detail panel becomes full-screen overlay — z-index above
+     the sidebar (1100) and its backdrop (1050) for the same reason as
+     .edit-modal-overlay above. */
   .detail-panel-overlay {
     position: fixed;
     top: 0;
@@ -672,7 +691,7 @@
     bottom: 0;
     left: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    z-index: 1200;
   }
 
   .detail-panel {
@@ -701,10 +720,21 @@
 
   .notes-header {
     padding: 16px;
+    /* Stacked instead of side-by-side — a fixed-size button next to a
+       heading in a row that's too narrow for both was overlapping
+       ("+ Import New" colliding with "Notes"), since neither could shrink
+       to make room for the other. */
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
 
   .notes-header h1 {
     font-size: 24px;
+  }
+
+  .notes-header .btn {
+    width: 100%;
   }
 
   .notes-filters {
@@ -718,10 +748,13 @@
 
   .filter-group {
     width: 100%;
+    /* Was a single un-wrapping row — adding a third filter (Projects)
+       pushed it off-screen instead of onto its own line. */
+    flex-direction: column;
   }
 
   .filter-select {
-    flex: 1;
+    width: 100%;
   }
 
   .notes-table th,
@@ -815,5 +848,23 @@
   .tag-mini {
     font-size: 10px;
     padding: 2px 6px;
+  }
+
+  /* Multi-button action cells stack their label above a full-width
+     column of buttons — a horizontal row of 2-3 buttons has no readable
+     layout at this width. */
+  .notes-table td[data-label="Action"] {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+  }
+
+  .row-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .row-actions .btn {
+    width: 100%;
   }
 }

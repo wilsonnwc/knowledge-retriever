@@ -87,13 +87,15 @@ function TrashView({ trash, loading, error, onRestore, onBack }) {
                           {remaining === null ? '' : remaining === 0 ? 'purging soon' : `${remaining}d left`}
                         </td>
                         <td data-label="Action">
-                          <button
-                            className="btn btn-secondary btn-small"
-                            onClick={() => handleRestore(note.id)}
-                            disabled={restoringId === note.id}
-                          >
-                            {restoringId === note.id ? 'Restoring…' : 'Restore'}
-                          </button>
+                          <div className="row-actions">
+                            <button
+                              className="btn btn-secondary btn-small"
+                              onClick={() => handleRestore(note.id)}
+                              disabled={restoringId === note.id}
+                            >
+                              {restoringId === note.id ? 'Restoring…' : 'Restore'}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

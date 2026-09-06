@@ -120,9 +120,18 @@
 }
 
 @media (max-width: 768px) {
+  /* height: auto here (instead of a real viewport height, like desktop
+     has) was why the input didn't stay pinned to the bottom, and why a
+     new answer pushed the input further down the page instead of the
+     thread scrolling internally beneath a fixed input — with no real
+     height on this flex column, .chat-thread's flex:1 had nothing to
+     fill, so the whole block just grew to fit its content and the page
+     scrolled as a unit. 100dvh (not 100vh) accounts for mobile browser
+     chrome (address bar) so this doesn't overshoot the visible area; the
+     56px subtracted matches .main-content's padding-top added for the
+     fixed hamburger toggle (App.css). */
   .main-chat {
-    height: auto;
-    min-height: 60vh;
+    height: calc(100dvh - 56px);
   }
 
   .chat-landing {

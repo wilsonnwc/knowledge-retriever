@@ -38,6 +38,33 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 36 — 2026-09-06 (mobile QA round 2: 6 more real issues found and fixed)
+
+**Phase/step completed:** User's dedicated mobile QA pass on Session 35's responsive work (with screenshots) found 6 real issues — all fixed. This is the second QA round on the same feature area in one day; the pattern of "ship, get real screenshots, root-cause, fix" continues to earn its keep.
+
+**Where to pick up next:** MCP server (Learning OS Phase 1) — still the agreed milestone, this was the second interruption for QA fixes.
+
+**What worked:**
+- **Hamburger button covering modal headers, on every full-screen mobile view:** root cause was a z-index ordering bug, not a positioning one — the sidebar toggle was `z-index: 1100`, while both the note-edit modal (`1001`) and the mobile full-screen note-detail panel (`1000`) sat *underneath* it. Fixed by raising both overlays to `1200`, above the sidebar and its backdrop, so a full-screen view always covers the toggle rather than the toggle punching through it. One targeted question ("check this logic on all pages") led to finding it affected two separate components, not just the one screenshotted.
+- **"+ Import New" overlapping "Notes":** the header row had no fallback when a fixed-size button and an un-shrinkable heading no longer both fit one row — fixed by stacking the header vertically on mobile instead of trying to keep it side-by-side.
+- **Third filter dropdown invisible on Notes:** `.filter-group` (wrapping Topic/Tag/now Project) had no wrap behavior — adding a third item silently pushed it off-screen instead of onto a new line. Fixed by stacking filters vertically on mobile, the same fix pattern as the header.
+- **"New Project" label not reading as a sub-heading:** reused the exact same visual treatment already established for the Active/Archived group headings, rather than inventing a new style — one line of CSS, matches the pattern already validated on the same page.
+- **Uneven action-button sizing (View Notes / Rename / Archive):** root cause was text wrapping *inside* one button ("View Notes →" breaking to two lines) while its siblings stayed single-line, producing mismatched heights in the same row. Fixed two ways at once: shortened the label ("Notes →") to reduce wrapping pressure, and wrapped all multi-button action cells in a shared `.row-actions` container so *whole buttons* wrap to a new line together when needed, instead of text breaking awkwardly inside one. Stacks to a clean full-width vertical list in the mobile card layout.
+- **Chat input not pinned to the bottom on mobile; a new answer pushed it further down instead of the thread scrolling beneath a fixed input:** root cause was `.main-chat` switching to `height: auto` on mobile (an existing, pre-Session-35 override) instead of a real viewport height — with no real height on that flex column, `.chat-thread`'s `flex: 1` had nothing to fill, so the whole block just grew with its content and the page scrolled as one unit, the opposite of every real chat app's pattern. Fixed by giving `.main-chat` a real `calc(100dvh - 56px)` height on mobile too (accounting for `.main-content`'s hamburger-clearance padding), restoring the same flex-fill-and-pin mechanism that was already working correctly on desktop the whole time.
+- All six verified via a clean production build; visual correctness still pending the user's own browser check, same limitation as every frontend change this session (no Chrome automation available in this environment).
+
+**What didn't work / got stuck on:**
+- None — every issue was root-caused precisely (a z-index number, a missing flex-wrap, a stale height override) rather than papered over, and each fix was small once the actual mechanism was found.
+
+**Learnings:**
+- Two of six issues (hamburger-over-modals, chat-input-not-pinned) were caused by CSS that predates or sits alongside Session 35's changes interacting badly with the *new* mobile-first additions, rather than being wrong in isolation — a reminder that adding a new global-positioned element (the fixed toggle) needs checking against every other fixed/full-screen element already in the app, not just the views it was designed for.
+- "One button wraps, its siblings don't" is a specific, recognizable CSS smell (uneven flex-item heights from internal text wrapping) with a specific fix (wrap whole items via `flex-wrap` on the container, not just hope text doesn't break) — a repeatable pattern now that it's been named.
+
+**Open questions to come back to:**
+- Same as Session 35: mobile work still needs the user's own visual confirmation in a real browser.
+- Standing deferred items unchanged: freshness tripwire via Flask, snippet highlighting, stable project IDs.
+
+---
 ### Session 35 — 2026-09-06 (Projects UI: first real QA pass, 5 issues found and fixed)
 
 **Phase/step completed:** User's first hands-on manual QA of Session 34's Projects UI surfaced 5 real issues — a naming-convention question, a UI grouping request, a genuine pre-existing bug (not something Session 34 introduced), a missing field, and a missing navigation path. All five defined as explicit acceptance criteria before any code, then built end to end. One item (mobile responsiveness) expanded significantly mid-build after the user asked to go further than a quick fix — real mobile optimization (iPhone 12 width, collapsible sidebar), not just "stop the table from overlapping."
