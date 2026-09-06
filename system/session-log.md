@@ -38,6 +38,34 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 35 — 2026-09-06 (Projects UI: first real QA pass, 5 issues found and fixed)
+
+**Phase/step completed:** User's first hands-on manual QA of Session 34's Projects UI surfaced 5 real issues — a naming-convention question, a UI grouping request, a genuine pre-existing bug (not something Session 34 introduced), a missing field, and a missing navigation path. All five defined as explicit acceptance criteria before any code, then built end to end. One item (mobile responsiveness) expanded significantly mid-build after the user asked to go further than a quick fix — real mobile optimization (iPhone 12 width, collapsible sidebar), not just "stop the table from overlapping."
+
+**Where to pick up next:** MCP server (Learning OS Phase 1) — still the agreed next milestone, this was an interruption for QA fixes, not a new direction.
+
+**What worked:**
+- **Naming convention — reconsidered mid-conversation, better for it.** First proposal was auto-slugify (matching topics/tags' hyphenated convention). User pushed back wanting to type naturally with spaces. Checked the actual parsing code before re-proposing rather than guessing: `_parse_list_field` splits only on commas, so a space in a project name was *never* actually unsafe — the hyphen convention was inherited from topics (which are real folder names, an OS-level constraint) without checking whether that constraint applied to projects too. It didn't. Final design: names stored and displayed exactly as typed, only `,` and `:` rejected (both genuinely break parsing — comma in the frontmatter list, colon in the registry's own `name: status` line format), duplicates checked case-insensitively.
+- **Visual grouping:** Active/Archived projects now render as two separately-headed tables instead of one flat list.
+- **Root-caused the "cramped view" complaint instead of patching Projects alone:** the garbled overlapping header text in the user's screenshot ("AUTHORSTPUFRACKER") turned out to be a bug in the *shared* `.notes-table` CSS that predates this session — `<th>` had `white-space: nowrap` but, unlike the body `<td>`s, no `overflow`/`text-overflow` truncation, so adjacent header text overflowed into each other's space at narrow widths. Projects inherited this by reusing the same CSS, so fixing it once at the shared level repairs Notes, Trash, and Projects simultaneously.
+- **Mobile scope expanded mid-build, per explicit user direction:** initial proposal was a half-laptop-screen fix (~800px, horizontal scroll). User asked to go further — real optimization for an iPhone-12-width viewport (390px), including a collapsible sidebar. Built: (1) all three tables (Notes/Trash/Projects) convert to a stacked-card layout below 480px via `data-label` attributes on every `<td>` plus one shared CSS block — added once, works for all three without per-table card components; (2) the sidebar becomes an off-canvas slide-in panel below 768px with a fixed hamburger toggle, instead of permanently eating ~40% of a short phone screen's height as it did before. Added a new standing acceptance-criteria principle to `CLAUDE.md`'s Key Design Principles: every future UI change gets checked at a mobile width, not just desktop.
+- **Missing Projects field in the read-only note panel:** confirmed via inspection — the field was added to the Edit form in Session 34 but the separate read-only `NotesDetailPanel` was missed entirely. Added a Projects section mirroring the existing Tags section exactly.
+- **Filtered notes-by-project, both halves built:** a third "All Projects" filter dropdown added to Notes (mirrors the existing Topic/Tag filter pattern exactly), plus a "View Notes →" link on each Projects-view row that navigates to Notes pre-filtered — implemented via a one-shot initial-value prop rather than lifting the whole filter state up to `App.jsx`, since `NotesListView` already remounts fresh each time the view is switched to.
+- Verified backend naming rules directly via curl (comma/colon rejection, case-insensitive duplicate detection against the user's own real test data from yesterday, whitespace trimming with internal spacing preserved) before touching the frontend. Re-ran the locked eval and the CLI's project commands (including a name with spaces) — both unaffected.
+
+**What didn't work / got stuck on:**
+- None — every fix worked on the first real attempt once the actual root cause (for the table bug) or actual parsing constraint (for the naming question) was checked directly, rather than assumed.
+
+**Learnings:**
+- A UI bug report is worth root-causing before scoping the fix, not just patching the symptom in the view where it was noticed — the table overflow looked like "a Projects problem" but was actually inherited shared CSS, and fixing it once benefited three views instead of one.
+- A convention borrowed from elsewhere in the same codebase (hyphenated topic/tag names) can carry a constraint that doesn't actually apply to the new thing inheriting it (topics are folder names; projects aren't) — worth checking the *actual* mechanical reason for an existing convention before assuming it transfers, rather than pattern-matching by default.
+- When a user says "go further than what you proposed," the honest response is asking exactly how far (concrete target — iPhone 12 width, collapsible sidebar) rather than guessing at a scope, since "make it responsive" alone under-specifies effort by an order of magnitude between "add overflow-x: auto" and "redesign navigation for mobile."
+
+**Open questions to come back to:**
+- The mobile card layout and collapsible sidebar are built and reasoned through carefully, but — like all frontend work this session — not yet visually verified in a live browser by me (no Chrome automation available). Genuinely first-eyes-on for the user, more so than usual given the scope.
+- Same deferred items as prior sessions: freshness tripwire not yet surfaced via Flask; before/after snippet highlighting still deferred; stable project IDs deferred per the existing roadmap entry.
+
+---
 ### Session 34 — 2026-09-05 (Projects UI built end to end — complete)
 
 **Phase/step completed:** Built the full Projects feature decided in Session 33: registry CRUD (list/create/rename/archive), note-to-project tagging in the Edit modal and Import wizard, and a project filter on Search/Chat. Closes `system/ui-build-plan.md`'s long-dropped Phase 1B. Built as one continuous pass per an explicit working-style change this session (front-load acceptance criteria via a structured Q&A, then build end-to-end with verification at each layer instead of checking in after every step) rather than the tighter per-decision check-in cadence used in prior sessions.

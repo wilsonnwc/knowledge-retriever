@@ -66,6 +66,35 @@ def _note_count(name: str) -> int:
     return sum(1 for n in notes_store.list_notes() if name in n.get("projects", []))
 
 
+def _validate_name(name: str) -> str:
+    """
+    Project names are stored and displayed exactly as typed — no
+    slugification, no separate display-name-vs-id split. The only real
+    constraint is structural: a comma would corrupt the comma-delimited
+    `projects: [a, b]` frontmatter list (see notes_store._parse_list_field),
+    and a colon would corrupt this registry's own "name: status" line
+    format (see load_projects' partition(":")). Everything else, spaces
+    and casing included, is safe as-is.
+    """
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("Project name is required")
+    if "," in name or ":" in name:
+        raise ValueError("Project names can't contain a comma or colon")
+    return name
+
+
+def _find_existing(name: str, projects: dict) -> str:
+    """Case-insensitive lookup so 'Test Project' and 'test project' can't
+    both exist as separate, easily-confused entries — but each project's
+    originally-typed casing is still what gets stored and displayed."""
+    lower = name.lower()
+    for existing in projects:
+        if existing.lower() == lower:
+            return existing
+    return None
+
+
 def list_projects() -> list:
     projects = load_projects()
     return [
@@ -75,13 +104,12 @@ def list_projects() -> list:
 
 
 def create_project(name: str) -> dict:
-    name = (name or "").strip()
-    if not name:
-        raise ValueError("Project name is required")
+    name = _validate_name(name)
 
     projects = load_projects()
-    if name in projects:
-        raise ValueError(f"Project '{name}' already exists (status: {projects[name]['status']})")
+    existing = _find_existing(name, projects)
+    if existing:
+        raise ValueError(f"Project '{existing}' already exists (status: {projects[existing]['status']})")
 
     projects[name] = {"status": "active", "line": f"active, created {date.today().isoformat()}"}
     save_projects(projects)
@@ -111,25 +139,26 @@ def rename_project(old_name: str, new_name: str) -> dict:
     tags and their order.
     """
     old_name = (old_name or "").strip()
-    new_name = (new_name or "").strip()
-    if not new_name:
-        raise ValueError("New project name is required")
+    new_name = _validate_name(new_name)
 
     projects = load_projects()
-    if old_name not in projects:
+    existing_old = _find_existing(old_name, projects)
+    if not existing_old:
         raise ValueError(f"Project '{old_name}' not found")
-    if new_name != old_name and new_name in projects:
-        raise ValueError(f"Project '{new_name}' already exists")
 
-    if new_name == old_name:
-        return {"name": old_name, "status": projects[old_name]["status"], "noteCount": _note_count(old_name)}
+    if new_name.lower() != existing_old.lower():
+        existing_new = _find_existing(new_name, projects)
+        if existing_new:
+            raise ValueError(f"Project '{existing_new}' already exists")
+    elif new_name == existing_old:
+        return {"name": existing_old, "status": projects[existing_old]["status"], "noteCount": _note_count(existing_old)}
 
-    projects[new_name] = projects.pop(old_name)
+    projects[new_name] = projects.pop(existing_old)
     save_projects(projects)
 
     for note in notes_store.list_notes():
-        if old_name in note.get("projects", []):
-            updated_projects = [new_name if p == old_name else p for p in note["projects"]]
+        if existing_old in note.get("projects", []):
+            updated_projects = [new_name if p == existing_old else p for p in note["projects"]]
             notes_store.update_note(note["id"], {"projects": updated_projects})
 
     return {"name": new_name, "status": projects[new_name]["status"], "noteCount": _note_count(new_name)}

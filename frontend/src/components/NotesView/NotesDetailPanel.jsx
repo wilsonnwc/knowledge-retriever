@@ -106,6 +106,20 @@ function NotesDetailPanel({ note, contentLoading, contentError, onClose, onEdit 
             </div>
           </div>
 
+          {/* Projects section */}
+          <div className="tags-section">
+            <h3>Projects</h3>
+            <div className="tags-display">
+              {note.projects && note.projects.length > 0 ? (
+                note.projects.map(project => (
+                  <span key={project} className="tag-badge">{project}</span>
+                ))
+              ) : (
+                <p className="no-tags">Not tagged to a project</p>
+              )}
+            </div>
+          </div>
+
           {/* Full content */}
           <div className="content-section">
             {contentLoading && <p className="content-status">Loading content…</p>}

@@ -78,15 +78,15 @@ function TrashView({ trash, loading, error, onRestore, onBack }) {
                     const remaining = daysRemaining(note.trashed_at);
                     return (
                       <tr key={note.id} className="note-row">
-                        <td className="title-cell" title={note.title}>{note.title}</td>
-                        <td className="source-cell" title={note.source}>{note.source}</td>
-                        <td className="topic-cell">
+                        <td className="title-cell" title={note.title} data-label="Title">{note.title}</td>
+                        <td className="source-cell" title={note.source} data-label="Source">{note.source}</td>
+                        <td className="topic-cell" data-label="Topic">
                           <span className="topic-badge">{note.topic}</span>
                         </td>
-                        <td className="date-cell">
+                        <td className="date-cell" data-label="Trashed">
                           {remaining === null ? '' : remaining === 0 ? 'purging soon' : `${remaining}d left`}
                         </td>
-                        <td>
+                        <td data-label="Action">
                           <button
                             className="btn btn-secondary btn-small"
                             onClick={() => handleRestore(note.id)}

@@ -23,6 +23,14 @@
   background: white;
 }
 
+.projects-group-heading {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #999;
+  margin: 20px 16px 8px;
+}
+
 .notes-header h1 {
   font-size: 32px;
   font-weight: 600;
@@ -133,6 +141,8 @@
   color: #666;
   text-transform: uppercase;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .notes-table tbody tr {
@@ -730,17 +740,71 @@
   }
 }
 
+/* True mobile (iPhone-12-and-narrower): a 6-column table has no readable
+   layout at ~390px no matter how much text gets truncated, so tables
+   become stacked cards instead — each row a bordered block, each cell a
+   label/value row via the data-label attribute JSX already sets on every
+   <td> in NotesListView/TrashView/ProjectsListView, so this one CSS block
+   covers all three tables without duplicating markup per component. */
 @media (max-width: 480px) {
-  .notes-table th,
-  .notes-table td {
-    padding: 8px;
-    font-size: 11px;
+  .notes-table-container {
+    overflow-x: visible;
   }
 
-  .title-cell {
-    max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .notes-table thead {
+    display: none;
+  }
+
+  .notes-table,
+  .notes-table tbody,
+  .notes-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .notes-table tbody tr {
+    margin-bottom: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 4px 12px;
+  }
+
+  .notes-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    width: auto;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 13px;
+    white-space: normal;
+    text-align: right;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .notes-table td:last-child {
+    border-bottom: none;
+  }
+
+  .notes-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #999;
+    flex-shrink: 0;
+    text-align: left;
+  }
+
+  .notes-table td.title-cell {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .tags-cell .tags-list {
+    justify-content: flex-end;
   }
 
   .topic-badge {

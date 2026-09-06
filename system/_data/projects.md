@@ -6,4 +6,5 @@ Archiving a project only changes its status here; it never removes the project l
 
 <!-- PROJECTS_START -->
 - leapspace-interview-prep: active, created 2026-08-05
+- Test project: archived, closed 2026-09-06
 <!-- PROJECTS_END -->

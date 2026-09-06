@@ -84,6 +84,9 @@ body {
 
   .main-content {
     height: auto;
+    /* Clears the fixed hamburger toggle (Sidebar.css) so it never sits on
+       top of a page's own heading/title. */
+    padding-top: 56px;
   }
 
   .page-scroll {

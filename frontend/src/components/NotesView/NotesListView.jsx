@@ -3,13 +3,19 @@ import NotesDetailPanel from './NotesDetailPanel';
 import * as api from '../../api/client';
 import './NotesView.css';
 
-function NotesListView({ notes, loading, error, onImportClick, onEditNote }) {
+function NotesListView({ notes, loading, error, initialProjectFilter, onImportClick, onEditNote }) {
   const [selectedNoteId, setSelectedNoteId] = useState(null);
   const [selectedContent, setSelectedContent] = useState(null);
   const [selectedContentLoading, setSelectedContentLoading] = useState(false);
   const [selectedContentError, setSelectedContentError] = useState(null);
   const [filterTopic, setFilterTopic] = useState('');
   const [filterTag, setFilterTag] = useState('');
+  // Initial value only — set once from the "View Notes" link on a Projects
+  // row. This component remounts each time the Notes view is (re-)opened
+  // (it's conditionally rendered, not just hidden), so a fresh initial
+  // value from a new navigation is picked up correctly without needing to
+  // lift this state up to App.jsx.
+  const [filterProject, setFilterProject] = useState(initialProjectFilter || '');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch full content for whichever note is selected — the list only
@@ -28,9 +34,10 @@ function NotesListView({ notes, loading, error, onImportClick, onEditNote }) {
       .finally(() => setSelectedContentLoading(false));
   }, [selectedNoteId]);
 
-  // Get unique topics and tags for filters
+  // Get unique topics, tags, and projects for filters
   const allTopics = [...new Set(notes.map(n => n.topic))];
   const allTags = [...new Set(notes.flatMap(n => n.tags))];
+  const allProjects = [...new Set(notes.flatMap(n => n.projects || []))];
 
   // Filter notes based on search and filters
   const filteredNotes = notes.filter(note => {
@@ -38,7 +45,8 @@ function NotesListView({ notes, loading, error, onImportClick, onEditNote }) {
                          note.source.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTopic = !filterTopic || note.topic === filterTopic;
     const matchesTag = !filterTag || note.tags.includes(filterTag);
-    return matchesSearch && matchesTopic && matchesTag;
+    const matchesProject = !filterProject || (note.projects || []).includes(filterProject);
+    return matchesSearch && matchesTopic && matchesTag && matchesProject;
   });
 
   const selectedNoteSummary = notes.find(n => n.id === selectedNoteId);
@@ -85,6 +93,17 @@ function NotesListView({ notes, loading, error, onImportClick, onEditNote }) {
               <option value="">All Tags</option>
               {allTags.map(tag => (
                 <option key={tag} value={tag}>{tag}</option>
+              ))}
+            </select>
+
+            <select
+              value={filterProject}
+              onChange={(e) => setFilterProject(e.target.value)}
+              className="filter-select"
+            >
+              <option value="">All Projects</option>
+              {allProjects.map(project => (
+                <option key={project} value={project}>{project}</option>
               ))}
             </select>
           </div>
@@ -136,14 +155,14 @@ function NotesListView({ notes, loading, error, onImportClick, onEditNote }) {
                         setSelectedContent(null);
                       }}
                     >
-                      <td className="title-cell" title={note.title}>{note.title}</td>
-                      <td className="author-cell" title={note.author}>{note.author}</td>
-                      <td className="source-cell" title={note.source}>{note.source}</td>
-                      <td className="date-cell">{note.date}</td>
-                      <td className="topic-cell">
+                      <td className="title-cell" title={note.title} data-label="Title">{note.title}</td>
+                      <td className="author-cell" title={note.author} data-label="Author">{note.author}</td>
+                      <td className="source-cell" title={note.source} data-label="Source">{note.source}</td>
+                      <td className="date-cell" data-label="Date">{note.date}</td>
+                      <td className="topic-cell" data-label="Topic">
                         <span className="topic-badge">{note.topic}</span>
                       </td>
-                      <td className="tags-cell">
+                      <td className="tags-cell" data-label="Tags">
                         <div className="tags-list">
                           {note.tags.map(tag => (
                             <span key={tag} className="tag-mini">{tag}</span>

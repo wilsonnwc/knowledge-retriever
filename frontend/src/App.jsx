@@ -68,6 +68,11 @@ function App() {
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [projectsError, setProjectsError] = useState(null);
   const activeProjectNames = projects.filter((p) => p.status === 'active').map((p) => p.name);
+  // Set right before switching to the Notes view from a Projects row's
+  // "View Notes" link — NotesListView reads it once as its filter's
+  // initial value (see that component for why this is safe without
+  // lifting the whole filter state up).
+  const [notesInitialProjectFilter, setNotesInitialProjectFilter] = useState('');
 
   useEffect(() => {
     setNotesLoading(true);
@@ -413,6 +418,11 @@ function App() {
 
   const handleArchiveProject = (name) => api.archiveProject(name).then(refreshProjects);
 
+  const handleViewProjectNotes = (projectName) => {
+    setNotesInitialProjectFilter(projectName);
+    setView('notes');
+  };
+
   return (
     <div className="app">
       <Sidebar
@@ -463,6 +473,7 @@ function App() {
               notes={notes}
               loading={notesLoading}
               error={notesError}
+              initialProjectFilter={notesInitialProjectFilter}
               onImportClick={handleImportClick}
               onEditNote={handleEditNote}
             />
@@ -479,6 +490,7 @@ function App() {
               onCreate={handleCreateProject}
               onRename={handleRenameProject}
               onArchive={handleArchiveProject}
+              onViewNotes={handleViewProjectNotes}
             />
           </div>
         )}
