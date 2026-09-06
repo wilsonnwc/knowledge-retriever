@@ -22,6 +22,7 @@ function EditNoteModal({ note, topics, tags: availableTags, activeProjects, onSa
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -64,8 +65,10 @@ function EditNoteModal({ note, topics, tags: availableTags, activeProjects, onSa
     }
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm(`Move "${formData.title || note.source || 'this note'}" to trash?`)) return;
+  const handleDeleteClick = () => setShowDeleteConfirm(true);
+
+  const handleConfirmDelete = async () => {
+    setShowDeleteConfirm(false);
     setDeleting(true);
     setSaveError(null);
     try {
@@ -222,7 +225,7 @@ function EditNoteModal({ note, topics, tags: availableTags, activeProjects, onSa
 
         {/* Footer */}
         <div className="edit-modal-footer">
-          <button className="btn-delete-link" onClick={handleDelete} disabled={saving || deleting}>
+          <button className="btn-delete-link" onClick={handleDeleteClick} disabled={saving || deleting}>
             {deleting ? 'Moving to trash…' : 'Delete note'}
           </button>
           <div className="edit-modal-footer-right">
@@ -271,6 +274,43 @@ function EditNoteModal({ note, topics, tags: availableTags, activeProjects, onSa
                 onClick={handleCreateNewTopic}
               >
                 Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h2>Move note to trash?</h2>
+              <button
+                className="close-button"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>
+                "{formData.title || note.source || 'This note'}" will move to Trash and can be
+                restored within 7 days.
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={handleConfirmDelete}
+              >
+                Move to Trash
               </button>
             </div>
           </div>

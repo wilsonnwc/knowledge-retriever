@@ -1,4 +1,9 @@
 import React from 'react';
+import { renderInline, stripInlineBlockquoteMarker } from '../MarkdownLite';
+
+function renderChunkText(text) {
+  return renderInline(stripInlineBlockquoteMarker(text));
+}
 
 function SnippetCard({ source, onOpenArticle }) {
   return (
@@ -11,9 +16,9 @@ function SnippetCard({ source, onOpenArticle }) {
       </button>
       <p className="snippet-card-text">
         "
-        {source.before && <span className="snippet-context">{source.before} </span>}
-        <em className="snippet-chunk">{source.chunk}</em>
-        {source.after && <span className="snippet-context"> {source.after}</span>}
+        {source.before && <span className="snippet-context">{renderChunkText(source.before)} </span>}
+        <em className="snippet-chunk">{renderChunkText(source.chunk)}</em>
+        {source.after && <span className="snippet-context"> {renderChunkText(source.after)}</span>}
         "
       </p>
     </div>

@@ -5,6 +5,7 @@ const NUMBERED_RE = /^\d+\.\s+(.*)$/;
 const H3_RE = /^### (.*)$/;
 const H2_RE = /^## (.*)$/;
 const H1_RE = /^# (.*)$/;
+const BLOCKQUOTE_RE = /^>\s?(.*)$/;
 const BOLD_RE = /\*\*(.+?)\*\*/g;
 
 // Renders **bold** spans within a line of text; everything else passes
@@ -22,6 +23,15 @@ function renderInline(text) {
   }
   if (lastIndex < text.length) parts.push(text.slice(lastIndex));
   return parts;
+}
+
+// Drops a "> " blockquote marker that appears mid-paragraph rather than at
+// the start of its own line — the shape a chunk of embedded note text is in
+// once it's been flattened into one flowing excerpt (e.g. a search result
+// snippet). There's no separate block to render there, so the marker is
+// just noise; renderInline still bolds the "**...**" text that follows it.
+function stripInlineBlockquoteMarker(text) {
+  return text.replace(/(^|\s)>\s*(?=\*\*)/g, '$1');
 }
 
 // Minimal markdown rendering (headers, bullet/numbered lists, bold,
@@ -70,9 +80,11 @@ function MarkdownLite({ content }) {
     const h3 = line.match(H3_RE);
     const h2 = line.match(H2_RE);
     const h1 = line.match(H1_RE);
+    const blockquote = line.match(BLOCKQUOTE_RE);
     if (h3) return blocks.push({ type: 'h3', text: h3[1] });
     if (h2) return blocks.push({ type: 'h2', text: h2[1] });
     if (h1) return blocks.push({ type: 'h1', text: h1[1] });
+    if (blockquote) return blocks.push({ type: 'blockquote', text: blockquote[1] });
     if (line.trim()) return blocks.push({ type: 'p', text: line });
     blocks.push({ type: 'br' });
   });
@@ -98,6 +110,7 @@ function MarkdownLite({ content }) {
         if (block.type === 'h1') return <h1 key={idx}>{renderInline(block.text)}</h1>;
         if (block.type === 'h2') return <h2 key={idx}>{renderInline(block.text)}</h2>;
         if (block.type === 'h3') return <h3 key={idx}>{renderInline(block.text)}</h3>;
+        if (block.type === 'blockquote') return <blockquote key={idx}>{renderInline(block.text)}</blockquote>;
         if (block.type === 'p') return <p key={idx}>{renderInline(block.text)}</p>;
         return <br key={idx} />;
       })}
@@ -106,3 +119,4 @@ function MarkdownLite({ content }) {
 }
 
 export default MarkdownLite;
+export { renderInline, stripInlineBlockquoteMarker };

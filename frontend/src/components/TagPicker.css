@@ -76,7 +76,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  /* Above .edit-modal-overlay (1200, NotesView.css) — both the "New Topic"
+     and delete-confirm modals nest inside the Edit modal, so this must
+     out-rank it or it renders invisibly behind the modal that opened it. */
+  z-index: 1300;
 }
 
 .modal {

@@ -63,7 +63,10 @@ def _clean_scalar(raw: str) -> str:
 def slugify(text: str) -> str:
     """Matches the slug logic the frontend already uses in SuccessScreen."""
     text = text.lower().strip()
-    text = re.sub(r"[^a-z0-9\s-]", "", text)
+    # Replaced with a space (not dropped) so punctuation between words —
+    # e.g. the colon in "1:1" — still separates them instead of fusing
+    # into "11".
+    text = re.sub(r"[^a-z0-9\s-]", " ", text)
     text = re.sub(r"\s+", "-", text)
     return re.sub(r"-+", "-", text).strip("-")
 

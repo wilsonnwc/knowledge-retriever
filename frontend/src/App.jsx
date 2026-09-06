@@ -27,6 +27,12 @@ const blankImportData = () => ({
 function App() {
   const [view, setView] = useState('chat'); // chat, notes, trash, projects
   const [mode, setMode] = useState('search'); // search, import
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
+  };
 
   // Search/chat state
   const [conversations, setConversations] = useState([]);
@@ -140,7 +146,7 @@ function App() {
 
   const historyItems = [
     ...conversations.map((c) => ({ id: c.id, title: c.title, type: 'search', updatedAt: c.updatedAt })),
-    ...(importScreen !== 'upload' || importData.content
+    ...(importScreen !== 'upload' && importScreen !== 'success' && importData.content
       ? [
           {
             id: 'in-progress-import',
@@ -376,6 +382,7 @@ function App() {
       setNotes((prev) => prev.filter((n) => n.id !== editingNoteId));
       setEditingNoteId(null);
       setEditingNoteDetail(null);
+      showToast('Note moved to trash');
     });
   };
 
@@ -532,6 +539,8 @@ function App() {
             onCancel={handleCancelEditNote}
           />
         )}
+
+        {toast && <div className="app-toast">{toast}</div>}
       </div>
     </div>
   );

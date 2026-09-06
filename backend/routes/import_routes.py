@@ -67,7 +67,7 @@ def _suggest_frontmatter(content: str, user_prompt: str = None) -> list:
     excerpt = content[:4000]
     prompt = f"""Suggest metadata for this saved note. Reply with exactly three lines, no extra text:
 TITLE: <a concise title for this content>
-SOURCE: <author or publication, if inferable from the text; otherwise reuse the title>
+SOURCE: <author or publication this came from, only if inferable from the text; otherwise reply NONE — do not repeat the title>
 TYPE: <one of: article, book, podcast, video, quote, own-note>
 
 {f"Context from the user: {user_prompt}" if user_prompt else ""}
@@ -88,6 +88,15 @@ Content:
         for field, key in (("TITLE:", "title"), ("SOURCE:", "source"), ("TYPE:", "type")):
             if line.strip().upper().startswith(field):
                 suggestions[key] = line.split(":", 1)[1].strip()
+
+    # Guard against the model still echoing the title back as the source
+    # (or a literal "NONE"/"N/A") regardless of the prompt above — a note
+    # with no real external source should have a blank Source field, not
+    # a duplicate of its own title.
+    if suggestions["source"].strip().upper() in ("", "NONE", "N/A", "NA") or (
+        suggestions["source"].strip().lower() == suggestions["title"].strip().lower()
+    ):
+        suggestions["source"] = ""
 
     return [
         {"field": "title", "value": suggestions["title"], "confirmed": False},

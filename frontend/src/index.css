@@ -28,6 +28,15 @@ code {
     monospace;
 }
 
+/* Shared MarkdownLite blockquote styling (Notes read view, Import preview,
+   chat answers) — sets a "> " callout apart from body text. */
+blockquote {
+  margin: 8px 0;
+  padding: 4px 14px;
+  border-left: 3px solid var(--color-border-hover);
+  color: var(--color-text-secondary);
+}
+
 /* Base form element styling (app-wide) */
 .form-group {
   display: flex;
@@ -124,6 +133,15 @@ select {
 .btn-secondary:hover:not(:disabled) {
   border-color: var(--color-border-hover);
   background: var(--color-bg);
+}
+
+.btn-danger {
+  background: #C0392B;
+  color: #FFFFFF;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #A5321F;
 }
 
 .btn-small {

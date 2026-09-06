@@ -40,13 +40,32 @@ def get_chroma_collection():
 
 def chunk_text_for_embedding(chunk) -> str:
     """
-    What actually gets embedded: section title (if any) + chunk body.
-    Frontmatter is stored as metadata, not embedded, since it's identifiers
-    (dates, tags) rather than semantic content a query would match on.
+    What actually gets embedded: note title + author (when present) +
+    section title (if any) + chunk body. Title/author used to be left out
+    as pure metadata (like dates/tags), on the reasoning that they're
+    identifiers, not semantic content a query would match on — but a name
+    is exactly what a real query like "what does Teresa Torres say about
+    X" or "what about Teresa Torres" matches on. That query only worked
+    for notes whose body happened to restate the author's name in prose
+    (e.g. Marty Cagan's), and silently failed for notes where the name
+    only ever appeared in frontmatter (e.g. Teresa Torres's "Continuous
+    Discovery Habits") — retrieval-by-author was luck, not a designed
+    capability. Prepending title/author gives every chunk that signal
+    regardless of body wording.
     """
-    if chunk.section_title:
-        return f"{chunk.section_title}\n\n{chunk.text}"
-    return chunk.text
+    fm = chunk.frontmatter
+    title = fm.get("title") or fm.get("source") or ""
+    author = fm.get("author", "")
+
+    header_lines = [line for line in (
+        f"Title: {title}" if title else "",
+        f"Author: {author}" if author else "",
+        chunk.section_title,
+    ) if line]
+
+    if not header_lines:
+        return chunk.text
+    return "\n".join(header_lines) + f"\n\n{chunk.text}"
 
 
 def embed_all_notes():
@@ -58,12 +77,14 @@ def embed_all_notes():
     collection = get_chroma_collection()
 
     ids = []
-    documents = []
+    embedding_inputs = []  # title/author-prefixed text — embedded for retrieval signal only
+    documents = []          # original chunk body — what a citation actually shows back
     metadatas = []
     for c in chunks:
         by_file_index = sum(1 for prior in ids if prior.startswith(f"{c.source_file}::"))
         ids.append(f"{c.source_file}::{by_file_index}")
-        documents.append(chunk_text_for_embedding(c))
+        embedding_inputs.append(chunk_text_for_embedding(c))
+        documents.append(c.text)
         metadatas.append({
             "source_file": c.source_file,
             "section_title": c.section_title,
@@ -71,7 +92,7 @@ def embed_all_notes():
         })
 
     print(f"Generating embeddings via {EMBEDDING_MODEL}...")
-    response = openai_client.embeddings.create(model=EMBEDDING_MODEL, input=documents)
+    response = openai_client.embeddings.create(model=EMBEDDING_MODEL, input=embedding_inputs)
     embeddings = [d.embedding for d in response.data]
 
     print(f"Upserting {len(ids)} chunks into Chroma collection '{COLLECTION_NAME}'...")
@@ -99,17 +120,18 @@ def embed_single_note(note_id: str):
     openai_client = get_openai_client()
     collection = get_chroma_collection()
 
-    ids, documents, metadatas = [], [], []
+    ids, embedding_inputs, documents, metadatas = [], [], [], []
     for i, c in enumerate(chunks):
         ids.append(f"{c.source_file}::{i}")
-        documents.append(chunk_text_for_embedding(c))
+        embedding_inputs.append(chunk_text_for_embedding(c))
+        documents.append(c.text)
         metadatas.append({
             "source_file": c.source_file,
             "section_title": c.section_title,
             **{k: v for k, v in c.frontmatter.items() if v},
         })
 
-    response = openai_client.embeddings.create(model=EMBEDDING_MODEL, input=documents)
+    response = openai_client.embeddings.create(model=EMBEDDING_MODEL, input=embedding_inputs)
     embeddings = [d.embedding for d in response.data]
     collection.upsert(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
 

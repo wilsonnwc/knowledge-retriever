@@ -69,6 +69,31 @@
   line-height: 1.6;
 }
 
+/* Headings in a Claude answer default to full document-heading size
+   (browser UA styles), which visually overpowers a chat bubble — scaled
+   down here to stay clearly heading-sized but proportionate to the 16px
+   body text around them. */
+.chat-bubble h1 {
+  font-size: 20px;
+  margin: 12px 0 6px;
+}
+
+.chat-bubble h2 {
+  font-size: 18px;
+  margin: 12px 0 6px;
+}
+
+.chat-bubble h3 {
+  font-size: 17px;
+  margin: 10px 0 6px;
+}
+
+.chat-bubble h1:first-child,
+.chat-bubble h2:first-child,
+.chat-bubble h3:first-child {
+  margin-top: 0;
+}
+
 /* Sources */
 .sources-section {
   margin-top: 12px;
