@@ -38,6 +38,30 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 37 — 2026-09-06 (chat input pinning: first fix insufficient, switched approach)
+
+**Phase/step completed:** User reported Session 36's chat-input-pinning fix hadn't actually worked, with screenshots showing the input not visible at all without scrolling past a full response. Diagnosed properly this time rather than guessing a second patch blind, then switched to a more robust technique.
+
+**Where to pick up next:** User re-verifying this fix now; MCP server remains the actual next milestone once mobile QA settles.
+
+**What worked:**
+- **Didn't re-guess blind.** Before touching any code, verified the previous fix had actually reached the running dev server by fetching the live bundle directly and grepping for the `.main-chat` rule — confirmed the CSS *was* being served correctly, which ruled out "the fix never deployed" and narrowed the problem to the technique itself, not a caching or build issue.
+- **Asked for the specific state and got a screenshot** rather than continuing to reason in the abstract — the screenshots showed no input visible at all, worse than the narrower bug originally diagnosed, which changed the diagnosis: the flex-fill-and-pin approach (giving `.main-chat` a real height so `.chat-thread`'s `flex: 1` has something to fill) wasn't taking effect as intended on whatever's rendering it, for a reason not fully pinned down (a live-in-browser inspection would be needed to know for certain — dvh support/behavior in the exact testing context is the leading suspect, but unconfirmed).
+- **Switched to a technique that doesn't depend on the uncertain part being right.** Rather than keep refining the viewport-height calc, made the input bar `position: fixed` directly — this is positioned relative to the viewport itself, completely independent of whatever `.main-chat`'s computed height turns out to be. This is also the standard technique real mobile chat UIs use, not a workaround specific to this bug. Added `padding-bottom` to `.chat-thread` so the last message isn't hidden behind the now-fixed bar, and kept the `.main-chat` height fix in place too (declared `vh` first as a fallback, `dvh` second) since that part is still needed for the thread itself to scroll internally rather than the whole page scrolling.
+- Verified the new rule reached the live dev server the same way as before (fetched the bundle, confirmed the exact CSS text) before reporting back, rather than assuming the fix worked.
+
+**What didn't work / got stuck on:**
+- The Session 36 fix (giving `.main-chat` a real `calc(100dvh - 56px)` height) was verified to compile and to be served correctly, and traced through the full CSS chain with no logical error found on paper — yet visibly didn't work for the user. Root cause not fully confirmed (most likely a `dvh`-in-`calc()` quirk in the specific browser/emulator being used, but this is an informed guess, not a verified finding) — noting this honestly rather than claiming certainty. The `position: fixed` approach sidesteps needing to know the exact cause, which is also why it was chosen over further refining the calc.
+
+**Learnings:**
+- Verifying that a fix's *code* is correct and reaches the browser is necessary but not sufficient proof it *worked* — CSS layout techniques (flex-fill against a viewport-unit height, in this case) can be logically sound on paper and still fail in a specific rendering context for reasons that are hard to fully diagnose without live browser access. When that happens, switching to a more robust technique (position: fixed, which doesn't depend on the uncertain part) beats continuing to debug the fragile one blind.
+- Worth flagging honestly when a root cause isn't fully confirmed, rather than writing up a guess as if it were a diagnosis — the previous entry's "root cause: height:auto" explanation was reasonable but evidently incomplete, since fixing exactly that didn't fix the symptom.
+
+**Open questions to come back to:**
+- Confirm with the user whether the input is now actually pinned. If `position: fixed` also fails, the next hypothesis to test would be getting direct browser dev-tools access to the actual computed styles rather than reasoning from source alone.
+- Same standing deferred items as prior sessions.
+
+---
 ### Session 36 — 2026-09-06 (mobile QA round 2: 6 more real issues found and fixed)
 
 **Phase/step completed:** User's dedicated mobile QA pass on Session 35's responsive work (with screenshots) found 6 real issues — all fixed. This is the second QA round on the same feature area in one day; the pattern of "ship, get real screenshots, root-cause, fix" continues to earn its keep.

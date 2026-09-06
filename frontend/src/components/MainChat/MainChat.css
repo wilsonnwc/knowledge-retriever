@@ -121,16 +121,22 @@
 
 @media (max-width: 768px) {
   /* height: auto here (instead of a real viewport height, like desktop
-     has) was why the input didn't stay pinned to the bottom, and why a
-     new answer pushed the input further down the page instead of the
-     thread scrolling internally beneath a fixed input — with no real
-     height on this flex column, .chat-thread's flex:1 had nothing to
-     fill, so the whole block just grew to fit its content and the page
-     scrolled as a unit. 100dvh (not 100vh) accounts for mobile browser
-     chrome (address bar) so this doesn't overshoot the visible area; the
-     56px subtracted matches .main-content's padding-top added for the
-     fixed hamburger toggle (App.css). */
+     has) was why .chat-thread's flex:1 had nothing to fill, so the whole
+     block just grew to fit its content and the page scrolled as a unit
+     instead of the thread scrolling internally. vh declared first as a
+     fallback, dvh second (better on mobile browsers with a collapsing
+     address bar) — a browser that doesn't understand dvh ignores that
+     second line as invalid and keeps the vh one, rather than the whole
+     property falling through to some other rule. 56px matches
+     .main-content's padding-top for the fixed hamburger toggle (App.css).
+     This alone turned out not to be sufficient in testing — see the
+     .chat-input-area-wrapper fix below, which pins the input via
+     position: fixed instead of relying purely on flex-fill, since that's
+     immune to whatever was making the flex-height approach not take
+     effect. Both fixes are kept: this one still matters for
+     .chat-thread's internal scrolling to work at all. */
   .main-chat {
+    height: calc(100vh - 56px);
     height: calc(100dvh - 56px);
   }
 

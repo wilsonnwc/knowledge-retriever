@@ -320,6 +320,23 @@
 @media (max-width: 768px) {
   .chat-thread {
     padding: 16px;
+    /* Room for the now-fixed input bar below, so the last message isn't
+       hidden behind it. */
+    padding-bottom: 160px;
+  }
+
+  /* Pinned via position: fixed rather than relying solely on the
+     flex-fill layout (.main-chat's height, above) actually taking
+     effect — fixed positioning is relative to the viewport regardless
+     of what any ancestor's height/overflow computes to, so this holds
+     even if a viewport-unit quirk broke the flex approach. */
+  .chat-input-area-wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-bg);
+    z-index: 500;
   }
 
   .chat-input-area {
