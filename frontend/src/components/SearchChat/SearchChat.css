@@ -155,7 +155,7 @@
 
 .chat-input-area-wrapper .project-filter-select {
   align-self: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 /* Input */
@@ -336,6 +336,11 @@
     left: 0;
     right: 0;
     background: var(--color-bg);
+    /* A flat fixed bar with no elevation cue read as content bleeding
+       right up to its edge with no visible boundary — this gives it a
+       clear "floating above the page" separation from whatever's
+       scrolled underneath it. */
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
     z-index: 500;
   }
 

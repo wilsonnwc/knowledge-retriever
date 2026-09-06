@@ -23,7 +23,7 @@ function ChatInput({ onSend }) {
       <form className="chat-input-form" onSubmit={handleSubmit}>
         <textarea
           className="chat-input-textarea"
-          placeholder="Ask a follow-up, or start a new question..."
+          placeholder="Ask a follow-up..."
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
