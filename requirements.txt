@@ -3,3 +3,4 @@ python-dotenv
 openai
 chromadb
 rank_bm25
+mcp

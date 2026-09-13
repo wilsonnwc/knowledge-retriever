@@ -137,7 +137,7 @@ Ordered by dependency and by what cannot be recovered later.
 | Phase | The Plan | In plain English |
 |---|---|---|
 | **0** | Repair eval debt; extract the service layer | Fix the broken search test; reorganise the code so both doors open into the same room |
-| **1** | MCP server, read-only, stdio | Build the AI plug. Immediate payoff: ask Claude Desktop about your notes |
+| **1** | MCP server, read-only, stdio. **Built Session 40 (2026-09-13)** — `mcp_server.py`, 5 tools (`search_notes`, `get_note`, `suggest_related`, `list_notes`, `list_topics`). Required upgrading chromadb (0.4.0 → 1.5.9) to resolve a real dependency conflict with the `mcp` SDK's pydantic requirement — see `system/session-log.md` Session 40. Pending: re-embed + re-eval verification on the real machine, then real Claude Desktop use. | Build the AI plug. Immediate payoff: ask Claude Desktop about your notes |
 | **2** | Event log + Today page (local) + free-text dismiss | The daily page with four buttons, and the recording of every click |
 | **3** | Hosting stage 1 + Cloudflare Access | Put it online behind a login — now it's on your phone |
 | **4** | `skills.yaml` + Later queue + resurfacing | Structured skill map; "later" items that come back when relevant |
