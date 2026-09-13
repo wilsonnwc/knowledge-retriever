@@ -6,23 +6,38 @@ const H3_RE = /^### (.*)$/;
 const H2_RE = /^## (.*)$/;
 const H1_RE = /^# (.*)$/;
 const BLOCKQUOTE_RE = /^>\s?(.*)$/;
-const BOLD_RE = /\*\*(.+?)\*\*/g;
+// Tries **bold** first at each position, falling back to *italic* — so
+// "**bold**" is never misread as "*" + "*bold*" + "*".
+const BOLD_ITALIC_RE = /\*\*(.+?)\*\*|\*(.+?)\*/g;
+const INLINE_HEADER_RE = /^(#{1,6})\s+(.*)$/gm;
 
-// Renders **bold** spans within a line of text; everything else passes
-// through as plain text.
+// Renders **bold** and *italic* spans within a line of text; everything
+// else passes through as plain text.
 function renderInline(text) {
   const parts = [];
   let lastIndex = 0;
   let match;
   let key = 0;
-  BOLD_RE.lastIndex = 0;
-  while ((match = BOLD_RE.exec(text)) !== null) {
+  BOLD_ITALIC_RE.lastIndex = 0;
+  while ((match = BOLD_ITALIC_RE.exec(text)) !== null) {
     if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
-    parts.push(<strong key={key++}>{match[1]}</strong>);
+    if (match[1] !== undefined) {
+      parts.push(<strong key={key++}>{match[1]}</strong>);
+    } else {
+      parts.push(<em key={key++}>{match[2]}</em>);
+    }
     lastIndex = match.index + match[0].length;
   }
   if (lastIndex < text.length) parts.push(text.slice(lastIndex));
   return parts;
+}
+
+// Converts a "## Heading" line that appears within flattened inline text
+// (chunking.py keeps a section's "## Title" line as the first line of its
+// chunk text) into a bold span instead of literal "##" — there's no block
+// element to render it as here, the way MarkdownLite's block parser would.
+function stripInlineHeaderMarkers(text) {
+  return text.replace(INLINE_HEADER_RE, (_match, _hashes, headerText) => `**${headerText}**`);
 }
 
 // Drops a "> " blockquote marker that appears mid-paragraph rather than at
@@ -119,4 +134,4 @@ function MarkdownLite({ content }) {
 }
 
 export default MarkdownLite;
-export { renderInline, stripInlineBlockquoteMarker };
+export { renderInline, stripInlineBlockquoteMarker, stripInlineHeaderMarkers };

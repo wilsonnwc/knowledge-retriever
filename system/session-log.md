@@ -38,6 +38,26 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 39 — 2026-09-13 (closed the two markdown-rendering gaps deferred from Session 38)
+
+**Phase/step completed:** Fixed both small findings Session 38 deferred rather than starting the MCP server, since they were cheap and already root-caused.
+
+**Where to pick up next:** MCP server (Learning OS Phase 1) — the actual next milestone, unaffected by this session.
+
+**What worked:**
+- **`*italic*` support in `MarkdownLite`'s shared `renderInline`:** replaced the bold-only regex with a combined `/\*\*(.+?)\*\*|\*(.+?)\*/g` that tries `**bold**` first at each position before falling back to single-asterisk `*italic*`, so `**bold**` is never misparsed as a stray asterisk plus an italic span. Verified with a standalone Node script (bypassing the missing `node_modules`/no `react-scripts` build in this environment) against `**bold** and *italic* and **both** again.` and a lone `*italic*` string — both parsed correctly.
+- **Root-caused the literal `##` in `SnippetCard` citation excerpts before patching it:** `chunking.py`'s `_split_at_matches()` keeps the boundary line itself (`## Section Title`) as the first line of `Chunk.text` when a note is split at `##` headers (chunking.py:97). `SnippetCard` renders that chunk text with `renderInline` only — an inline-only pass, not `MarkdownLite`'s block-level parser that would normally turn a `## ` line into a real heading — so the literal `##` characters were showing in search-result quotes. Added `stripInlineHeaderMarkers()` alongside the existing `stripInlineBlockquoteMarker()` in `MarkdownLite.jsx`, converting a `^#{1,6} Heading` line within flattened text to a bold span (`**Heading**`, then run through the now-shared `renderInline`) instead of leaving the raw `#` characters visible. Wired into `SnippetCard.jsx`'s `renderChunkText()`.
+- Couldn't run the frontend's own build to verify (`node_modules` isn't installed in this environment and `react-scripts` isn't available), so verified the regex/replacement logic directly with a small Node script mirroring the real code path, rather than skipping verification.
+
+**What didn't work / got stuck on:**
+- No `node_modules` in this environment meant no real `npm run build`/eslint pass — worked around it with an equivalent plain-Node logic check instead of a live compile, which is a weaker guarantee than normal (a JSX syntax slip wouldn't have been caught this way, though the JSX added here was a minimal, well-worn pattern already used elsewhere in the same file).
+
+**Learnings:**
+- `chunking.py` keeping the `## Title` boundary line inside `Chunk.text` (rather than storing it only in the separate `section_title` field, which already exists and is unused by the frontend) is *why* raw `##` was leaking through in the first place — the data already has a clean way to carry the heading, the frontend just wasn't using it. Patched at the display layer this session since it's the smaller, lower-risk fix; if `section_title` needs to reach the UI for other reasons later, this is a case where fixing it at the source instead would remove the leading `##`-line duplication altogether.
+
+**Open questions to come back to:**
+- Same standing deferred items as prior sessions: freshness tripwire via Flask, before/after sentence-highlighting for search snippets, stable project IDs (only if project count/rename frequency grow), Goals UI (real design question, not just plumbing).
+---
 ### Session 38 — 2026-09-06 (first full Chrome-driven QA pass across the whole app: 7 bugs found and fixed, plus an 8th added mid-session)
 
 **Phase/step completed:** With real Chrome browser access now confirmed working (tested earlier this session), ran a systematic QA tour across every major screen — Search/Chat, Import wizard, Notes list/detail/edit, Trash, Projects, Goals — at both desktop and mobile width, rather than the narrower per-feature checks prior sessions relied on. Found 10 issues; user chose 7 to fix this session (deferred the rest), locked scope/acceptance criteria for each up front, then all 7 were implemented, tested, and verified in one continuous pass. A real native-dialog freeze during testing led the user to add an 8th item (replace the browser's native delete-confirm with an in-app modal), fixed and verified in the same session.

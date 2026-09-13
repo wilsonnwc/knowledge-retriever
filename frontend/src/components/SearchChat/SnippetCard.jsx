@@ -1,8 +1,8 @@
 import React from 'react';
-import { renderInline, stripInlineBlockquoteMarker } from '../MarkdownLite';
+import { renderInline, stripInlineBlockquoteMarker, stripInlineHeaderMarkers } from '../MarkdownLite';
 
 function renderChunkText(text) {
-  return renderInline(stripInlineBlockquoteMarker(text));
+  return renderInline(stripInlineBlockquoteMarker(stripInlineHeaderMarkers(text)));
 }
 
 function SnippetCard({ source, onOpenArticle }) {
