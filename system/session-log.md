@@ -40,9 +40,15 @@ At the end of each session, copy the template below and fill it in at the top of
 ---
 ### Session 41 — 2026-09-26 (chromadb upgrade verification closed out — was a false alarm, not a real regression)
 
-**Phase/step completed:** Closed out Session 40's "IMMEDIATE NEXT" item — verifying the chromadb 0.4.0→1.5.9 upgrade didn't regress either eval baseline.
+**Phase/step completed:** Closed out Session 40's "IMMEDIATE NEXT" item — verifying the chromadb 0.4.0→1.5.9 upgrade didn't regress either eval baseline. Then wired `mcp_server.py` into Claude Desktop and the user confirmed it working end to end. **Learning OS Phase 1 is complete.**
 
-**Where to pick up next:** Wire `mcp_server.py` into `claude_desktop_config.json` and try it end-to-end via a real Claude Desktop session — the last open piece of Learning OS Phase 1.
+**Where to pick up next:** Learning OS Phase 2 — event log + Today page (local) + free-text dismiss, per `system/learning-os-plan.md` Section G. Start by locking acceptance criteria.
+
+**MCP wiring (added later the same session):**
+- Added a `knowledge-retriever` entry under `mcpServers` in `~/Library/Application Support/Claude/claude_desktop_config.json`, pointing at the project's `.venv/bin/python3` and `mcp_server.py`.
+- The file turned out to hold many unrelated app preferences (newer desktop app build), so it was backed up first (`claude_desktop_config.json.bak-20260926222140`) and edited via a JSON parse-and-merge rather than a text edit. A key-by-key comparison against the backup confirmed only `mcpServers` was added.
+- User fully quit and reopened Claude Desktop and confirmed the tools appear and return real notes.
+- Follow-up discussion (no code): how MCP works at the wire level (JSON-RPC 2.0, `tools/list` / `tools/call`, JSON Schema generated from Python type hints), and layered guardrails for multi-user MCP deployments. Checked the installed `mcp_types` package directly and found that `ToolAnnotations` hints such as `read_only_hint` are explicitly advisory, not enforced. Captured in `learnings.md`.
 
 **What worked:**
 - Picking this session back up (13 days after Session 40) surfaced uncommitted local state from that same day: a disposable test note (`notes/vibe-coding/test-note-markdown-rendering-check.md`, made to verify Session 39's markdown fixes in the browser, explicitly marked "safe to trash" in its own body) had been left in the corpus when both eval scripts were re-run, and the results were never committed.
