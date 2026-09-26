@@ -38,6 +38,30 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 41 — 2026-09-26 (chromadb upgrade verification closed out — was a false alarm, not a real regression)
+
+**Phase/step completed:** Closed out Session 40's "IMMEDIATE NEXT" item — verifying the chromadb 0.4.0→1.5.9 upgrade didn't regress either eval baseline.
+
+**Where to pick up next:** Wire `mcp_server.py` into `claude_desktop_config.json` and try it end-to-end via a real Claude Desktop session — the last open piece of Learning OS Phase 1.
+
+**What worked:**
+- Picking this session back up (13 days after Session 40) surfaced uncommitted local state from that same day: a disposable test note (`notes/vibe-coding/test-note-markdown-rendering-check.md`, made to verify Session 39's markdown fixes in the browser, explicitly marked "safe to trash" in its own body) had been left in the corpus when both eval scripts were re-run, and the results were never committed.
+- Diagnosed the resulting confusion before treating it as a real regression: keyword (BM25) precision had dropped from 92.86% to 89.29% with the test note present. Isolated the cause by diffing old vs. new results query-by-query — one already-marginal query ("What makes good teamwork?") flipped from barely-in-top-5 to barely-out, because BM25 scores against corpus-wide term statistics (IDF, average document length), so even one unrelated extra document can nudge a borderline ranking. Not a bug in the upgrade.
+  > **Learning:** this is a clean example of why keyword-search eval baselines are corpus-sensitive, not just code-sensitive — worth remembering as an interview anecdote for "what makes evals fragile in practice."
+- User deleted the test note (which took the whole `notes/vibe-coding/` folder with it, including its `.gitkeep` — that folder is a real taxonomy entry, just empty right now). Restored the empty folder + `.gitkeep` before re-running, so the taxonomy stays intact on disk.
+- Re-ran both evals clean: **keyword back to 93% (26/28)**, identical to the pre-upgrade baseline; **semantic also 93% (26/28)**, same two pre-existing synonymy failures (Q4b, Q7) as before. One harmless tie-break reorder remains in `semantic_results.json` between two near-identical-distance chunks for an already-failing query — no effect on the score.
+- **Chromadb 1.5.9 upgrade is now fully verified, not just structurally checked:** both real eval numbers hold exactly where they were pre-upgrade.
+
+**What didn't work / got stuck on:**
+- N/A — this session was cleanup + verification only.
+
+**Learnings:**
+- Uncommitted local state (modified result files, an untracked note) is itself a legible trace of what happened in a prior session, even with no new commit — worth checking `git status`/`git diff` at the start of a resumed session, not just `git log`, since the true "where we left off" can be sitting uncommitted.
+- A disposable test artifact left behind after manual QA can silently pollute the next eval run in ways that look like a real regression until traced to the actual cause — worth deleting scratch/test notes right after using them, before the next eval run.
+
+**Open questions to come back to:**
+- Same standing deferred items as prior sessions: freshness tripwire via Flask, before/after sentence-highlighting for search snippets, stable project IDs (only if project count/rename frequency grow), Goals UI (real design question, not just plumbing).
+---
 ### Session 40 — 2026-09-13 (MCP server built — Learning OS Phase 1 — plus a real dependency-upgrade decision)
 
 **Phase/step completed:** Built and locally verified `mcp_server.py`, the Learning OS's Phase 1 milestone from `system/learning-os-plan.md` Section G. Along the way, hit and resolved a genuine blocker (the `mcp` SDK vs. the pinned old `chromadb` version) rather than working around it.
