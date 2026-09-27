@@ -75,8 +75,24 @@ At the end of each session, copy the template below and fill it in at the top of
   - A code review found 6 issues (links misbucketed as article failures, results lost on timeout, meta-refresh parsing, JS-redirect false positives, reCAPTCHA pages mislabelled as blocks, missing request spacing). All fixed and re-verified before handing over.
   - A 3-link smoke run on GitHub passed end to end. Early signal (n=2): The Neuron's beehiiv tracker returns 403 to GitHub's servers for GET, HEAD and a real headless browser, while the same links resolve from the Mac. The block looks location-based.
 
+- **Full spike result (run 36336565557; 45 links, 43 plausible articles):**
+  - The report said 30% recovered (13/43). Reading the captured text showed 7 of the 13 were false successes:
+    - 3 Bloomberg "let us know you're not a robot" pages
+    - a marketing page from The Information and a paywall teaser from WSJ
+    - 2 careers pages linked from The Batch's footer
+  - The 500-character "success" bar (the same one production uses) let block pages and teasers pass. **True recovery ≈ 6/41 (15%), all from T2 (resolving redirects). T3 (retry) and T4 (headless browser) recovered nothing real.**
+- **What actually stops the rest:**
+  1. **Where the request comes from.** beehiiv's tracker (The Neuron, 6/6) and bot-walled sites (Substack, Medium, deeplearning.ai, thehill, designweek) refuse GitHub's servers. The same beehiiv and deeplearning links resolved fine from the Mac in the code test.
+  2. **Genuine paywalls:** WSJ, NYT, Bloomberg, The Information. There's no legitimate engineering fix; the product answer is the newsletter's own blurb plus an "open original" button.
+- **Implication for production:** its "ok" status uses the same 500-character bar, so today's 41% baseline likely includes some block pages being summarised as if they were articles. Worth a check.
+- **Schema decisions (user):**
+  - Log card *opens* as events (not counted toward metrics).
+  - Store content as Markdown, keeping the original URL.
+  - Show one card per article, even when several newsletters link to it.
+
 **What didn't work / got stuck on:**
 - Full-text retrieval is the highest-uncertainty part of the new goal, so a time-boxed spike was scheduled before any page design depends on it.
+- The spike's own success bar was too loose. Its headline number overstated recovery 2×, and this was caught only by reading the captured text, not the score.
 
 **Learnings:**
 - Recomputing "now" at two points in a pipeline turns a scheduling delay into silent data loss. Compute it once and pass it along.
