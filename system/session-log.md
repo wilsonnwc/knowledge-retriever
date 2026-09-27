@@ -69,6 +69,12 @@ At the end of each session, copy the template below and fill it in at the top of
 - Decided to design Bug 2 (truncated rank JSON on busy days) away rather than patch it: store-first means a ranking failure can no longer lose the day's content.
 - **Article-retrieval baseline** (24 days, 2,698 links): 41% ok, 45% blocked (403), 10% too short, 2% rate-limited. Failures are extremely concentrated: 65% come from The Neuron's beehiiv tracking links (0% success), and The Batch's tracking links are 0% too. Many "links" are ads, sponsor or "Read online" links rather than articles, so the raw 41% understates real content coverage.
 
+- **Retrieval spike built** in ai-chief-of-staff (commit `a3cdfec`): `spikes/retrieval_spike.py` plus a manual-only `retrieval_spike.yml` workflow. It runs on GitHub Actions, not the Mac, so results reflect production. It is read-only: it reads committed manifests and writes nothing back.
+  - Techniques tested (user-approved): T1 filter non-articles, T2 resolve tracking redirects hop by hop, T3 polite retry on 429, T4 headless browser. The Mac fetch and paid reader services were excluded by the user.
+  - T1 alone (link text, no network) classifies 29% of the 10-day window's 375 failures as non-articles: preferences, feedback polls, subscribe/refer links.
+  - A code review found 6 issues (links misbucketed as article failures, results lost on timeout, meta-refresh parsing, JS-redirect false positives, reCAPTCHA pages mislabelled as blocks, missing request spacing). All fixed and re-verified before handing over.
+  - A 3-link smoke run on GitHub passed end to end. Early signal (n=2): The Neuron's beehiiv tracker returns 403 to GitHub's servers for GET, HEAD and a real headless browser, while the same links resolve from the Mac. The block looks location-based.
+
 **What didn't work / got stuck on:**
 - Full-text retrieval is the highest-uncertainty part of the new goal, so a time-boxed spike was scheduled before any page design depends on it.
 
