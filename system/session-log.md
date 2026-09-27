@@ -38,6 +38,49 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 42 — 2026-09-27 (Phase 2 scoped and reframed; digest date bug fixed)
+
+**Phase/step completed:** Locked Learning OS Phase 2's success metrics, acceptance criteria and core decisions. The user then reframed the ultimate goal, which changed the build sequence. Fixed the ai-chief-of-staff bug that was losing whole days.
+
+**Where to pick up next:** the article-retrieval spike (one session, time-boxed): test which techniques recover failed articles, before designing the page around full text. Then 2a: store-first ingestion into Neon, Today page and event log.
+
+**Decisions locked:**
+- **Success metrics:**
+  - At least one Today-page action on ≥ 70% of calendar days per month, weekends included.
+  - At least 5 cards actioned per day, or every card when fewer than 5 are shown. This keeps the metric compatible with the attention-budget rule of never padding.
+- **Acceptance criteria:**
+  - Every action writes an append-only event (timestamp, card, action, free-text reason on Dismiss).
+  - No event is lost silently; a failed save shows an error.
+  - The page works at 390px.
+  - A report computes both metrics directly from the event log.
+- **Event log:** Neon Postgres from day one, because this data can't be recreated and there are two laptops.
+- **Page location:** a new view in the existing React app.
+- **Cards come from the real ai-chief-of-staff digest,** not a seeded feed.
+- **Ultimate goal (user, 2026-09-27):** the page is where all newsletter content gets consumed (email bodies plus linked article text), without going back to the email client.
+- **Consequences of that goal:**
+  - The digest pipeline becomes the page's content supply. It will save full content to Neon first; summarising and ranking become an enrichment layer on top, and the email becomes a notification.
+  - The existing email keeps running untouched as a safety net meanwhile.
+- **Phase 2 is build-and-verify.** The metrics count from hosting day (Phase 3), because the real use case (commute, weekends) needs the phone.
+- **Gmail read/archive sync:** out of scope for now.
+
+**What worked:**
+- Looked at real data before answering "how complex is the digest integration?" A month of digests plus GitHub Actions logs showed 7 of 31 days with no digest. That caps the 70% metric at about 77% before any user behaviour.
+- **Root-caused and fixed the midnight-rollover bug in ai-chief-of-staff** (commit `8cc387c`). GitHub starts the 21:30 UTC schedule hours late. Computing "today" at start and again at commit time lost 4 days whose digests were emailed but never saved, and runs starting after midnight skipped 2 days. The fix resolves the date once, anchored to the scheduled day. Replaying a month of real start times gives one run per day, no gaps.
+- Decided to design Bug 2 (truncated rank JSON on busy days) away rather than patch it: store-first means a ranking failure can no longer lose the day's content.
+- **Article-retrieval baseline** (24 days, 2,698 links): 41% ok, 45% blocked (403), 10% too short, 2% rate-limited. Failures are extremely concentrated: 65% come from The Neuron's beehiiv tracking links (0% success), and The Batch's tracking links are 0% too. Many "links" are ads, sponsor or "Read online" links rather than articles, so the raw 41% understates real content coverage.
+
+**What didn't work / got stuck on:**
+- Full-text retrieval is the highest-uncertainty part of the new goal, so a time-boxed spike was scheduled before any page design depends on it.
+
+**Learnings:**
+- Recomputing "now" at two points in a pipeline turns a scheduling delay into silent data loss. Compute it once and pass it along.
+- Measure the failure distribution before choosing fixes. "59% of links fail" sounds like a broad scraping problem; it's actually mostly one sender's tracking links, many of which aren't articles at all.
+
+**Open questions to come back to:**
+- Retrieval spike results decide the coverage target and which techniques go into 2a/2b.
+- Eval: this is a scope change (ranked summaries → full content). Add a coverage metric and extraction-quality cases, and ideally a "digest landed every day" invariant in ai-chief-of-staff.
+- MCP tool-selection eval cases: still parked.
+---
 ### Session 41 — 2026-09-26 (chromadb upgrade verification closed out — was a false alarm, not a real regression)
 
 **Phase/step completed:** Closed out Session 40's "IMMEDIATE NEXT" item — verifying the chromadb 0.4.0→1.5.9 upgrade didn't regress either eval baseline. Then wired `mcp_server.py` into Claude Desktop and the user confirmed it working end to end. **Learning OS Phase 1 is complete.**
