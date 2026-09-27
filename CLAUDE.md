@@ -86,7 +86,16 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
   - Phase 2 is build-and-verify; metrics count from hosting day. Gmail sync is out of scope for now.
   - Fixed ai-chief-of-staff's midnight-rollover bug that lost 6 days a month.
   - Article-retrieval baseline: 41% of links ok, with failures concentrated in two senders' tracking links. See `system/session-log.md` Session 42.
-- **IMMEDIATE NEXT:** a time-boxed article-retrieval spike, measuring which techniques recover failed articles. Then 2a: store-first ingestion into Neon, Today page and event log. Small deferred items still open: freshness tripwire not surfaced via Flask yet; before/after sentence-highlighting for search source snippets if the plain-passage version feels unfocused in real use; stable project IDs (see "Future roadmap item" below) only if project count/rename frequency actually grow.
+- **Session 42, continued: retrieval spike run 1, and Neon tables live.**
+  - **Spike run 1:** true recovery of blocked articles was about 15%, all from resolving redirects. Retry and the headless browser recovered nothing real. The report's 30% was inflated by robot-check and paywall pages passing a 500-character bar.
+  - **Blockers found:** mostly where the request comes from (GitHub's data-centre servers), plus genuine paywalls.
+  - **Decisions:**
+    - Drop the headless browser.
+    - Blocked or paywalled items show the newsletter's blurb plus an "open original" button, counted separately in coverage.
+    - Spike run 2 tests T5 (The Neuron's public web issues, publishers' own feeds) with a stricter success check.
+  - **Neon (London):** `items` and append-only `events` tables created via `db/migrate.py` from `db/migrations/001_init.sql`.
+  - **Button rules:** Undo is supported (an `undo` event points at the event it cancels), and a card can take several decisions over time.
+- **IMMEDIATE NEXT:** read spike run 2's results and decide which retrieval techniques go into 2a. Then 2a proper: the store-first pipeline writes `items` to Neon (T1 junk filter, T2 redirect resolving, plus whichever T5 parts earn it), then the Today page view and the event API. Small deferred items still open: freshness tripwire not surfaced via Flask yet; before/after sentence-highlighting for search source snippets if the plain-passage version feels unfocused in real use; stable project IDs (see "Future roadmap item" below) only if project count/rename frequency actually grow.
 - **Next after that:** Wire the React frontend to the real Flask endpoints (Notes list/detail/tags first, then Import's Confirm step) — the plan doc's Session 4/step 4. Three open UX questions from the user (2026-08-12, still not answered — see session-log Session 19): (1) "Go to article" opens Edit mode, not a read view — fix directly, or first define Read vs. Preview vs. Edit as distinct named UI states? (2) How should the sources elaboration text actually be generated, and should it get eval discipline applied like other AI-generated pieces of this project? (3) Does generating it cost Anthropic API usage, or does it ride on the Claude Pro subscription? From Session 20: history currently only supports fully reopening the *most recent* completed import — older completed imports appear in the list but aren't individually reopenable yet. Deferred: interview-defense drill; 5 "Why this matters" TODOs on Kindle imports; keyword baseline re-run; Layer 3's other two slices (categorization/staleness).
 
 ## Roadmap (updated 2026-08-05, after re-reading full job ad's layer structure)
@@ -235,7 +244,8 @@ Read-only by design: `search_notes`, `get_note`, `suggest_related`, `list_notes`
 ## Environment Setup (new sessions)
 
 - **Python 3** — run with `python3 scripts/chat.py` from project root
-- **`.env`** — must exist locally (not in git). Contains `ANTHROPIC_API_KEY=...`
+- **`.env`** — must exist locally (not in git). Contains `ANTHROPIC_API_KEY=...`, `OPENAI_API_KEY=...`, and `DATABASE_URL=postgresql://...` (Neon; the same string on both laptops)
+- **Database schema:** run `python3 db/migrate.py` after pulling. It applies any new `db/migrations/*.sql` file exactly once, and is safe to re-run.
 - **Packages** — install with: `pip install anthropic python-dotenv`
 
 ## Key Design Principles
