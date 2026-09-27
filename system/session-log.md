@@ -42,7 +42,11 @@ At the end of each session, copy the template below and fill it in at the top of
 
 **Phase/step completed:** Locked Learning OS Phase 2's success metrics, acceptance criteria and core decisions. The user then reframed the ultimate goal, which changed the build sequence. Fixed the ai-chief-of-staff bug that was losing whole days.
 
-**Where to pick up next:** the article-retrieval spike (one session, time-boxed): test which techniques recover failed articles, before designing the page around full text. Then 2a: store-first ingestion into Neon, Today page and event log.
+**Where to pick up next:**
+1. Confirm the recommended retrieval techniques for 2a (T1, T2, T3, T5b and the stricter detection).
+2. Build 2a's store-first ingestion in ai-chief-of-staff, writing `items` to Neon. This needs a `NEON_DATABASE_URL` GitHub secret.
+3. Then the Today page view and the event API in knowledge-retriever.
+4. Also: confirm the Bug 1 fix held (the 2026-09-27 run log shows `Digest date: 2026-09-27`).
 
 **Decisions locked:**
 - **Success metrics:**
@@ -95,6 +99,17 @@ At the end of each session, copy the template below and fill it in at the top of
   - Dry-run on Neon inside a rolled-back transaction: creates cleanly, inserts work, and UPDATE, DELETE and TRUNCATE on `events` are blocked by a trigger. An `undo` without a target and unknown actions are rejected. The database was left empty.
   - `psycopg[binary]` added to `backend/requirements.txt`.
 - **Spike run 2 prepared** (ai-chief-of-staff `aa5a29e`): stricter success check (1500+ chars, not a robot-check or paywall page), the headless browser replaced by T5 (The Neuron's public web issues, which link directly; publishers' RSS/Atom feeds). Re-judging run 1's 13 "recoveries" under the new check reclassifies all 7 fakes correctly.
+- **Spike run 2 result (run 36339133649, stricter check, spot-checked real):** 9 of 40 blocked real articles recovered (22%).
+  - T2 resolve: 5. T3 retry: 1. T5 feeds: 3 (Jenny Wanger ×2, scrum.org).
+  - **T5a (The Neuron web version) is dead on GitHub:** theneurondaily.com's homepage itself returns 403 to GitHub's servers, even though it works from home internet.
+  - Most feeds on bot-walled sites are walled too (403).
+  - **Conclusion:** with the current constraints (free, no Mac, no paid reader), linked-article coverage tops out at roughly 55–60%. Email-body content stays at 100%. The remaining gap is data-centre IP blocking plus genuine paywalls. Lifting one of those three constraints is the only lever left, and that's a future product decision, not an engineering fix.
+- **Recommended for 2a (confirm next session):**
+  - T1 junk filter, T2 redirect resolver, T3 polite retry, T5b feed lookup
+  - the stricter robot-check/paywall/teaser detection, which also fixes production summarising block pages
+  - not T5a or the headless browser
+  - retrieval runs the same night as ingestion, so feeds should do better than in the spike's up-to-10-day-old sample
+- **Neon tables live:** `items`, `events` (append-only) and `schema_migrations`, created via `db/migrate.py`. The other laptop has `DATABASE_URL` and the driver installed.
 - **Schema decisions (user):**
   - Log card *opens* as events (not counted toward metrics).
   - Store content as Markdown, keeping the original URL.
