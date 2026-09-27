@@ -5,3 +5,4 @@ anthropic
 openai
 chromadb
 PyPDF2==3.0.1
+psycopg[binary]

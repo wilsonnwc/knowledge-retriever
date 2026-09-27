@@ -85,6 +85,16 @@ At the end of each session, copy the template below and fill it in at the top of
   1. **Where the request comes from.** beehiiv's tracker (The Neuron, 6/6) and bot-walled sites (Substack, Medium, deeplearning.ai, thehill, designweek) refuse GitHub's servers. The same beehiiv and deeplearning links resolved fine from the Mac in the code test.
   2. **Genuine paywalls:** WSJ, NYT, Bloomberg, The Information. There's no legitimate engineering fix; the product answer is the newsletter's own blurb plus an "open original" button.
 - **Implication for production:** its "ok" status uses the same 500-character bar, so today's 41% baseline likely includes some block pages being summarised as if they were articles. Worth a check.
+- **Button semantics and undo (user):**
+  - A card can take several decisions over time (e.g. Later → Read now → Build).
+  - Its state is its latest decision; opens aren't decisions.
+  - A card counts once toward the "≥5 cards actioned" metric.
+  - **Undo is in:** a mis-tap is corrected by an `undo` event that points at the exact event it cancels (`undoes_event_id`), so it's always known which button was undone.
+- **Neon connected** (London region, PostgreSQL 18). The Neon agent-setup script (CLI, skills, MCP, `neon.ts`) was deliberately skipped: this project only needs a connection string, and an account-wide MCP would give an agent far more access than the job needs.
+- **Schema drafted** in `db/migrations/001_init.sql`, **not yet applied** pending user review.
+  - Dry-run on Neon inside a rolled-back transaction: creates cleanly, inserts work, and UPDATE, DELETE and TRUNCATE on `events` are blocked by a trigger. An `undo` without a target and unknown actions are rejected. The database was left empty.
+  - `psycopg[binary]` added to `backend/requirements.txt`.
+- **Spike run 2 prepared** (ai-chief-of-staff `aa5a29e`): stricter success check (1500+ chars, not a robot-check or paywall page), the headless browser replaced by T5 (The Neuron's public web issues, which link directly; publishers' RSS/Atom feeds). Re-judging run 1's 13 "recoveries" under the new check reclassifies all 7 fakes correctly.
 - **Schema decisions (user):**
   - Log card *opens* as events (not counted toward metrics).
   - Store content as Markdown, keeping the original URL.
