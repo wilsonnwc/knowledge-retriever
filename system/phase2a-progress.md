@@ -55,7 +55,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Old-vs-new comparison report written.
 - [ ] ⏸ **Pause 1:** the user reviews the dry-run comparison and the junk disagreements, and approves Release A go-live.
 - [x] **B1** Password login on all routes, plus the Neon-backed items/events API (incl. `not_junk` migration). *(KR `cad2b32`; migration 002 applied to Neon)*
-- [ ] **B2** Today page (mobile-first):
+- [x] **B2** Today page (mobile-first): *(KR `11cc47f`)*
   - Cards and the Everything-else list.
   - Reader view.
   - Buttons, done/Undo, required Dismiss reason.
@@ -72,6 +72,18 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first)*
+- **2026-10-05 ~00:30 UTC — B2 done.**
+  - Today page, reader, buttons with Undo, Later, Junk today with "Not junk", previous days, metrics strip, login screen.
+  - **Browser QA:** the Chrome extension wasn't connected, so I used Playwright driving the installed Chrome (headless, temporary profile).
+    - 390px and 1280px, on 216 real items from 2 Oct seeded into a throwaway schema (dropped afterwards).
+    - Every flow passes. Fixed: "Not junk" wrapping, "card(s)" plural. Screenshots are in `system/qa/2026-10-04/`.
+  - **Code review:** 3 real bugs fixed —
+    - The day picker showed the wrong label.
+    - A failed dismiss closed its reason box.
+    - A stale build note could become a dismiss reason, polluting error-analysis data.
+  - Review note 4 (hosted mode never switches on) is expected until B4 builds `today_app.py`. Verify it there.
+  - **For B3:** store titles without the "(full article unavailable)" suffix; the tag already says it.
+  - ⚠ **Side effect to report:** starting the local app ran its existing 7-day trash purge, which permanently removed 5 notes from the Notes trash (the app's designed behaviour on any start).
 - **2026-10-04 ~23:45 UTC — B1 done.**
   - **Migration 002:** sightings (one card per URL, per-day rank), processed_messages, runs, junk/media kinds, `not_junk`. Applied while the tables were still empty.
   - **Today API:** today / items / later / events. Dismiss needs a reason; undo is validated; state is folded from the append-only history; metrics use London days.
