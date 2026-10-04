@@ -44,7 +44,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Video/podcast as media.
   - D2 "(full article unavailable)" tag.
   - Tests.
-- [ ] **A4** Junk judge (rules + Haiku):
+- [x] **A4** Junk judge (rules + Haiku): *(AICoS `423d3a3`, `2b16fe4`, local; push after 05:30 UTC)*
   - Passes `evals/junk_filter/labels_v1.csv`: 0 articles → junk, ≥ 90% junk recall.
   - Fresh-week blind check prepared.
 - [ ] **A5** Pre-go-live checks and dry run:
@@ -72,6 +72,19 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first)*
+- **2026-10-04 ~23:00 UTC — A4 done.**
+  - **Judge:** Haiku 4.5 with structured JSON output, temperature 0, batched 40 per call. It's told "unsure → article"; any failure keeps the link.
+  - **Eval results** (rules + judge):
+    - **dev** 0 lost / 98% junk caught (round 5).
+    - **test** (run once) 0 / 100%. Caveat: the rules were written after seeing all 150 labels.
+  - **Unseen holdout v2** (13–19 Sep, Claude blind labels committed first): **6 articles lost.**
+    - 2 real bugs, fixed: the vals.ai rule was host-wide (overfit), and the judge called market news "ticker".
+    - 4 sit on an open guideline question (Teresa Torres glossary links) and were not tuned on.
+  - Also fixed: temperature 0 for stable verdicts; eval inputs had lost query strings (RBI `?prid=`).
+    - A mislabelled "round 4" log entry is kept, with a correction note.
+  - **Second unseen holdout v3** (6–12 Sep): 1 lost (the Citi report landing page, which Claude had flagged ambiguous) / 100% junk caught.
+  - **Code review:** 2 bugs fixed — the judge would have crashed in CI (the key lives only in `.env`); an API outage could have burned a one-time holdout.
+  - 57/57 tests pass.
 - **2026-10-04 ~22:45 UTC — A3 done.**
   - `link_pipeline.py` + `layer1_v2.py`, behind `--v2`.
   - **Rules on dev:** 0 wrong calls; 36/40 junk settled with no LLM. The rest go to the A4 judge.
@@ -113,5 +126,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Added milestone A1b (email context recovery), because Gmail Trash expires after 30 days.
   - No code yet.
 
-## Questions for the user
-*(none yet)*
+## Questions for the user (batched for Pause 1)
+1. **Junk guideline (a):** inline links to an author's own glossary/explainer pages (Teresa Torres "opportunity solution tree", "customer needs"…). Article, or junk-as-reference like model cards and repos? This decides 4 of holdout v2's 6 misses.
+2. **Junk guideline (b):** a report's landing page (holdout v3 #22, Citi). Article or junk?
+3. **Grade Claude's blind labels:** a random sample of ~20 holdout links will be in the Pause 1 review page.
