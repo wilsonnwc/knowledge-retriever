@@ -32,7 +32,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Empty-day "nothing new today" notice.
   - Ranking-failure safety net (send unranked).
   - Tests.
-- [ ] **A3** Retrieval:
+- [x] **A3** Retrieval: *(AICoS `c01bf1a`, local; push after 05:30 UTC)*
   - Link-context capture.
   - T1 rules, also applied post-resolve.
   - T2 redirects.
@@ -72,6 +72,19 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first)*
+- **2026-10-04 ~22:45 UTC — A3 done.**
+  - `link_pipeline.py` + `layer1_v2.py`, behind `--v2`.
+  - **Rules on dev:** 0 wrong calls; 36/40 junk settled with no LLM. The rest go to the A4 judge.
+  - **Caught on real emails:** v2 first saw ~4× more links than v1, because v1 skips Substack redirect links. That turned essays (Lenny, a16z…) into "hybrids", and one essay lost its body.
+    - Fixed by keeping v1's link selection, except X/LinkedIn posts (user rule).
+    - Result: **0 shape mismatches on 61 real emails.**
+  - **Real-day run** (2 Oct, 18 emails, home network): 14.5 min.
+    - 110/147 real articles fetched (pre-judge); 81 junk by rule.
+    - **141 items for Claude vs 68 in v1**, so roughly 2× Haiku calls per night. D3 accepted the extra cost; A4's judge will trim some.
+    - Runtime is up from about 8–11 min, which is fine for a nightly job with no timeout.
+  - Fixed from real data: TLDR `(Sponsor)` blocks leaked through; headings picked the previous story's title. The eval context was regenerated before any tuning.
+  - **Code review (medium):** 2 bugs fixed — tracking-param stripping corrupted URLs; the `context_used` flag over-reported.
+  - 50/50 tests pass. Golden v1 is unchanged.
 - **2026-10-04 ~22:30 UTC — A2 done.**
   - **Golden test committed first.** Synthetic link-digest, essay and hybrid emails, a fake fetcher and a fake Claude.
     - Together they pin the live v1 output: ok, paywalled, too-short and blocked fetches, the sponsor filter, 2 batches and ranking.
