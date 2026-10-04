@@ -6,6 +6,8 @@ import NotesListView from './components/NotesView/NotesListView';
 import EditNoteModal from './components/NotesView/EditNoteModal';
 import TrashView from './components/NotesView/TrashView';
 import ProjectsListView from './components/ProjectsView/ProjectsListView';
+import TodayView from './components/TodayView/TodayView';
+import Login from './components/TodayView/Login';
 import * as api from './api/client';
 
 let nextMessageId = 1000;
@@ -25,7 +27,24 @@ const blankImportData = () => ({
 });
 
 function App() {
-  const [view, setView] = useState('chat'); // chat, notes, trash, projects
+  const [view, setView] = useState('chat'); // chat, notes, trash, projects, today
+  // 'checking' until we know whether a login is needed; 'login' shows the password screen.
+  const [boot, setBoot] = useState('checking');
+  // The hosted deploy serves only the Today page (backend/today_app.py reports mode 'today').
+  const [hosted, setHosted] = useState(false);
+
+  useEffect(() => {
+    const needLogin = () => setBoot('login');
+    window.addEventListener(api.AUTH_REQUIRED_EVENT, needLogin);
+    Promise.all([
+      api.fetchHealth().catch(() => ({})),
+      api.fetchSession().catch(() => ({ auth_required: false, authenticated: true }))
+    ]).then(([health, session]) => {
+      setHosted(health.mode === 'today');
+      setBoot(session.auth_required && !session.authenticated ? 'login' : 'ready');
+    });
+    return () => window.removeEventListener(api.AUTH_REQUIRED_EVENT, needLogin);
+  }, []);
   const [mode, setMode] = useState('search'); // search, import
   const [toast, setToast] = useState(null);
 
@@ -81,6 +100,7 @@ function App() {
   const [notesInitialProjectFilter, setNotesInitialProjectFilter] = useState('');
 
   useEffect(() => {
+    if (boot !== 'ready' || hosted) return; // notes/projects only exist in the local app
     setNotesLoading(true);
     Promise.all([api.fetchNotes(), api.fetchTopics(), api.fetchTags()])
       .then(([notesData, topicsData, tagsData]) => {
@@ -101,7 +121,7 @@ function App() {
       })
       .catch((err) => setProjectsError(err.message))
       .finally(() => setProjectsLoading(false));
-  }, []);
+  }, [boot, hosted]);
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
 
@@ -430,6 +450,20 @@ function App() {
     setView('notes');
   };
 
+  if (boot === 'checking') {
+    return <div className="app"><p style={{ padding: 24 }}>Loading…</p></div>;
+  }
+  if (boot === 'login') {
+    return <Login onSuccess={() => setBoot('ready')} />;
+  }
+  if (hosted) {
+    return (
+      <div className="app">
+        <div className="main-content hosted"><div className="page-scroll today-scroll"><TodayView /></div></div>
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <Sidebar
@@ -485,6 +519,12 @@ function App() {
               onEditNote={handleEditNote}
             />
             <button className="btn-trash-fab" onClick={handleTrashClick}>🗑️ Trash</button>
+          </div>
+        )}
+
+        {view === 'today' && (
+          <div className="page-scroll today-scroll">
+            <TodayView />
           </div>
         )}
 

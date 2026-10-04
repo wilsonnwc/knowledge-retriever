@@ -11,11 +11,16 @@ function encodeNoteId(noteId) {
   return noteId.split('/').map(encodeURIComponent).join('/');
 }
 
+// Fired on any 401 so the app can show the login screen, wherever the request came from.
+export const AUTH_REQUIRED_EVENT = 'kr-auth-required';
+
 async function request(path, options = {}) {
   let response;
   try {
     response = await fetch(`${API_BASE}${path}`, {
       headers: { 'Content-Type': 'application/json' },
+      // Sends the login cookie. Locally the page (:3000) and API (:5050) are different origins.
+      credentials: 'include',
       ...options
     });
   } catch (err) {
@@ -23,10 +28,51 @@ async function request(path, options = {}) {
   }
 
   const data = await response.json().catch(() => null);
+  if (response.status === 401 && path !== '/login') {
+    window.dispatchEvent(new Event(AUTH_REQUIRED_EVENT));
+  }
   if (!response.ok || !data || data.status === 'error') {
-    throw new Error((data && data.message) || `Request to ${path} failed (${response.status})`);
+    const error = new Error((data && data.message) || `Request to ${path} failed (${response.status})`);
+    error.status = response.status;
+    throw error;
   }
   return data;
+}
+
+// --- Session / login ---
+
+export function fetchSession() {
+  return request('/session');
+}
+
+export function fetchHealth() {
+  return request('/health');
+}
+
+export function login(password) {
+  return request('/login', { method: 'POST', body: JSON.stringify({ password }) });
+}
+
+// --- Today page ---
+
+export function fetchToday(date) {
+  return request(`/today${date ? `?date=${encodeURIComponent(date)}` : ''}`).then((data) => data.page);
+}
+
+export function fetchTodayItem(itemId) {
+  return request(`/items/${encodeURIComponent(itemId)}`).then((data) => data.item);
+}
+
+export function fetchLater() {
+  return request('/later').then((data) => data.items);
+}
+
+// Returns {event, state}: the card's new state after this press.
+export function recordEvent(itemId, action, { reason, undoesEventId } = {}) {
+  return request('/events', {
+    method: 'POST',
+    body: JSON.stringify({ item_id: itemId, action, reason, undoes_event_id: undoesEventId })
+  });
 }
 
 export function fetchNotes() {

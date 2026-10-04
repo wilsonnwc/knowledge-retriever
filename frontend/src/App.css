@@ -42,6 +42,19 @@ body {
   width: 100%;
 }
 
+/* The Today page manages its own width and padding (TodayView.css). */
+.page-scroll.today-scroll {
+  padding: 0;
+  max-width: none;
+}
+
+/* Hosted (Today-only) build has no sidebar, so no hamburger to clear. */
+@media (max-width: 768px) {
+  .main-content.hosted {
+    padding-top: 0;
+  }
+}
+
 /* Screen base styles */
 .screen {
   animation: fadeIn 0.3s ease-in-out;

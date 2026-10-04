@@ -44,6 +44,12 @@ function Sidebar({ view, onNavigate, onNewChat, historyItems, activeHistoryId, o
 
         <nav className="sidebar-nav">
           <button
+            className={`sidebar-nav-item ${view === 'today' ? 'active' : ''}`}
+            onClick={() => handleNavigate('today')}
+          >
+            📰 Today
+          </button>
+          <button
             className={`sidebar-nav-item ${view === 'projects' ? 'active' : ''}`}
             onClick={() => handleNavigate('projects')}
           >

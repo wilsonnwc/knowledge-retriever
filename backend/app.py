@@ -24,7 +24,9 @@ sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)  # Enable CORS for React frontend
+# The React dev server (:3000) calls this API (:5050) with the login cookie, which needs explicit
+# origins + credentials (a wildcard origin can't carry cookies).
+CORS(app, supports_credentials=True, origins=["http://localhost:3000", "http://127.0.0.1:3000"])
 
 # Configuration
 app.config['JSON_SORT_KEYS'] = False

@@ -48,7 +48,8 @@ def post_event():
         return jsonify({"status": "error", "message": str(e)}), 400
     except today_store.NotFound:
         return jsonify({"status": "error", "message": "no such item"}), 404
-    return jsonify({"status": "success", **result}), 201
+    # metrics ride along so the page's progress strip updates without refetching the whole day
+    return jsonify({"status": "success", **result, "metrics": today_store.metrics()}), 201
 
 
 @today_bp.route("/later", methods=["GET"])
