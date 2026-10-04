@@ -47,7 +47,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 - [x] **A4** Junk judge (rules + Haiku): *(AICoS `423d3a3`, `2b16fe4`, local; push after 05:30 UTC)*
   - Passes `evals/junk_filter/labels_v1.csv`: 0 articles → junk, ≥ 90% junk recall.
   - Fresh-week blind check prepared.
-- [ ] **A5** Pre-go-live checks and dry run:
+- [ ] **A5** Pre-go-live checks and dry run: *(code done, AICoS `ac6ddf4` local. **Waiting:** push after 05:30 UTC, then dispatch dry runs for 2026-09-30, 10-01, 10-02.)*
   - Coverage metric in the manifest and log.
   - No-repeat and digest-landed checks.
   - `dry_run` workflow input.
@@ -72,6 +72,18 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first)*
+- **2026-10-04 ~23:20 UTC — A5 code done; dry run waits for the push window.**
+  - Built: coverage metric, invariants (repeats / landed), `dry_run` workflow input (v1 and v2 side by side on the same emails), comparison report.
+  - **Local smoke test on 2 Oct** (v2 from home network): real-article coverage v1 32% → v2 75%; The Batch 0% → 89%.
+  - **⚠ Jenny Wanger came out worse** (3/11 → 1/11, rate-limited). Watch this in the GitHub dry run, since it fails "no newsletter worse".
+  - **Code review (medium):** 4 bugs fixed —
+    - The repeats check couldn't match v1 against v2.
+    - It raised false alarms after an unsent day.
+    - A local dry run could overwrite a real day.
+    - A missing live commit silently used the wrong `recent_urls`.
+  - 1 finding rejected with reasoning: the dry run ignoring the processed list matches what live v1 actually did, since v1 never had the list on GitHub.
+  - 67/67 tests pass. 8 AICoS commits are queued locally.
+  - **Next:** B1/B2 in knowledge-retriever while waiting (pushes are allowed there).
 - **2026-10-04 ~23:00 UTC — A4 done.**
   - **Judge:** Haiku 4.5 with structured JSON output, temperature 0, batched 40 per call. It's told "unsure → article"; any failure keeps the link.
   - **Eval results** (rules + judge):
