@@ -253,10 +253,38 @@ Use the `.venv`'s own Python interpreter (not a bare `python3`) so the right pac
 
 Read-only by design: `search_notes`, `get_note`, `suggest_related`, `list_notes`, `list_topics`. No tool creates or edits notes — that always goes through the human-approved import flow.
 
+### Today page — desktop (local)
+
+The fallback if the hosted page ever needs fixing: the same page and the same Neon data, on your laptop.
+
+```bash
+# Terminal 1 — API (from the project root, .venv activated)
+cd backend && python3 app.py            # http://localhost:5050
+
+# Terminal 2 — page
+cd frontend && npm start                # opens http://localhost:3000 → sidebar → 📰 Today
+```
+
+- Log in with the password in `.env` (`APP_PASSWORD`). The login lasts 30 days.
+- Remove `APP_PASSWORD` from `.env` to switch login off locally. Never do this on the host: there, the app refuses to start without a password.
+- Run the Today API tests with `python3 -m pytest backend/tests`. They create throwaway Neon schemas and drop them afterwards. React tests: `cd frontend && npm test`.
+
+### Today page — hosted (Render)
+
+- `backend/today_app.py` is the slim hosted app: Today + login only, plus the React build from the same origin.
+- `render.yaml` is the Blueprint, with the build and start commands. Secrets (`DATABASE_URL`, `APP_PASSWORD`, `SECRET_KEY`) are set in Render's dashboard, never in the repo (the repo is public).
+- Every push to `main` redeploys.
+- The free tier sleeps after 15 min idle, so the first open of the day takes about a minute.
+
 ## Environment Setup (new sessions)
 
 - **Python 3** — run with `python3 scripts/chat.py` from project root
-- **`.env`** — must exist locally (not in git). Contains `ANTHROPIC_API_KEY=...`, `OPENAI_API_KEY=...`, and `DATABASE_URL=postgresql://...` (Neon; the same string on both laptops)
+- **`.env`** — must exist locally (not in git). Contains:
+  - `ANTHROPIC_API_KEY=...`
+  - `OPENAI_API_KEY=...`
+  - `DATABASE_URL=postgresql://...` (Neon; the same string on both laptops)
+  - `APP_PASSWORD` + `SECRET_KEY` (Today page login; copy both to the other laptop)
+  - `RENDER_API_KEY` (deploys)
 - **Database schema:** run `python3 db/migrate.py` after pulling. It applies any new `db/migrations/*.sql` file exactly once, and is safe to re-run.
 - **Packages** — install with: `pip install anthropic python-dotenv`
 
