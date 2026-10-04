@@ -96,10 +96,18 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
   - **Neon (London):** `items` and append-only `events` tables created via `db/migrate.py` from `db/migrations/001_init.sql`.
   - **Button rules:** Undo is supported (an `undo` event points at the event it cancels), and a card can take several decisions over time.
 - **Spike run 2:** 22% of blocked real articles were recovered with free techniques from GitHub's servers. The Neuron's web version is blocked there too. Linked-article coverage is capped at roughly 55–60% under the current constraints (free, no Mac, no paid reader); email bodies are 100%. See the session log, Session 42.
+- **Session 43 (2026-10-04): Phase 2a spec locked, no code.** Everything lives in `system/phase2a-spec.md`.
+  - Release A: digest upgrade (retrieval techniques, junk-judge filter, repeat-email fix, empty-day notice).
+  - Release B: Neon store-first, the Today page, and Render hosting with a password login, all in one autonomous loop.
+  - GitHub re-test: The Batch 0% → 72%. The Neuron stays email-body-only.
 - **IMMEDIATE NEXT:**
-  1. Confirm the 2a retrieval set (recommended: T1 junk filter, T2 redirect resolve, T3 polite retry, T5b feed lookup, and stricter robot-check/paywall/teaser detection).
-  2. Build store-first ingestion in ai-chief-of-staff, writing `items` to Neon (needs a `NEON_DATABASE_URL` GitHub secret).
-  3. Then the Today page view and the event API here. Small deferred items still open: freshness tripwire not surfaced via Flask yet; before/after sentence-highlighting for search source snippets if the plain-passage version feels unfocused in real use; stable project IDs (see "Future roadmap item" below) only if project count/rename frequency actually grow.
+  1. The user labels ~150 links as junk or real. Claude prepares the label file.
+  2. The user does the Render signup and adds the `NEON_DATABASE_URL` GitHub secret, following Claude's steps.
+  3. Kick off the autonomous loop: Release A, then Release B. Pause points are in the spec.
+  - Small deferred items still open:
+    - Freshness tripwire not yet surfaced via Flask.
+    - Snippet sentence-highlighting.
+    - Stable project IDs.
 - **Next after that:** Wire the React frontend to the real Flask endpoints (Notes list/detail/tags first, then Import's Confirm step) — the plan doc's Session 4/step 4. Three open UX questions from the user (2026-08-12, still not answered — see session-log Session 19): (1) "Go to article" opens Edit mode, not a read view — fix directly, or first define Read vs. Preview vs. Edit as distinct named UI states? (2) How should the sources elaboration text actually be generated, and should it get eval discipline applied like other AI-generated pieces of this project? (3) Does generating it cost Anthropic API usage, or does it ride on the Claude Pro subscription? From Session 20: history currently only supports fully reopening the *most recent* completed import — older completed imports appear in the list but aren't individually reopenable yet. Deferred: interview-defense drill; 5 "Why this matters" TODOs on Kindle imports; keyword baseline re-run; Layer 3's other two slices (categorization/staleness).
 
 ## Roadmap (updated 2026-08-05, after re-reading full job ad's layer structure)

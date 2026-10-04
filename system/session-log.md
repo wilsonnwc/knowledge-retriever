@@ -38,6 +38,39 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 43 — 2026-10-04 (Phase 2a spec written and locked; no code)
+
+**What happened:**
+- Reviewed the last week of digests.
+  - The spike techniques were never in production. They were measurement-only and waiting on confirmation.
+  - Production, old method: 31% of links ok.
+  - The Neuron: 0%. The Batch: 0%, all "too short", which turned out to be a redirect problem.
+- Found the cause of the repeated emails: `processed_messages.json` is gitignored, so every GitHub run starts empty and re-processes the previous day. Roughly half of each digest was repeats (30 Sep–2 Oct).
+- 3 Oct run failed with 0 emails. The user had read the newsletters and moved them to Trash. Skipping Trash is correct; empty days should send a notice instead of crashing.
+- Re-ran the spike on the same 153 links in two places:
+  - Home: 50% of real articles recovered.
+  - GitHub: 20% (29% excluding The Neuron).
+  - The Batch: 21/29 on GitHub. The Neuron: 0/40 on GitHub.
+- Wrote and locked `system/phase2a-spec.md`, covering both releases:
+  - **Release A:** digest upgrade.
+  - **Release B:** Neon store-first, the Today page, and hosting, now pulled into this loop.
+
+**Decisions:** all recorded in `system/phase2a-spec.md`. Key ones:
+- The Neuron is email-body-only.
+- Link-context capture: the text around a link is used when the article can't be fetched.
+- Junk filter = rules + Claude Haiku judge, with a "Not junk" correction list on the Today page (the user's eval-flywheel idea, logged in learnings.md).
+- Dry-run before go-live.
+- Password login on Render (no domain).
+- Dismiss reason is required.
+- Coverage target: ≥ 65% excluding The Neuron, and The Batch ≥ 60%.
+
+**Where to pick up next:**
+1. The user hand-labels ~150 links as junk or real. Claude prepares the label file first.
+2. Claude gives click-by-click steps for the Render signup and the `NEON_DATABASE_URL` GitHub secret. The user does both.
+3. Confirm the loop's pause points at kickoff, then start the autonomous build loop on Release A, then Release B.
+
+**Open questions:** none blocking. Eval additions are part of Release A's scope: coverage metric, no-repeat invariant, digest-landed invariant, junk-judge eval set.
+---
 ### Session 42 — 2026-09-27 (Phase 2 scoped and reframed; digest date bug fixed)
 
 **Phase/step completed:** Locked Learning OS Phase 2's success metrics, acceptance criteria and core decisions. The user then reframed the ultimate goal, which changed the build sequence. Fixed the ai-chief-of-staff bug that was losing whole days.
