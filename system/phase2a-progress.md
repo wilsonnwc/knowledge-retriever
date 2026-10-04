@@ -67,11 +67,17 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 - [ ] **B3** (after Pause 1) Store-first ingestion to Neon:
   - Neon becomes the processed record.
   - Neon-failure banner plus the run marked failed.
-- [ ] **B4** Render deploy via API, plus desktop local-run instructions.
+- [ ] **B4** Render deploy via API, plus desktop local-run instructions. *(Prep done, KR `3691f4b`. **Blocked on user question 4:** Render's API returned 402 'payment information required'.)*
 - [ ] ⏸ **Pause 2:** the user's mobile walkthrough.
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-04 22:10 UTC — B4 prep done; deploy blocked (user question 4).**
+  - Built `today_app.py` (Today + login only, same-origin React, ProxyFix), `render.yaml`, desktop run docs. 5 tests pass (24 backend total).
+  - Generated `APP_PASSWORD` + `SECRET_KEY` into `.env`.
+    - **Self-caught:** `.env` had no trailing newline, so `APP_PASSWORD` got glued onto the `RENDER_API_KEY` line. Split back; the Render key was re-verified (HTTP 200).
+  - Render API: 402, card required → stopped, as instructed.
+  - **Remaining:** A5 dry runs at 05:30 UTC (time-gated, no question needed), then Pause 1.
 - **2026-10-04 21:56 UTC — B2 done.**
   - Today page, reader, buttons with Undo, Later, Junk today with "Not junk", previous days, metrics strip, login screen.
   - **Browser QA:** the Chrome extension wasn't connected, so I used Playwright driving the installed Chrome (headless, temporary profile).
@@ -162,3 +168,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 1. **Junk guideline (a):** inline links to an author's own glossary/explainer pages (Teresa Torres "opportunity solution tree", "customer needs"…). Article, or junk-as-reference like model cards and repos? This decides 4 of holdout v2's 6 misses.
 2. **Junk guideline (b):** a report's landing page (holdout v3 #22, Citi). Article or junk?
 3. **Grade Claude's blind labels:** a random sample of ~20 holdout links will be in the Pause 1 review page.
+4. **Hosting (blocks B4):** Render refuses to create even a free service through the API without a card on file. Options:
+   - (a) Add a card to Render. The free plan stays free, and Claude deploys straight away.
+   - (b) Create it yourself: Render dashboard → New → Blueprint → this repo (`render.yaml`), then paste the 3 secrets from `.env`. It's unknown whether the dashboard also asks for a card.
+   - (c) Switch to a host that needs no card, e.g. Vercel. The original reason to rule Vercel out (its 10s limit vs a stateful app) may no longer apply now the hosted app is stateless, but this changes an agreed decision.
