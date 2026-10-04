@@ -54,7 +54,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Dry run on GitHub.
   - Old-vs-new comparison report written.
 - [ ] ⏸ **Pause 1:** the user reviews the dry-run comparison and the junk disagreements, and approves Release A go-live.
-- [ ] **B1** Password login on all routes, plus the Neon-backed items/events API (incl. `not_junk` migration).
+- [x] **B1** Password login on all routes, plus the Neon-backed items/events API (incl. `not_junk` migration). *(KR `cad2b32`; migration 002 applied to Neon)*
 - [ ] **B2** Today page (mobile-first):
   - Cards and the Everything-else list.
   - Reader view.
@@ -72,6 +72,14 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first)*
+- **2026-10-04 ~23:45 UTC — B1 done.**
+  - **Migration 002:** sightings (one card per URL, per-day rank), processed_messages, runs, junk/media kinds, `not_junk`. Applied while the tables were still empty.
+  - **Today API:** today / items / later / events. Dismiss needs a reason; undo is validated; state is folded from the append-only history; metrics use London days.
+  - **Auth:** password + 30-day signed cookie on every `/api` route. A hosted deploy refuses to start without a password.
+  - **Neon gotcha:** the pooled endpoint rejects `search_path` as a startup option, so `SET LOCAL` per transaction is used instead.
+  - **19 tests on throwaway Neon schemas**, all cleaned up.
+  - **Code review:** a non-text reason or password caused a 500 → now a 400.
+  - **Carried to B2:** local dev runs page and API on different ports, so the frontend must send cookies (`credentials: 'include'`) and CORS needs `supports_credentials`. The hosted app is same-origin, so it's fine there.
 - **2026-10-04 ~23:20 UTC — A5 code done; dry run waits for the push window.**
   - Built: coverage metric, invariants (repeats / landed), `dry_run` workflow input (v1 and v2 side by side on the same emails), comparison report.
   - **Local smoke test on 2 Oct** (v2 from home network): real-article coverage v1 32% → v2 75%; The Batch 0% → 89%.
