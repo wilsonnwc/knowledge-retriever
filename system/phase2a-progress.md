@@ -26,7 +26,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Milestones
 - [x] **A1** Build plan written (`system/phase2a-build-plan.md`) and reviewed by the plan-reviewer agent. 12 amendments accepted.
-- [ ] **A1b** Recover source emails (incl. Trash) → `labels_v1_context.json`, plus the dev/test split, committed before any tuning.
+- [x] **A1b** Recover source emails (incl. Trash) → `labels_v1_context.json`, plus the dev/test split, committed before any tuning. *(AICoS `aee6472`, committed locally; push after 05:30 UTC.)*
 - [ ] **A2** Quick fixes:
   - Persist the processed-message list.
   - Empty-day "nothing new today" notice.
@@ -72,6 +72,13 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first)*
+- **2026-10-04 ~21:50 UTC — A1b done.**
+  - New `link_context.py`, shared with A3: the newsletter's own text around each link, plus the nearest heading.
+  - Re-fetched 76 source emails incl. Trash. Context recovered for 150/150 labelled rows: median 411 chars, never just the anchor.
+  - Committed the dev/test split before any tuning: dev 101, test 49, stratified by newsletter + label.
+  - Code review found 2 minor robustness issues (Gmail pagination, silent key collision). Both fixed.
+  - The AICoS commit stays local until the nightly window closes (05:30 UTC).
+  - Known imperfection, for A3: the heading heuristic sometimes picks the previous item's bold title in TLDR.
 - **2026-10-04 20:40 UTC — A1 done.**
   - Build plan written. The Plan agent's review found 12 issues, all accepted as amendments. The top two:
     - (1) The workflow commit/push could alter the live digest before Pause 1.
