@@ -27,7 +27,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 ## Milestones
 - [x] **A1** Build plan written (`system/phase2a-build-plan.md`) and reviewed by the plan-reviewer agent. 12 amendments accepted.
 - [x] **A1b** Recover source emails (incl. Trash) → `labels_v1_context.json`, plus the dev/test split, committed before any tuning. *(AICoS `aee6472`, committed locally; push after 05:30 UTC.)*
-- [ ] **A2** Quick fixes:
+- [x] **A2** Quick fixes: *(AICoS `8c4eb81` golden test, `09f0ea0` fixes; local, push after 05:30 UTC)*
   - Persist the processed-message list.
   - Empty-day "nothing new today" notice.
   - Ranking-failure safety net (send unranked).
@@ -72,6 +72,20 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first)*
+- **2026-10-04 ~22:30 UTC — A2 done.**
+  - **Golden test committed first.** Synthetic link-digest, essay and hybrid emails, a fake fetcher and a fake Claude.
+    - Together they pin the live v1 output: ok, paywalled, too-short and blocked fetches, the sponsor filter, 2 batches and ranking.
+    - A first fixture accidentally put every link within 700 chars of "sponsor", so all links were filtered. Fixed before recording the baseline.
+  - **v2:** empty-day notice for all 3 empty paths, with the binned count; resilient Claude calls; unranked fallback; processed list persisted; workflow `v2` input.
+  - **Self-caught bug:** v2 originally saved the processed list even when it crashed before sending, which would have **lost** those emails. It's now gated on a SENT marker.
+  - **Code review (medium) found 5 more issues, all fixed with tests:**
+    - The rebase was blocked by a dirty tracked state file (fixed with `--autostash`).
+    - `recent_urls` was saved before sending, so a failed send would have hidden those items tomorrow. Now deferred until after sending.
+    - Layer 1's zero items was misreported as "already featured".
+    - A stale SENT marker survived re-runs.
+    - Spam was counted as "binned".
+  - **13/13 tests pass. v1 output is byte-identical.**
+  - Workflow change `git pull --rebase --autostash` also applies to v1 runs. It is protective only: it doesn't change digest content, and it stops a concurrent push losing a night's output.
 - **2026-10-04 ~21:50 UTC — A1b done.**
   - New `link_context.py`, shared with A3: the newsletter's own text around each link, plus the nearest heading.
   - Re-fetched 76 source emails incl. Trash. Context recovered for 150/150 labelled rows: median 411 chars, never just the anchor.
