@@ -30,16 +30,22 @@ CORS(app)  # Enable CORS for React frontend
 app.config['JSON_SORT_KEYS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file upload
 
+# Login guard first, so it covers every route registered below (off unless APP_PASSWORD is set)
+from auth import init_auth  # noqa: E402
+init_auth(app)
+
 # Register route blueprints
 from routes.notes_routes import notes_bp  # noqa: E402
 from routes.import_routes import import_bp  # noqa: E402
 from routes.search_routes import search_bp  # noqa: E402
 from routes.projects_routes import projects_bp  # noqa: E402
+from routes.today_routes import today_bp  # noqa: E402
 
 app.register_blueprint(notes_bp)
 app.register_blueprint(import_bp)
 app.register_blueprint(search_bp)
 app.register_blueprint(projects_bp)
+app.register_blueprint(today_bp)
 
 # Lazy trash purge: this is a local single-user app with no background
 # scheduler, so "empty trash weekly" means "purge anything old enough,
