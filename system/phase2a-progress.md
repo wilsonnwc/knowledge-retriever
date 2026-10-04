@@ -71,8 +71,8 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 - [ ] ⏸ **Pause 2:** the user's mobile walkthrough.
 
 ## Iteration log
-*(newest first)*
-- **2026-10-05 ~00:30 UTC — B2 done.**
+*(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-04 21:56 UTC — B2 done.**
   - Today page, reader, buttons with Undo, Later, Junk today with "Not junk", previous days, metrics strip, login screen.
   - **Browser QA:** the Chrome extension wasn't connected, so I used Playwright driving the installed Chrome (headless, temporary profile).
     - 390px and 1280px, on 216 real items from 2 Oct seeded into a throwaway schema (dropped afterwards).
@@ -84,7 +84,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Review note 4 (hosted mode never switches on) is expected until B4 builds `today_app.py`. Verify it there.
   - **For B3:** store titles without the "(full article unavailable)" suffix; the tag already says it.
   - ⚠ **Side effect to report:** starting the local app ran its existing 7-day trash purge, which permanently removed 5 notes from the Notes trash (the app's designed behaviour on any start).
-- **2026-10-04 ~23:45 UTC — B1 done.**
+- **2026-10-04 21:45 UTC — B1 done.**
   - **Migration 002:** sightings (one card per URL, per-day rank), processed_messages, runs, junk/media kinds, `not_junk`. Applied while the tables were still empty.
   - **Today API:** today / items / later / events. Dismiss needs a reason; undo is validated; state is folded from the append-only history; metrics use London days.
   - **Auth:** password + 30-day signed cookie on every `/api` route. A hosted deploy refuses to start without a password.
@@ -92,7 +92,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - **19 tests on throwaway Neon schemas**, all cleaned up.
   - **Code review:** a non-text reason or password caused a 500 → now a 400.
   - **Carried to B2:** local dev runs page and API on different ports, so the frontend must send cookies (`credentials: 'include'`) and CORS needs `supports_credentials`. The hosted app is same-origin, so it's fine there.
-- **2026-10-04 ~23:20 UTC — A5 code done; dry run waits for the push window.**
+- **2026-10-04 21:36 UTC — A5 code done; dry run waits for the push window.**
   - Built: coverage metric, invariants (repeats / landed), `dry_run` workflow input (v1 and v2 side by side on the same emails), comparison report.
   - **Local smoke test on 2 Oct** (v2 from home network): real-article coverage v1 32% → v2 75%; The Batch 0% → 89%.
   - **⚠ Jenny Wanger came out worse** (3/11 → 1/11, rate-limited). Watch this in the GitHub dry run, since it fails "no newsletter worse".
@@ -104,7 +104,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - 1 finding rejected with reasoning: the dry run ignoring the processed list matches what live v1 actually did, since v1 never had the list on GitHub.
   - 67/67 tests pass. 8 AICoS commits are queued locally.
   - **Next:** B1/B2 in knowledge-retriever while waiting (pushes are allowed there).
-- **2026-10-04 ~23:00 UTC — A4 done.**
+- **2026-10-04 21:28 UTC — A4 done.**
   - **Judge:** Haiku 4.5 with structured JSON output, temperature 0, batched 40 per call. It's told "unsure → article"; any failure keeps the link.
   - **Eval results** (rules + judge):
     - **dev** 0 lost / 98% junk caught (round 5).
@@ -117,7 +117,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - **Second unseen holdout v3** (6–12 Sep): 1 lost (the Citi report landing page, which Claude had flagged ambiguous) / 100% junk caught.
   - **Code review:** 2 bugs fixed — the judge would have crashed in CI (the key lives only in `.env`); an API outage could have burned a one-time holdout.
   - 57/57 tests pass.
-- **2026-10-04 ~22:45 UTC — A3 done.**
+- **2026-10-04 21:12 UTC — A3 done.**
   - `link_pipeline.py` + `layer1_v2.py`, behind `--v2`.
   - **Rules on dev:** 0 wrong calls; 36/40 junk settled with no LLM. The rest go to the A4 judge.
   - **Caught on real emails:** v2 first saw ~4× more links than v1, because v1 skips Substack redirect links. That turned essays (Lenny, a16z…) into "hybrids", and one essay lost its body.
@@ -130,7 +130,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Fixed from real data: TLDR `(Sponsor)` blocks leaked through; headings picked the previous story's title. The eval context was regenerated before any tuning.
   - **Code review (medium):** 2 bugs fixed — tracking-param stripping corrupted URLs; the `context_used` flag over-reported.
   - 50/50 tests pass. Golden v1 is unchanged.
-- **2026-10-04 ~22:30 UTC — A2 done.**
+- **2026-10-04 20:50 UTC — A2 done.**
   - **Golden test committed first.** Synthetic link-digest, essay and hybrid emails, a fake fetcher and a fake Claude.
     - Together they pin the live v1 output: ok, paywalled, too-short and blocked fetches, the sponsor filter, 2 batches and ranking.
     - A first fixture accidentally put every link within 700 chars of "sponsor", so all links were filtered. Fixed before recording the baseline.
@@ -144,7 +144,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
     - Spam was counted as "binned".
   - **13/13 tests pass. v1 output is byte-identical.**
   - Workflow change `git pull --rebase --autostash` also applies to v1 runs. It is protective only: it doesn't change digest content, and it stops a concurrent push losing a night's output.
-- **2026-10-04 ~21:50 UTC — A1b done.**
+- **2026-10-04 20:41 UTC — A1b done.**
   - New `link_context.py`, shared with A3: the newsletter's own text around each link, plus the nearest heading.
   - Re-fetched 76 source emails incl. Trash. Context recovered for 150/150 labelled rows: median 411 chars, never just the anchor.
   - Committed the dev/test split before any tuning: dev 101, test 49, stratified by newsletter + label.
