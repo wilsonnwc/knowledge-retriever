@@ -47,7 +47,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 - [x] **A4** Junk judge (rules + Haiku): *(AICoS `423d3a3`, `2b16fe4`, local; push after 05:30 UTC)*
   - Passes `evals/junk_filter/labels_v1.csv`: 0 articles → junk, ≥ 90% junk recall.
   - Fresh-week blind check prepared.
-- [ ] **A5** Pre-go-live checks and dry run: *(code pushed 07:12 UTC 5 Oct; dry runs dispatched: 37276478843 (09-30), 37276482782 (10-01), 37276486493 (10-02))*
+- [x] **A5** Pre-go-live checks and dry run: *(code pushed 07:12 UTC 5 Oct; dry runs 37276478843 (09-30), 37276482782 (10-01), 37276486493 (10-02) all succeeded; comparison in AICoS `evals/dryrun_2026-10-05.md`; fixes `a871845`)*
   - Coverage metric in the manifest and log.
   - No-repeat and digest-landed checks.
   - `dry_run` workflow input.
@@ -72,6 +72,16 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 07:55 UTC — A5 done. Loop stopped at ⏸ Pause 1.**
+  - **All 3 dry runs succeeded.** Real-article coverage, excl. The Neuron: v1 37% → **v2 76%** (75% / 77% / 75% per day). The Batch: 0/17 → 12/17 (71%).
+  - **AC1 "no newsletter worse" FAILS on 2 Oct** (Jenny Wanger 2/8 → 1/8; Daily Rip 7/11 → 6/11). In each case, one link where v1's loose "ok" was a CNBC teaser or an event landing page. Not lowered silently: Pause 1 question P1.
+  - **AC2 spot check:** 27/30 are real article text.
+  - **Fixed `a871845`:**
+    - One item per story per day. TLDR's own LinkedIn self-promo post was appearing 6–7 times a day.
+    - Link-only X posts (long-form X Articles) are now `partial`.
+    - Code review: no blocking bugs. Two suggestions applied: case-safe story key, and full text replaces an earlier blurb.
+    - 70/70 tests pass.
+  - **Known gap, not a regression:** jennywanger.com blocks GitHub's servers (429/403) for both v1 and v2.
 - **2026-10-05 07:12 UTC — AICoS pushed; dry runs dispatched.**
   - The laptop slept through the scheduled 05:30 check-in; the user prompted the push.
   - Last night's live v1 digest ran OK at 00:01 UTC, before the push.
@@ -187,6 +197,11 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - No code yet.
 
 ## Questions for the user (batched for Pause 1)
+**Open at Pause 1 (2026-10-05 07:55 UTC):**
+- **P1:** Accept the 2 Oct "no newsletter worse" FAIL as a measurement artefact? Recommended: yes. It was 1 link each, and v1's "ok" was a teaser or event page.
+- **P2:** TLDR's own LinkedIn self-promo post (in every TLDR footer): junk, like sponsors and referrals? Recommended: junk.
+- **P3:** Go live: switch the nightly digest to v2 from tonight? Recommended: yes, then watch 3 nights for repeats, then B3.
+
 **Answered 2026-10-05 (user reviewed all 27 Pause 1 links: "nothing to change, recommendations spot on"):**
 - Q1: an author's own glossary/explainer pages are **articles**.
 - Q2: a report's landing page is an **article**.
