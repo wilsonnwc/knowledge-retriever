@@ -99,6 +99,18 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 ~11:30 UTC — Hosted reader showed no content; fixed (KR `25a5ddd`).**
+  - **Found by the user on their phone** with the 4 Oct backfill.
+  - **Cause:** the reader fetched `/api/items/<id>`. Item ids contain `/`, `<`, `@` (canonical URLs, email Message-IDs), and Vercel's Python adapter passes the path still percent-encoded, so the lookup 404'd.
+  - **Why local QA missed it:** the local dev server decodes the path. The B2 test fixture ids were also plain (`a1`).
+  - **How it was diagnosed:**
+    - Hosted probes reached Flask (401).
+    - The local endpoint worked.
+    - Simulating a still-encoded path reproduced the 404.
+    - The local browser reader worked.
+  - **Fix:** `GET /api/item?id=…` (query strings are always decoded by Flask). Regression test with real-shaped ids; backend 26/26, frontend 6/6.
+  - Confirmed the new bundle is live on Vercel.
+  - **Noted for the user, not changed:** email bodies read as choppy plain text (mid-sentence line breaks, blank gaps where images were, no links).
 - **2026-10-05 09:50 UTC — B3 built behind `NEON_STORE` (AICoS `a12fab6`); 85/85 tests pass.**
   - **Design:**
     - Layer 1 writes `$DATE/store/items.json` (never committed), plus an `ITEM_ID` line per cleaned item. That line is never sent to Claude.
