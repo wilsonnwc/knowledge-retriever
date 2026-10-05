@@ -37,7 +37,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
    - **Revised the same day:** switch on from **6 Oct**, if v2's first night alone (5 Oct) is clean.
    - Reasoning: B3 can't break the email or cause repeats, and its failures are labelled separately (the NEON_FAILED step name plus the banner). v2's own checks don't depend on it. The night that matters most for telling the two apart is v2's first one.
    - **Switch-on, morning of 6 Oct, if the 5 Oct email and invariants are clean.** Edit `.github/workflows/daily_digest.yml` (this needs the user's OK, since auto-mode treats workflow edits as production deploys):
-     - Add `"psycopg[binary]"` to the `pip install` line.
+     - Add `"psycopg[binary]" markdownify` to the `pip install` line. Without markdownify, the reader-format import crashes the run once NEON_STORE is on.
      - Add to the job's `env:` block: `NEON_STORE: 'true'` and `DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}` (the secret already exists).
      - Push before 21:00 UTC, then check the next morning's Today page.
    - **Backfill for review (user decision, 5 Oct; supersedes "no backfill" for this one day):**
@@ -99,6 +99,16 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 ~13:00 UTC — Reader shows Markdown with links (AICoS `aa9826d`, KR `e56a8e1`). User decision: option A, no images.**
+  - **Problem (found by the user on their phone):** email bodies read as flattened plain text. Lines broke mid-sentence, invisible preheader padding left blank walls, and there were no links.
+  - **Emails:** converted with markdownify after the plain-text path's own footer cleanup (`newsletter_digest_prep.email_soup`, now shared). Layout tables are unwrapped and images dropped.
+  - **Why not trafilatura for emails:** it was tried first and dropped real content (Peter Yang's "Top takeaways" heading) as boilerplate.
+  - **Articles:** trafilatura Markdown, with tables flattened.
+  - **Safety net:** under 90% of the plain text's words, the plain text is stored instead.
+  - **Eval** (`evals/reader_format_eval.py`) on a real week, 28 Sep–4 Oct (56 emails, 18 senders): 56/56 Markdown, 100% of words kept, about 1,800 links, 0 gaps.
+  - **Code review found 8 issues, all fixed with tests:** autolinks, titled links, parentheses in URLs, non-http links, nested lists, stray asterisks, article tables, bare `>` lines. Tests: AICoS 92/92, KR frontend 12/12.
+  - **Reader styling:** headings on the chat scale, links in the accent colour. Checked in a local browser on the 4 Oct data.
+  - **Live data:** 4 Oct reloaded with Markdown. The user's 10 events are kept.
 - **2026-10-05 ~11:30 UTC — Hosted reader showed no content; fixed (KR `25a5ddd`).**
   - **Found by the user on their phone** with the 4 Oct backfill.
   - **Cause:** the reader fetched `/api/items/<id>`. Item ids contain `/`, `<`, `@` (canonical URLs, email Message-IDs), and Vercel's Python adapter passes the path still percent-encoded, so the lookup 404'd.
