@@ -105,7 +105,14 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
     - Before switching: added the self-promo junk rule (Pause 1 P2), and fixed a night-one repeat bug by seeding v2's processed-email list from v1's last digest.
   - **Release B:**
     - B1 (login + Neon API), B2 (Today page) and B4 (Vercel hosting) are done. Live at https://knowledge-retriever-today.vercel.app.
-    - B3 (Neon ingestion) is built and pushed behind `NEON_STORE` (AICoS `a12fab6`). It gets switched on around 8 Oct, after 3 clean v2 nights (user's option A).
+    - B3 (Neon ingestion) is built and pushed behind `NEON_STORE` (AICoS `a12fab6`). The user moved switch-on to **6 Oct**, if v2's first night is clean. The GitHub pre-flight smoke test passed.
+    - Today page refined through two mobile reviews (5 Oct):
+      - the reader shows Markdown with links, with a plain-text fallback
+      - auto-hiding bars and the phone's own back swipe
+      - Completed / Later / Skip / Build as colour toggles
+      - Skip reasons as multi-select pills
+    - Junk eval loop: "Not junk" taps → `labels_corrections.csv` → `run_eval.py --split corrections`.
+  - **Session 45 (2026-10-05):** see `system/session-log.md`.
   - **Pick up from** `system/phase2a-progress.md` → "NEXT SESSION START HERE".
 - **IMMEDIATE NEXT (superseded by the line above; kept for history):**
   1. The user labels ~150 links as junk or real. Claude prepares the label file.

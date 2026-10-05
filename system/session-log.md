@@ -38,6 +38,58 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 45 — 2026-10-05 (Release A live; B3 built behind a switch; Today page refined through two mobile reviews; junk eval loop)
+
+**Phase/step completed:**
+- Phase 2a: Release A live, B3 built, Today reader refined, B3 pre-flight passed, junk eval loop built.
+- Remaining: switch-on, then ⏸ Pause 2.
+
+**Where to pick up next:** `system/phase2a-progress.md` → "NEXT SESSION START HERE":
+- check v2's first night
+- then switch B3 on (6 Oct, the user's OK)
+- then Pause 2
+
+**What worked:**
+- **Release A live** (AICoS `16cd408`):
+  - self-promo junk rule (P2), narrowed after code review and checked on all 390 labelled links
+  - a night-one repeat bug caught *before* go-live and fixed by seeding the processed list
+- **B3, store-first to Neon,** built behind `NEON_STORE`:
+  - the switch-off proven inert by a flag-on/flag-off comparison
+  - a real 4 Oct replay read back through the Today page's own code
+  - the switch-on moved from 8 Oct to 6 Oct after a risk re-assessment with the user
+- **B3 pre-flight smoke test** (manual, read-only workflow) passed on GitHub's real runner.
+- **Reader:**
+  - email HTML becomes Markdown with links; real-week eval: 56/56 emails, 100% of words kept
+  - lists fixed (a global CSS reset was clipping list markers)
+  - auto-hiding bars, the native back swipe
+- **Decisions:** Completed / Later / Skip / Build as colour toggles (the user's design); Skip reasons as multi-select pills; migration 003 adds the `read` action.
+- **Junk eval loop:** "Not junk" taps become a re-runnable regression set (report-only until about 10 collect).
+- **Testing at phone width without a phone:** a 390px iframe in Chrome, measuring element bounds with JS.
+
+**What didn't work / got stuck on:**
+- **Hosted reader showed no text.** Vercel's Python adapter passes the URL path still percent-encoded, so `/items/<id>` with Message-IDs 404'd; local dev decoded it. Fixed with `?id=`.
+- **trafilatura dropped real email content** as boilerplate. Switched emails to markdownify.
+- **iOS sticky hover** made the Skip confirm button invisible.
+- **Test problems:**
+  - a test silently called the real Haiku judge (a default argument bound at import)
+  - two test races with the busy state
+- **Auto-mode** blocked workflow edits as production deploys, which was correct; the user approved each one.
+
+**Learnings:**
+- **Cold start:** a new version that keeps state the old one didn't starts empty on night one, and dry runs that bypass that state can't see it.
+- **Build dark, switch on later;** prove the switch-off is inert; test a handoff from the receiving side.
+- **"Works locally" ≠ works hosted:** test with real-shaped IDs, and keep complex IDs out of URL paths.
+- **Choose the tool for its job** (article extractor vs. full converter), and guard it with a measurable fallback plus a real-week eval.
+- **A button label encodes a behaviour model:** "Read now" vs "Completed" changed the data and the state model.
+- **Prefer the platform's native back gesture** over a custom swipe.
+
+**Open questions to come back to:**
+- Tune the junk filter once about 10 corrections exist (with the user).
+- Skip-reason analysis for ranking after a week of chips.
+- Build idea bank across the Learning OS (`learning-os-plan.md` H).
+
+---
+
 ### Session 44 — 2026-10-04 → 10-05 (Phase 2a autonomous loop: Release A built and dry-run, Release B built and hosted; Pause 1 approved)
 
 **Phase/step completed:**

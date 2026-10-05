@@ -24,31 +24,25 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Put secrets in code, logs or commits.
 - The junk-filter fresh-week check uses Claude's blind labels, written **before** seeing judge output. Disagreements go to the user at Pause 1.
 
-## NEXT SESSION START HERE (updated 2026-10-05 ~08:50 UTC)
-1. ~~**P2: self-promo junk rule**~~ **Done** (AICoS `727e5e7`, pushed). See the iteration log.
-2. ~~**P3: go live**~~ **Done** (AICoS `16cd408`, pushed 09:29 UTC 5 Oct, after the user said "go live"). The first v2 night is 5 Oct (scheduled 21:30 UTC).
-   - **Now watch 3 nights (5, 6 and 7 Oct):**
-     - The invariants step: no repeats, and the digest landed.
-     - The coverage line in the email header.
-     - Night 1 specifically: none of the 3 seeded 4 Oct emails reappear.
-   - **Rollback if needed:** revert `16cd408`, or run the workflow manually with `v2` unticked.
-3. **B3: built and pushed, switched OFF** (AICoS `a12fab6`).
-   - The user first chose option A on 5 Oct: build now, switch on after the 3-night v2 watch.
-   - **Revised the same day:** switch on from **6 Oct**, if v2's first night alone (5 Oct) is clean.
-   - Reasoning: B3 can't break the email or cause repeats, and its failures are labelled separately (the NEON_FAILED step name plus the banner). v2's own checks don't depend on it. The night that matters most for telling the two apart is v2's first one.
-   - **Switch-on, morning of 6 Oct, if the 5 Oct email and invariants are clean.** Edit `.github/workflows/daily_digest.yml` (this needs the user's OK, since auto-mode treats workflow edits as production deploys):
-     - Add `"psycopg[binary]" markdownify` to the `pip install` line. Without markdownify, the reader-format import crashes the run once NEON_STORE is on.
-     - Add to the job's `env:` block: `NEON_STORE: 'true'` and `DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}` (the secret already exists).
-     - Push before 21:00 UTC, then check the next morning's Today page.
-   - **Backfill for review (user decision, 5 Oct; supersedes "no backfill" for this one day):**
-     - 4 Oct was re-fetched from Gmail (read-only) and loaded into the live tables (public schema): 38 items, 3 top / 7 rest / 28 junk (3 borderline).
-     - No processed_messages written. The `runs` row has `sent=false`.
-     - It exists for the user's mobile review before real B3 nights land.
-   - Junk-today list: answered (Q6). Borderline calls first, rule-filtered underneath. Built.
-4. **Then ⏸ Pause 2:** the user's mobile walkthrough with real data.
+## NEXT SESSION START HERE (updated 2026-10-05 ~16:20 UTC, end of Session 45)
+1. **Morning of 6 Oct: check v2's first live night (the 5 Oct digest).**
+   - The email arrived. None of the 3 seeded 4 Oct emails reappear. The coverage line is in the header.
+   - GitHub → Actions → that night's run: the **Check invariants** step is green.
+   - Rollback if needed: revert AICoS `16cd408`, or run the workflow manually with `v2` unticked.
+2. **If clean, switch B3 on** (needs the user's OK; auto-mode treats workflow edits as production deploys). Edit AICoS `.github/workflows/daily_digest.yml`:
+   - `pip install` line: add `"psycopg[binary]" markdownify`. The same line already passed in `neon_smoke.yml` (run 37338992019).
+   - Job `env:` block: add `NEON_STORE: 'true'` and `DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}`.
+   - Push before 21:00 UTC. On the morning of 7 Oct, check the Today page shows the 6 Oct day, and that no "⚠ Today page not updated" banner is in the email.
+   - Keep watching v2's invariants on 6 and 7 Oct, as planned.
+3. **Then ⏸ Pause 2:** the user's mobile walkthrough with real nightly data (TLDR included, which isn't in the 4 Oct backfill).
+4. **Open questions and parked items (none block 1–3):**
+   - **Junk corrections:** run `export_corrections.py`, then `run_eval.py --split corrections`, once about 10 "Not junk" taps exist. Then a tuning session with the user.
+   - **Skip-reason analysis** for ranking: after about a week of chip data. Not built; the user to decide.
+   - **Build idea bank:** a future Learning OS item (`learning-os-plan.md` section H).
 - **Test commands:**
-  - AICoS: AICoS has no `requirements.txt`. Install the package list from `daily_digest.yml`'s `pip install` line plus `pytest` into a venv, then run `python -m pytest -q`. 74 tests pass.
-  - KR: `backend` tests, 24 pass.
+  - AICoS: AICoS has no `requirements.txt`. Install `daily_digest.yml`'s `pip install` line plus `"psycopg[binary]" markdownify pytest` into a venv, then run `python -m pytest -q`. 97 tests pass; the Neon ones need knowledge-retriever next door with its `.env`.
+  - KR: `python -m pytest -q backend/tests` (28 pass). In `frontend/`: `CI=true npx react-scripts test --watchAll=false` (18 pass).
+  - **Phone-width check without a phone:** load `localhost:3000` inside a 390px iframe (this Chrome won't go narrower than about 555px).
 
 ## Milestones
 - [x] **A1** Build plan written (`system/phase2a-build-plan.md`) and reviewed by the plan-reviewer agent. 12 amendments accepted.
@@ -99,6 +93,15 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 ~16:20 UTC — B3 pre-flight passed; junk eval loop built (AICoS `cb3cae1`, `a1ffbf9`).** User's loop rules: read-only smoke test, report-only corrections, on-demand export, stop only when done or blocked.
+  - **Smoke test** (`neon_smoke.yml` + `evals/neon_smoke.py`, manual and read-only): green on GitHub in 25s.
+    - Python 3.11.16 imports B3. Neon is reachable with the secret, all 4 tables exist, and the Markdown conversion works.
+  - **Corrections loop:**
+    - `export_corrections.py`: live `not_junk` events become `labels_corrections.csv`. One row per link (code review: a double-tap counted twice). Idempotent; undone taps drop out.
+    - `run_eval.py --split corrections`: re-runnable, report-only ("Still junked: N of M", by rules vs judge).
+    - First real export: 0 corrections.
+  - **Found by a test:** the first version of the tests called the real Haiku judge (`classify`'s default argument binds at import). Fixed by passing the judge in.
+  - AICoS 97/97.
 - **2026-10-05 ~17:00 UTC — Decisions as toggles, the user's design (KR `092d44f`).**
   - **Toggles:** unselected is tinted with a coloured border; selected is filled. Tapping again undoes, history-based (Later → Completed → tap Completed → back to Later). No Undo buttons.
   - **Skip:** multi-select pills, then ✓ saves or ✕ cancels. ✓ with no pill = no reason. The "Just skip" pill is dropped. Several reasons are stored as one text joined by "; ".
