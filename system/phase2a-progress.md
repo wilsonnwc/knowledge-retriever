@@ -67,11 +67,23 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 - [ ] **B3** (after Pause 1) Store-first ingestion to Neon:
   - Neon becomes the processed record.
   - Neon-failure banner plus the run marked failed.
-- [ ] **B4** Render deploy via API, plus desktop local-run instructions. *(Prep done, KR `3691f4b`. **Blocked on user question 4:** Render's API returned 402 'payment information required'.)*
+- [x] **B4** Hosting, on **Vercel** (user decision), plus desktop local-run instructions. *(KR `4ff21c2`; live at https://knowledge-retriever-today.vercel.app)*
 - [ ] ⏸ **Pause 2:** the user's mobile walkthrough.
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 ~00:05 UTC — B4 done on Vercel (user present).**
+  - Render needed a card. Vercel was verified (Hobby: free, no billing cycle, pauses rather than charges; Python/Flask; London `lhr1`; 5-min limit) and the user chose it.
+  - Built as two Vercel Services in one project (React on the CDN, Flask API on `/api/*`). `backend/requirements.txt` was slimmed so the function stays small.
+  - Created via API: project, London region, 3 encrypted env vars, production deploy (build OK).
+  - **Outside checks:**
+    - The API is locked: 401 without login, including the notes route.
+    - Wrong password → 401; right password → 200.
+    - The cookie is Secure + HttpOnly, 30 days.
+    - Warm `/api/today` takes 0.24s.
+  - **Phone QA in Chrome:** login → Today-only layout (no sidebar) → still logged in after a reload; no console errors.
+  - The page is empty until B3 writes data.
+  - **Junk review answered:** the user confirmed all 27 labels. The judge still misses those two rule types → fix the judge prompt, then re-test on a fresh unseen holdout.
 - **2026-10-04 22:10 UTC — B4 prep done; deploy blocked (user question 4).**
   - Built `today_app.py` (Today + login only, same-origin React, ProxyFix), `render.yaml`, desktop run docs. 5 tests pass (24 backend total).
   - Generated `APP_PASSWORD` + `SECRET_KEY` into `.env`.
@@ -165,10 +177,15 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - No code yet.
 
 ## Questions for the user (batched for Pause 1)
+**Answered 2026-10-05 (user reviewed all 27 Pause 1 links: "nothing to change, recommendations spot on"):**
+- Q1: an author's own glossary/explainer pages are **articles**.
+- Q2: a report's landing page is an **article**.
+- Q3: Claude's 20 random blind labels were all confirmed.
+
 1. **Junk guideline (a):** inline links to an author's own glossary/explainer pages (Teresa Torres "opportunity solution tree", "customer needs"…). Article, or junk-as-reference like model cards and repos? This decides 4 of holdout v2's 6 misses.
 2. **Junk guideline (b):** a report's landing page (holdout v3 #22, Citi). Article or junk?
 3. **Grade Claude's blind labels:** a random sample of ~20 holdout links will be in the Pause 1 review page.
-4. **Hosting (blocks B4):** Render refuses to create even a free service through the API without a card on file. Options:
+4. ~~**Hosting (blocks B4):**~~ **Answered 2026-10-05: Vercel**, after a verified comparison. Recorded in `learning-os-plan.md`. Render refuses to create even a free service through the API without a card on file. Options:
    - (a) Add a card to Render. The free plan stays free, and Claude deploys straight away.
    - (b) Create it yourself: Render dashboard → New → Blueprint → this repo (`render.yaml`), then paste the 3 secrets from `.env`. It's unknown whether the dashboard also asks for a card.
    - (c) Switch to a host that needs no card, e.g. Vercel. The original reason to rule Vercel out (its 10s limit vs a stateful app) may no longer apply now the hosted app is stateless, but this changes an agreed decision.

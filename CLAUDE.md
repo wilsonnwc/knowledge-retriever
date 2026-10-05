@@ -271,6 +271,8 @@ cd frontend && npm start                # opens http://localhost:3000 → sideba
 
 ### Today page — hosted (Vercel)
 
+**Live at https://knowledge-retriever-today.vercel.app** (password: `APP_PASSWORD` in `.env`). Vercel project: `knowledge-retriever-today`.
+
 - `vercel.json` defines two Vercel Services in one project on one domain:
   - `frontend/` — the React build, served from Vercel's CDN.
   - `backend/` — the Flask API (`backend/today_app.py`: Today + login only), which gets `/api/*`.
