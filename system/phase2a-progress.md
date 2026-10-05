@@ -36,9 +36,13 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
    - Keep watching v2's invariants on 6 and 7 Oct, as planned.
 3. **Then ⏸ Pause 2:** the user's mobile walkthrough with real nightly data (TLDR included, which isn't in the 4 Oct backfill).
 4. **Open questions and parked items (none block 1–3):**
-   - **Junk corrections:** run `export_corrections.py`, then `run_eval.py --split corrections`, once about 10 "Not junk" taps exist. Then a tuning session with the user.
+   - **Junk corrections are now automatic** (AICoS `40095ee`, active once B3 is on):
+     - At 10 corrections since the last tuning, the morning digest carries a scored report with Claude-drafted fixes at the bottom. A line at the top every day says a tuning session is due.
+     - **In that session:** review the proposals with the user, apply only approved ones, then re-run `run_eval.py --split corrections` and the held-out sets.
+     - **Then** set `junk_tuned_through_event_id` in AICoS `evals/junk_filter/tuning_state.json` to the last corrected event id.
+   - **Idea bank:** a top line appears at 10 Build ideas. Start with a design-only session. Then set `idea_bank_design_started: true` in the same file.
    - **Skip-reason analysis** for ranking: after about a week of chip data. Not built; the user to decide.
-   - **Build idea bank:** a future Learning OS item (`learning-os-plan.md` section H).
+   - **Build idea bank:** a future Learning OS item (`learning-os-plan.md` section H). It's triggered by the signal above.
 - **Test commands:**
   - AICoS: AICoS has no `requirements.txt`. Install `daily_digest.yml`'s `pip install` line plus `"psycopg[binary]" markdownify pytest` into a venv, then run `python -m pytest -q`. 97 tests pass; the Neon ones need knowledge-retriever next door with its `.env`.
   - KR: `python -m pytest -q backend/tests` (28 pass). In `frontend/`: `CI=true npx react-scripts test --watchAll=false` (18 pass).
@@ -93,6 +97,13 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 ~16:45 UTC — Nightly signals (AICoS `40095ee`; user decisions: export + score + drafted fixes, a digest line, the same trigger for ideas).**
+  - `maintenance_signals.py`, run from `NightRun.maintenance()` after Layer 2:
+    - Junk corrections: at 10 since the last tuning, a report plus Opus 5.5-drafted fixes (with the refusal fallback), once per level.
+    - Build ideas: an idea bank line at 10.
+  - **Code review found 4 real bugs, all fixed with tests:** levels scoped per tuning period; the report file written last, after the email text; a judge outage postpones the report; a same-day re-run reuses the report.
+  - **Real drafting sample** (5 stand-in corrections from 4 Oct): fixes tied to link ids with concrete risks, and "no change" for a plain ad.
+  - AICoS 107/107. Smoke test re-run green (run 37343079364).
 - **2026-10-05 ~16:20 UTC — B3 pre-flight passed; junk eval loop built (AICoS `cb3cae1`, `a1ffbf9`).** User's loop rules: read-only smoke test, report-only corrections, on-demand export, stop only when done or blocked.
   - **Smoke test** (`neon_smoke.yml` + `evals/neon_smoke.py`, manual and read-only): green on GitHub in 25s.
     - Python 3.11.16 imports B3. Neon is reachable with the secret, all 4 tables exist, and the Markdown conversion works.
