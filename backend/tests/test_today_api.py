@@ -28,7 +28,7 @@ def press(c, item_id, action, **kw):
 
 # ── Login guard ───────────────────────────────────────────────────────────────
 
-@pytest.mark.parametrize("method,path", [("GET", "/api/today"), ("GET", "/api/items/a1"), ("POST", "/api/events"),
+@pytest.mark.parametrize("method,path", [("GET", "/api/today"), ("GET", "/api/item?id=a1"), ("POST", "/api/events"),
                                          ("GET", "/api/later"), ("GET", "/api/notes"), ("DELETE", "/api/notes")])
 def test_every_api_route_requires_login(client, method, path):
     assert client.open(path, method=method).status_code == 401
@@ -79,8 +79,18 @@ def test_today_defaults_to_latest_day_with_sections_in_rank_order(logged_in, sch
 
 def test_reader_and_unknown_item(logged_in, schema):
     _seed_day(schema)
-    assert logged_in.get("/api/items/a1").get_json()["item"]["seen_on"] == [DAY]
-    assert logged_in.get("/api/items/nope").status_code == 404
+    assert logged_in.get("/api/item?id=a1").get_json()["item"]["seen_on"] == [DAY]
+    assert logged_in.get("/api/item?id=nope").status_code == 404
+    assert logged_in.get("/api/item").status_code == 400
+
+
+@pytest.mark.parametrize("item_id", ["email:<20261004.3.5ce6@mg1.substack.com>", "pub.example/p/a-story?id=7"])
+def test_reader_opens_real_shaped_ids(logged_in, schema, item_id):
+    # B3's real ids: an email Message-ID (<, @, >) and a canonical URL (/, ?). Hosted, they failed in the path.
+    from urllib.parse import quote
+    seed(schema, [(item_id, "email_body", "Real", "top", 1, DAY)])
+    got = logged_in.get(f"/api/item?id={quote(item_id, safe='')}")
+    assert got.status_code == 200 and got.get_json()["item"]["id"] == item_id
 
 
 # ── Button presses ────────────────────────────────────────────────────────────

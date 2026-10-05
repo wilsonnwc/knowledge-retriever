@@ -60,7 +60,7 @@ export function fetchToday(date) {
 }
 
 export function fetchTodayItem(itemId) {
-  return request(`/items/${encodeURIComponent(itemId)}`).then((data) => data.item);
+  return request(`/item?id=${encodeURIComponent(itemId)}`).then((data) => data.item);
 }
 
 export function fetchLater() {

@@ -28,8 +28,13 @@ def get_today():
     return jsonify({"status": "success", "page": today_store.today(day)}), 200
 
 
-@today_bp.route("/items/<path:item_id>", methods=["GET"])
-def get_item(item_id):
+# The id is a query parameter, not a path segment: ids hold '/', '<', '@' (URLs, Message-IDs), and Vercel's
+# Python adapter passes the path still percent-encoded, so /items/<id> never matched there (5 Oct).
+@today_bp.route("/item", methods=["GET"])
+def get_item():
+    item_id = request.args.get("id", "")
+    if not item_id:
+        return jsonify({"status": "error", "message": "id is required"}), 400
     try:
         return jsonify({"status": "success", "item": today_store.item(item_id)}), 200
     except today_store.NotFound:
