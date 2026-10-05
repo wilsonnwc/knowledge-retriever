@@ -195,7 +195,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 1. **Junk guideline (a):** inline links to an author's own glossary/explainer pages (Teresa Torres "opportunity solution tree", "customer needs"…). Article, or junk-as-reference like model cards and repos? This decides 4 of holdout v2's 6 misses.
 2. **Junk guideline (b):** a report's landing page (holdout v3 #22, Citi). Article or junk?
 3. **Grade Claude's blind labels:** a random sample of ~20 holdout links will be in the Pause 1 review page.
-5. **Junk bar, last borderline case (Pause 1):** holdout v4 lost 1 "article": a Benzinga "Best Oil Stocks Right Now" listicle, which the judge called a ticker page. Is an evergreen "best X stocks" listicle an article or junk? If junk, every unseen set since the rulings meets the bar.
+5. ~~**Junk bar, last borderline case:**~~ **Answered 2026-10-05: junk.** Holdout v4 now **passes** (0 lost, 93%). holdout v4 lost 1 "article": a Benzinga "Best Oil Stocks Right Now" listicle, which the judge called a ticker page. Is an evergreen "best X stocks" listicle an article or junk? If junk, every unseen set since the rulings meets the bar.
 4. ~~**Hosting (blocks B4):**~~ **Answered 2026-10-05: Vercel**, after a verified comparison. Recorded in `learning-os-plan.md`. Render refuses to create even a free service through the API without a card on file. Options:
    - (a) Add a card to Render. The free plan stays free, and Claude deploys straight away.
    - (b) Create it yourself: Render dashboard → New → Blueprint → this repo (`render.yaml`), then paste the 3 secrets from `.env`. It's unknown whether the dashboard also asks for a card.
