@@ -38,6 +38,45 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 44 — 2026-10-04 → 10-05 (Phase 2a autonomous loop: Release A built and dry-run, Release B built and hosted; Pause 1 approved)
+
+**Phase/step completed:**
+- **Release A**, in the AICoS repo. Not live yet: tonight's nightly run is still v1.
+  - **A1 and A1b:** build plan and email context recovery.
+  - **A2:** quick fixes for repeat emails and empty days.
+  - **A3:** retrieval upgrade.
+  - **A4:** Haiku junk judge.
+  - **A5:** dry runs.
+- **Release B:**
+  - **B1:** password login, plus the Neon items/events API.
+  - **B2:** the Today page.
+  - **B4:** hosting on Vercel, live at https://knowledge-retriever-today.vercel.app.
+- **⏸ Pause 1:** reviewed, and all 3 questions approved by the user.
+
+**What worked:**
+- **Dry runs:** real-article coverage went from 37% (v1) to **76%** (v2) across 30 Sep–2 Oct. The Batch went from 0/17 to 12/17.
+  - Evidence: AICoS `evals/dryrun_2026-10-05.md`.
+- **Junk filter:**
+  - Locked split: dev 0 lost / 98% caught; test 0 lost / 100% caught.
+  - Fourth unseen holdout: 0 lost / 93% caught, after the user's rulings.
+- **HITL eval flywheel:** the user graded only the judge-vs-Claude disagreements, not every link. This was logged as an interview learning.
+
+**What didn't work / got stuck on:**
+- **Render** needs a card on file even for a free service created through the API. Switched to Vercel, the user's decision.
+- **Dry runs exposed two bugs**, both fixed in AICoS `a871845`:
+  - TLDR's own LinkedIn post appeared 6–7 times a day, because v2 didn't dedupe stories across newsletters.
+  - Link-only X posts counted as full text.
+- **AC1 "no newsletter worse" failed on 2 Oct:**
+  - Jenny Wanger and Daily Rip each lost one link.
+  - In both cases, v1's loose "ok" had been a teaser or an event page.
+  - The user accepted this as a measurement artefact (P1).
+
+**Learnings:**
+- A stricter success check makes the old system look better than it was. Before calling something a regression, inspect the items behind it.
+- A dry run's spot check catches what aggregate metrics hide. Coverage passed while the same promo post sat in the digest 7 times.
+
+**Where to pick up next:** `system/phase2a-progress.md` → "NEXT SESSION START HERE".
+---
 ### Session 43 — 2026-10-04 (Phase 2a spec written and locked; no code)
 
 **What happened:**

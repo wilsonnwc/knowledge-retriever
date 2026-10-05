@@ -24,6 +24,24 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Put secrets in code, logs or commits.
 - The junk-filter fresh-week check uses Claude's blind labels, written **before** seeing judge output. Disagreements go to the user at Pause 1.
 
+## NEXT SESSION START HERE (written 2026-10-05 ~08:15 UTC; the session ended for fresh context)
+1. **P2: self-promo junk rule** (AICoS `link_pipeline.py`).
+   - Today `classify_destination` returns `article` for every social post before the judge sees it.
+   - Add a rule: a social post is junk when its context is the newsletter's own hiring/award/about-us blurb (e.g. `jobs@`, "if we hire", "we're hiring").
+   - Or let such social posts fall through to the judge.
+   - Add a test using the real context above.
+   - Holdout v4 row #6 is exactly this link (labelled junk). Note it in that eval's results as a known miss, now fixed by a rule. Don't re-run the holdout as if it were unseen.
+2. **P3: go live.**
+   - Make the scheduled run use v2: the one-line change to `env.V2` in `.github/workflows/daily_digest.yml`, for scheduled runs too.
+   - Push before 21:00 UTC (loop rule), or tonight's run stays v1.
+   - Re-run the tests first.
+   - Then watch 3 nights: the invariants step (no repeats, digest landed) and the coverage line in the email header.
+3. **B3: store-first ingestion to Neon.** See the milestone below. It can be built while the 3 nights are being watched.
+4. **Then ⏸ Pause 2:** the user's mobile walkthrough with real data.
+- **Test commands:**
+  - AICoS: use the scratchpad venv or any Python with `requirements.txt` and trafilatura, then `python -m pytest -q`. 70 tests pass.
+  - KR: `backend` tests, 24 pass.
+
 ## Milestones
 - [x] **A1** Build plan written (`system/phase2a-build-plan.md`) and reviewed by the plan-reviewer agent. 12 amendments accepted.
 - [x] **A1b** Recover source emails (incl. Trash) → `labels_v1_context.json`, plus the dev/test split, committed before any tuning. *(AICoS `aee6472`, committed locally; push after 05:30 UTC.)*
@@ -197,10 +215,12 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - No code yet.
 
 ## Questions for the user (batched for Pause 1)
-**Open at Pause 1 (2026-10-05 07:55 UTC):**
-- **P1:** Accept the 2 Oct "no newsletter worse" FAIL as a measurement artefact? Recommended: yes. It was 1 link each, and v1's "ok" was a teaser or event page.
-- **P2:** TLDR's own LinkedIn self-promo post (in every TLDR footer): junk, like sponsors and referrals? Recommended: junk.
-- **P3:** Go live: switch the nightly digest to v2 from tonight? Recommended: yes, then watch 3 nights for repeats, then B3.
+**Pause 1 answered 2026-10-05 ~08:10 UTC: user "Agree with all 3".**
+- **P1 ✅** Accepted: the 2 Oct "no newsletter worse" FAIL is a measurement artefact. It was 1 link each, and v1's "ok" was a teaser or event page.
+- **P2 ✅** A newsletter's own self-promo social post is **junk**, like sponsors and referrals.
+  - Example: TLDR's LinkedIn "Best Bootstrapped" post, whose context is "Apply here… jobs@tldr.tech… get $1k if we hire them! TLDR is one of Inc.'s Best Bootstrapped businesses".
+  - **Not built yet.**
+- **P3 ✅** Go live: switch the nightly digest to v2. **Not done yet.**
 
 **Answered 2026-10-05 (user reviewed all 27 Pause 1 links: "nothing to change, recommendations spot on"):**
 - Q1: an author's own glossary/explainer pages are **articles**.
