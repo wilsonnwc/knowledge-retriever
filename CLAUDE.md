@@ -269,12 +269,16 @@ cd frontend && npm start                # opens http://localhost:3000 → sideba
 - Remove `APP_PASSWORD` from `.env` to switch login off locally. Never do this on the host: there, the app refuses to start without a password.
 - Run the Today API tests with `python3 -m pytest backend/tests`. They create throwaway Neon schemas and drop them afterwards. React tests: `cd frontend && npm test`.
 
-### Today page — hosted (Render)
+### Today page — hosted (Vercel)
 
-- `backend/today_app.py` is the slim hosted app: Today + login only, plus the React build from the same origin.
-- `render.yaml` is the Blueprint, with the build and start commands. Secrets (`DATABASE_URL`, `APP_PASSWORD`, `SECRET_KEY`) are set in Render's dashboard, never in the repo (the repo is public).
+- `vercel.json` defines two Vercel Services in one project on one domain:
+  - `frontend/` — the React build, served from Vercel's CDN.
+  - `backend/` — the Flask API (`backend/today_app.py`: Today + login only), which gets `/api/*`.
+- Functions run in London (`lhr1`), next to Neon.
+- `backend/requirements.txt` is deliberately slim because it is what Vercel installs. Heavy local-only packages live in the root `requirements.txt`.
+- Secrets (`DATABASE_URL`, `APP_PASSWORD`, `SECRET_KEY`) are Vercel project environment variables, never in the repo (the repo is public).
 - Every push to `main` redeploys.
-- The free tier sleeps after 15 min idle, so the first open of the day takes about a minute.
+- Why Vercel and not Render: see `system/learning-os-plan.md`, "Hosting provider revised (2026-10-05)".
 
 ## Environment Setup (new sessions)
 
@@ -284,7 +288,8 @@ cd frontend && npm start                # opens http://localhost:3000 → sideba
   - `OPENAI_API_KEY=...`
   - `DATABASE_URL=postgresql://...` (Neon; the same string on both laptops)
   - `APP_PASSWORD` + `SECRET_KEY` (Today page login; copy both to the other laptop)
-  - `RENDER_API_KEY` (deploys)
+  - `VERCEL_TOKEN` (deploys)
+  - `RENDER_API_KEY` (unused since the move to Vercel)
 - **Database schema:** run `python3 db/migrate.py` after pulling. It applies any new `db/migrations/*.sql` file exactly once, and is safe to re-run.
 - **Packages** — install with: `pip install anthropic python-dotenv`
 

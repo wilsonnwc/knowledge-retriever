@@ -1,8 +1,7 @@
+# The web backend. This folder is also the hosted (Vercel) backend service, so keep it slim:
+# heavy local-only packages (Chroma, OpenAI, Anthropic) live in the root requirements.txt.
+# Local setup installs both: pip install -r requirements.txt -r backend/requirements.txt
 Flask==3.0.0
 Flask-CORS==4.0.0
 python-dotenv==1.0.0
-anthropic
-openai
-chromadb
-PyPDF2==3.0.1
 psycopg[binary]

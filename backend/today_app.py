@@ -1,11 +1,10 @@
 """
-today_app.py — the hosted (Render) app: the Today page and its API only, behind the password.
+today_app.py — the hosted app: the Today page's API only, behind the password.
 
-Deliberately slim: no notes, search, Chroma or Anthropic key, so it fits Render's free 512 MB and
-exposes nothing but the Today page. It serves the React build from the same origin, so the login
-cookie is first-party. Locally, the full app (app.py) serves the Today page too.
-
-    gunicorn --chdir backend today_app:app      (Render start command; RENDER is set by Render)
+On Vercel this is the backend service (vercel.json): Vercel serves the React build from its CDN on the
+same domain and routes /api/* here, so the login cookie is first-party. Deliberately slim (no notes,
+search, Chroma or Anthropic key) so cold starts stay short and nothing but the Today page is exposed.
+It can also serve the React build itself (any single-host deploy). Locally, app.py serves Today too.
 """
 
 import sys
@@ -21,7 +20,7 @@ from routes.today_routes import today_bp  # noqa: E402
 BUILD = Path(__file__).resolve().parent.parent / "frontend" / "build"
 
 app = Flask(__name__, static_folder=None)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)  # Render terminates HTTPS in front of us
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)  # the platform terminates HTTPS in front of us
 init_auth(app)
 app.register_blueprint(today_bp)
 

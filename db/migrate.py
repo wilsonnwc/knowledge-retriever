@@ -7,7 +7,7 @@
 
 import argparse
 import os
-import re
+import sys
 from pathlib import Path
 
 import psycopg
@@ -15,19 +15,8 @@ from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")
-
-
-def check_schema(schema: str) -> str:
-    if not re.fullmatch(r"[a-z_][a-z0-9_]*", schema):
-        raise ValueError(f"unsafe schema name: {schema!r}")
-    return schema
-
-
-def use_schema(conn, schema: str) -> None:
-    """Scope this transaction to `schema`. Neon's pooled endpoint rejects search_path as a startup
-    option and pools by transaction, so it is set per transaction (SET LOCAL), never per session."""
-    if schema != "public":
-        conn.execute(f"SET LOCAL search_path TO {check_schema(schema)}")
+sys.path.insert(0, str(ROOT / "backend"))
+from db_schema import check_schema, use_schema  # noqa: E402,F401  (use_schema re-exported for tests)
 
 
 def migrate(schema: str = "public") -> list[str]:

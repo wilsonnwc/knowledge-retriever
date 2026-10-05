@@ -56,6 +56,7 @@ def test_local_without_a_password_keeps_auth_off(monkeypatch):
     from flask import Flask
     from auth import init_auth
     monkeypatch.delenv("RENDER", raising=False)
+    monkeypatch.delenv("VERCEL", raising=False)
     monkeypatch.delenv("APP_PASSWORD", raising=False)
     app = Flask(__name__)
     init_auth(app)

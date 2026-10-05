@@ -7,7 +7,7 @@ import pytest
 
 @pytest.fixture
 def hosted(monkeypatch, tmp_path):
-    monkeypatch.setenv("RENDER", "true")
+    monkeypatch.setenv("VERCEL", "1")
     monkeypatch.setenv("APP_PASSWORD", "pw")
     monkeypatch.setenv("SECRET_KEY", "s")
     (tmp_path / "index.html").write_text("<html>today</html>")
@@ -39,7 +39,7 @@ def test_page_routes_serve_the_react_app(hosted):
 
 
 def test_refuses_to_start_hosted_without_a_password(monkeypatch):
-    monkeypatch.setenv("RENDER", "true")
+    monkeypatch.setenv("VERCEL", "1")
     monkeypatch.delenv("APP_PASSWORD", raising=False)
     import today_app
     with pytest.raises(RuntimeError):

@@ -52,6 +52,7 @@ def client(schema, monkeypatch):
     monkeypatch.setenv("APP_PASSWORD", PASSWORD)
     monkeypatch.setenv("SECRET_KEY", "test-secret")
     monkeypatch.delenv("RENDER", raising=False)
+    monkeypatch.delenv("VERCEL", raising=False)
     from auth import init_auth
     from routes.today_routes import today_bp
     app = Flask(__name__)

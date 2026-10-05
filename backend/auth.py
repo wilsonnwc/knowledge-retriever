@@ -19,7 +19,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api")
 
 def init_auth(app) -> None:
     password = os.environ.get("APP_PASSWORD")
-    hosted = bool(os.environ.get("RENDER"))
+    hosted = bool(os.environ.get("VERCEL") or os.environ.get("RENDER"))  # both platforms set these
     if hosted and not password:
         raise RuntimeError("APP_PASSWORD must be set when hosted; refusing to serve an unauthenticated API")
     app.config.update(

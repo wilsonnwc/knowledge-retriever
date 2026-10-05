@@ -17,10 +17,10 @@ from dotenv import load_dotenv
 from psycopg.rows import dict_row
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "db"))
-from migrate import use_schema  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from db_schema import use_schema  # noqa: E402
 
-load_dotenv(ROOT / ".env")
+load_dotenv(ROOT / ".env")  # local only; hosted platforms provide the variables directly
 
 LONDON = ZoneInfo("Europe/London")          # metrics count calendar days where the user lives
 DECISIONS = ("read_now", "later", "build", "dismiss")  # count toward the success metrics

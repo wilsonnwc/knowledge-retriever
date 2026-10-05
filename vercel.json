@@ -1,0 +1,32 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": [
+    "lhr1"
+  ],
+  "services": {
+    "web": {
+      "root": "frontend/",
+      "framework": "create-react-app",
+      "buildCommand": "REACT_APP_API_URL=/api npm run build",
+      "outputDirectory": "build"
+    },
+    "api": {
+      "root": "backend/",
+      "entrypoint": "today_app:app"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "web"
+      }
+    }
+  ]
+}

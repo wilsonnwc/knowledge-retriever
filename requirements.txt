@@ -4,3 +4,4 @@ openai
 chromadb
 rank_bm25
 mcp
+PyPDF2==3.0.1
