@@ -33,7 +33,12 @@
 .decision-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .decision-row.compact { margin-top: 8px; }
 .today-btn { min-height: 44px; padding: 0 14px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); font-size: 15px; color: var(--color-text); cursor: pointer; flex: 1 1 auto; }
-.today-btn:hover:not(:disabled) { border-color: var(--color-border-hover); background: var(--color-bg); }
+/* Hover only where there is a real pointer: iOS keeps a tapped button "hovered", which painted the orange
+   Skip confirm button pale with white text (invisible). */
+@media (hover: hover) {
+  .today-btn:hover:not(:disabled) { border-color: var(--color-border-hover); background: var(--color-bg); }
+  .today-btn.primary:hover:not(:disabled) { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
+}
 .today-btn:disabled { opacity: 0.5; cursor: default; }
 .today-btn.primary { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
 .today-btn.ghost { flex: 0 0 auto; background: none; }
@@ -44,6 +49,15 @@
 .decision-done-label { font-weight: 600; }
 .decision-done-reason { color: var(--color-text-secondary); font-size: 14px; }
 .decision-chip { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+/* Each decision is recognisable at a glance (user's mobile review): Completed green, Later blue, Skip muted;
+   Build is the odd one out — accent-tinted and set apart from the reading-status group. */
+.today-btn.btn-completed { background: #EEF6EF; border-color: #8DBF94; color: #24562C; font-weight: 600; }
+.today-btn.btn-later { background: #EDF3FA; border-color: #93B4D8; color: #234A73; }
+.today-btn.btn-skip { background: transparent; border-style: dashed; border-color: var(--color-border-hover); color: var(--color-text-secondary); }
+.today-btn.btn-build { background: var(--color-accent-subtle); border-color: var(--color-accent); color: var(--color-accent-hover); flex: 0 0 auto; margin-left: auto; }
+.reason-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.reason-chips-label { width: 100%; font-size: 14px; color: var(--color-text-secondary); }
+.today-btn.reason-chip { flex: 0 0 auto; min-height: 40px; border-radius: 999px; font-size: 14px; }
 
 .junk-row { display: flex; gap: 12px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding: 10px 0; }
 .junk-text { min-width: 0; overflow-wrap: anywhere; }

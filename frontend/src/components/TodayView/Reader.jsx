@@ -11,11 +11,13 @@ const EDGE_PX = 40;       // near the top or the end of the text, the bars alway
 // Reading room (user's mobile review, 2026-10-05): the title scrolls with the text, and the top bar and the
 // decision buttons fade away while scrolling down, back on scrolling up, at the top or end, or on a tap.
 // Back: opening pushes a history entry, so the phone's own back swipe / back button closes the reader.
+// Keyboard: when a note box is open (Skip "Other…", Build), the buttons sit just above the phone keyboard.
 function Reader({ card, onClose, onDecide, onUndo }) {
   const [item, setItem] = useState(null);
   const [error, setError] = useState(null);
   const [barsHidden, setBarsHidden] = useState(false);
   const [pad, setPad] = useState({ top: 0, bottom: 0 });
+  const [keyboard, setKeyboard] = useState(0); // px of the layout viewport the on-screen keyboard covers
   const bodyRef = useRef(null);
   const headerRef = useRef(null);
   const footerRef = useRef(null);
@@ -50,6 +52,30 @@ function Reader({ card, onClose, onDecide, onUndo }) {
     const ro = new ResizeObserver(measure);
     [headerRef.current, footerRef.current].forEach((el) => el && ro.observe(el));
     return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    const footer = footerRef.current;
+    if (!vv || !footer) return undefined;
+    // Only while typing in a box in the footer, and not zoomed: pinch-zoom also shrinks the visual viewport.
+    const update = () => {
+      const el = document.activeElement;
+      const typing = footer.contains(el) && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT');
+      const shown = typing && Math.abs(vv.scale - 1) < 0.01;
+      setKeyboard(shown ? Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop)) : 0);
+    };
+    const later = () => setTimeout(update, 0); // focusout fires before the new element is focused
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    footer.addEventListener('focusin', update);
+    footer.addEventListener('focusout', later);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      footer.removeEventListener('focusin', update);
+      footer.removeEventListener('focusout', later);
+    };
   }, []);
 
   const onScroll = () => {
@@ -96,7 +122,7 @@ function Reader({ card, onClose, onDecide, onUndo }) {
             </>
           )}
         </div>
-        <footer ref={footerRef} className={`reader-footer ${hidden}`}>
+        <footer ref={footerRef} className={`reader-footer ${keyboard ? '' : hidden}`} style={keyboard ? { bottom: keyboard } : undefined}>
           <DecisionButtons state={card.state} onDecide={(a, o) => onDecide(card.id, a, o)} onUndo={(e) => onUndo(card.id, e)} />
         </footer>
       </div>

@@ -4,9 +4,9 @@ import DecisionButtons from './DecisionButtons';
 
 const fresh = { status: null, status_event_id: null, reason: null, build: false, build_event_id: null, build_note: null };
 
-test('a fresh card offers Later, Completed, Skip and Build', () => {
+test('a fresh card offers Completed, Later, Skip in reading order, then Build', () => {
   render(<DecisionButtons state={fresh} onDecide={jest.fn()} onUndo={jest.fn()} />);
-  ['Later', 'Completed', 'Skip', 'Build'].forEach((name) => expect(screen.getByRole('button', { name })).toBeInTheDocument());
+  expect(screen.getAllByRole('button').map((b) => b.textContent)).toEqual(['Completed', 'Later', 'Skip', '🛠 Build']);
   expect(screen.queryByText('Read now')).not.toBeInTheDocument();
 });
 
@@ -17,11 +17,20 @@ test('Completed is one tap and stores the read action', () => {
   expect(onDecide).toHaveBeenCalledWith('read');
 });
 
-test('skip reason is optional', () => {
+test('skip asks why with one-tap chips, no text box', () => {
   const onDecide = jest.fn(() => Promise.resolve());
   render(<DecisionButtons state={fresh} onDecide={onDecide} onUndo={jest.fn()} />);
   fireEvent.click(screen.getByRole('button', { name: 'Skip' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Skip' })); // confirm with an empty box
+  expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Already know it' }));
+  expect(onDecide).toHaveBeenCalledWith('dismiss', { reason: 'Already know it' });
+});
+
+test('"Just skip" records no reason; "Other…" opens the text box', () => {
+  const onDecide = jest.fn(() => Promise.resolve());
+  render(<DecisionButtons state={fresh} onDecide={onDecide} onUndo={jest.fn()} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Skip' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Just skip' }));
   expect(onDecide).toHaveBeenCalledWith('dismiss', { reason: undefined });
 });
 
@@ -50,6 +59,7 @@ test('a failed skip keeps the reason box open with its text', async () => {
   const onDecide = jest.fn(() => Promise.reject(new Error('offline')));
   render(<DecisionButtons state={fresh} onDecide={onDecide} onUndo={jest.fn()} />);
   fireEvent.click(screen.getByRole('button', { name: 'Skip' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Other…' }));
   fireEvent.change(screen.getByLabelText('Skip reason'), { target: { value: 'too long' } });
   fireEvent.click(screen.getByRole('button', { name: 'Skip' }));
   await screen.findByLabelText('Skip reason');
@@ -59,12 +69,13 @@ test('a failed skip keeps the reason box open with its text', async () => {
 test('a saved build note does not carry over into a later skip', async () => {
   const onDecide = jest.fn(() => Promise.resolve());
   const { rerender } = render(<DecisionButtons state={fresh} onDecide={onDecide} onUndo={jest.fn()} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Build' }));
+  fireEvent.click(screen.getByRole('button', { name: '🛠 Build' }));
   fireEvent.change(screen.getByLabelText('Build note'), { target: { value: 'a prototype' } });
   fireEvent.click(screen.getByRole('button', { name: 'Save build idea' }));
   await screen.findByRole('button', { name: 'Skip' });
   rerender(<DecisionButtons state={fresh} onDecide={onDecide} onUndo={jest.fn()} />);
   fireEvent.click(screen.getByRole('button', { name: 'Skip' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Other…' }));
   expect(screen.getByLabelText('Skip reason')).toHaveValue('');
 });
 
