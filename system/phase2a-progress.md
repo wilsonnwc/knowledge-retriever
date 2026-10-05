@@ -99,6 +99,14 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 ~16:00 UTC — Second mobile review (KR `e4de454`).**
+  - **Button order** is Completed · Later · Skip, with Build set apart.
+  - **Colours:** Completed green, Later blue, Skip muted/dashed, Build accent.
+  - **iOS sticky-hover bug fixed:** the Skip confirm button was invisible.
+  - **Skip reason chips:** Not relevant / Already know it / Low quality / Just skip / Other… Only Other… opens the keyboard.
+  - **Keyboard:** reader buttons lift above it while typing. Code review: not when pinch-zoomed.
+  - **Build ideas:** the user wants a Learning-OS-wide idea bank, not a Today tab. Logged in `learning-os-plan.md` section H. The `build` events with notes accumulate meanwhile.
+  - Frontend 16/16. Checked in the 390px frame.
 - **2026-10-05 ~15:00 UTC — First mobile review fixes (KR `8c94930`, migration 003 applied to Neon with the user's OK).**
   - **Lists clipped on the left.**
     - Cause: App.css's global `* { padding: 0 }` strips list indentation, so outside markers ("10.") fell past the reader's 16px edge.
