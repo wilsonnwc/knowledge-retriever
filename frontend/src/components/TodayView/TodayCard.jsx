@@ -1,5 +1,5 @@
 import React from 'react';
-import DecisionButtons from './DecisionButtons';
+import DecisionButtons, { OPEN_STATUSES } from './DecisionButtons';
 
 export function availabilityTag(card) {
   if (card.kind === 'media') return 'video/podcast — not fetched';
@@ -20,7 +20,7 @@ function Meta({ card }) {
 // A full card (Top 3 / Next 7) or a compact row (Everything else). Tapping the title opens the reader.
 function TodayCard({ card, variant = 'card', onOpen, onDecide, onUndo }) {
   const tag = availabilityTag(card);
-  const done = Boolean(card.state.decision);
+  const done = Boolean(card.state.status) && !OPEN_STATUSES.includes(card.state.status); // Completed / Skipped grey out
   return (
     <article className={`today-${variant} ${done ? 'done' : ''}`}>
       <button className="today-title" onClick={() => onOpen(card)}>

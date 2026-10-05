@@ -23,8 +23,14 @@ from db_schema import use_schema  # noqa: E402
 load_dotenv(ROOT / ".env")  # local only; hosted platforms provide the variables directly
 
 LONDON = ZoneInfo("Europe/London")          # metrics count calendar days where the user lives
-DECISIONS = ("read_now", "later", "build", "dismiss")  # count toward the success metrics
-ACTIONS = DECISIONS + ("open", "undo", "not_junk")
+# Decisions (count toward the success metrics). Revised with the user on 2026-10-05:
+#   reading status — later / read ("Completed") / dismiss ("Skip"): one at a time, the latest live one wins;
+#   build — a separate flag that can sit beside any status.
+# 'read_now' (the old "Read now", meaning "about to read") only exists in history: it still folds as a
+# status, but new presses can't write it.
+STATUSES = ("later", "read", "dismiss", "read_now")
+DECISIONS = STATUSES + ("build",)
+ACTIONS = ("later", "read", "dismiss", "build", "open", "undo", "not_junk")  # what a button may write
 SECTION_ORDER = {"top": 0, "next": 1, "rest": 2, "junk": 3}
 
 
@@ -47,15 +53,20 @@ def tx():
 # ── State from history ────────────────────────────────────────────────────────
 
 def state_from_events(events: list[dict]) -> dict:
-    """Fold one item's events (oldest first) into its current state."""
+    """Fold one item's events (oldest first) into its current state: a reading status plus a build flag."""
     undone = {e["undoes_event_id"] for e in events if e["action"] == "undo"}
     live = [e for e in events if e["id"] not in undone and e["action"] != "undo"]
-    decisions = [e for e in live if e["action"] in DECISIONS]
-    last = decisions[-1] if decisions else None
+    statuses = [e for e in live if e["action"] in STATUSES]
+    status = statuses[-1] if statuses else None
+    builds = [e for e in live if e["action"] == "build"]
+    build = builds[-1] if builds else None
     return {
-        "decision": last["action"] if last else None,
-        "decision_event_id": last["id"] if last else None,
-        "reason": last["reason"] if last else None,
+        "status": status["action"] if status else None,
+        "status_event_id": status["id"] if status else None,
+        "reason": status["reason"] if status else None,
+        "build": build is not None,
+        "build_event_id": build["id"] if build else None,
+        "build_note": build["reason"] if build else None,
         "opened": any(e["action"] == "open" for e in live),
         "not_junk": any(e["action"] == "not_junk" for e in live),
         "not_junk_event_id": next((e["id"] for e in reversed(live) if e["action"] == "not_junk"), None),
@@ -132,14 +143,14 @@ def later() -> list[dict]:
         ids = [r["item_id"] for r in conn.execute(
             "SELECT DISTINCT item_id FROM events WHERE action = 'later'")]
         events = _events_by_item(conn, ids)
-        keep = [i for i in ids if state_from_events(events[i])["decision"] == "later"]
+        keep = [i for i in ids if state_from_events(events[i])["status"] == "later"]
         rows = list(conn.execute(
             """SELECT i.*, s.section, s.rank, s.why, s.source
                FROM items i JOIN LATERAL (SELECT * FROM sightings WHERE item_id = i.id
                                           ORDER BY digest_date DESC LIMIT 1) s ON true
                WHERE i.id = ANY(%s::text[])""", (keep,)))
     cards = [_card(r, events[r["id"]]) for r in rows]
-    return sorted(cards, key=lambda c: c["state"]["decision_event_id"], reverse=True)
+    return sorted(cards, key=lambda c: c["state"]["status_event_id"], reverse=True)
 
 
 def last_updated() -> dict | None:
@@ -174,8 +185,6 @@ def record_event(item_id: str, action: str, reason: str | None = None, undoes_ev
     if reason is not None and not isinstance(reason, str):
         raise InvalidEvent("reason must be text")
     reason = (reason or "").strip() or None
-    if action == "dismiss" and not reason:
-        raise InvalidEvent("a reason is required to dismiss")
     if action == "undo" and undoes_event_id is None:
         raise InvalidEvent("undo needs the event it cancels")
     with tx() as conn:

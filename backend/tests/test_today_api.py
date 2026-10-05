@@ -95,12 +95,28 @@ def test_reader_opens_real_shaped_ids(logged_in, schema, item_id):
 
 # ── Button presses ────────────────────────────────────────────────────────────
 
-def test_dismiss_requires_a_reason(logged_in, schema):
+def test_skip_reason_is_optional(logged_in, schema):
+    # user decision 2026-10-05: Skip (stored as 'dismiss') no longer requires a reason
     _seed_day(schema)
-    assert press(logged_in, "a1", "dismiss").status_code == 400
-    assert press(logged_in, "a1", "dismiss", reason="   ").status_code == 400
-    r = press(logged_in, "a1", "dismiss", reason="already read it elsewhere")
-    assert r.status_code == 201 and r.get_json()["state"]["decision"] == "dismiss"
+    assert press(logged_in, "a1", "dismiss").get_json()["state"]["status"] == "dismiss"
+    r = press(logged_in, "a2", "dismiss", reason="already read it elsewhere")
+    assert r.status_code == 201 and r.get_json()["state"]["reason"] == "already read it elsewhere"
+
+
+def test_completed_and_build_go_together_and_status_switches(logged_in, schema):
+    _seed_day(schema)
+    press(logged_in, "a1", "later")
+    press(logged_in, "a1", "build", reason="a prompt library")
+    state = press(logged_in, "a1", "read").get_json()["state"]      # Later -> Completed: the status switches
+    assert (state["status"], state["build"], state["build_note"]) == ("read", True, "a prompt library")
+    assert logged_in.get("/api/later").get_json()["items"] == []    # no longer on the Later list
+    undo = press(logged_in, "a1", "undo", undoes_event_id=state["build_event_id"]).get_json()["state"]
+    assert (undo["status"], undo["build"]) == ("read", False)      # undoing Build leaves Completed alone
+
+
+def test_old_read_now_can_no_longer_be_written(logged_in, schema):
+    _seed_day(schema)
+    assert press(logged_in, "a1", "read_now").status_code == 400
 
 
 def test_malformed_input_is_a_400_not_a_crash(client, schema):
@@ -114,9 +130,9 @@ def test_malformed_input_is_a_400_not_a_crash(client, schema):
 def test_undo_restores_the_previous_decision_and_cannot_repeat(logged_in, schema):
     _seed_day(schema)
     first = press(logged_in, "a1", "later").get_json()["event"]["id"]
-    second = press(logged_in, "a1", "read_now").get_json()["event"]["id"]
+    second = press(logged_in, "a1", "read").get_json()["event"]["id"]
     undo = press(logged_in, "a1", "undo", undoes_event_id=second)
-    assert undo.get_json()["state"]["decision"] == "later"
+    assert undo.get_json()["state"]["status"] == "later"
     assert press(logged_in, "a1", "undo", undoes_event_id=second).status_code == 400  # already undone
     assert press(logged_in, "a2", "undo", undoes_event_id=first).status_code == 400   # another card's press
 
@@ -129,7 +145,7 @@ def test_not_junk_moves_a_junk_link_into_everything_else(logged_in, schema):
     assert "j1" in [c["id"] for c in page["rest"]] and page["junk"] == []
 
 
-def test_later_list_follows_the_current_decision(logged_in, schema):
+def test_later_list_follows_the_current_status(logged_in, schema):
     _seed_day(schema)
     ev = press(logged_in, "n4", "later").get_json()["event"]["id"]
     assert [c["id"] for c in logged_in.get("/api/later").get_json()["items"]] == ["n4"]
