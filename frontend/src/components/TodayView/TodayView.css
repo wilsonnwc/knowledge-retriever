@@ -16,8 +16,9 @@
 
 .today-card, .today-row { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 12px; }
 .today-row { padding: 12px 14px; margin-bottom: 8px; }
-.today-card.done, .today-row.done { opacity: 0.55; }
-.today-card.done:hover, .today-row.done:hover { opacity: 0.85; }
+/* A finished card fades its text, not its buttons: a filled (selected) toggle must stay unmistakable. */
+.today-card.done > :not(.decision), .today-row.done > :not(.decision) { opacity: 0.55; }
+.today-card.done:hover > :not(.decision), .today-row.done:hover > :not(.decision) { opacity: 0.85; }
 
 .today-title { display: block; width: 100%; text-align: left; background: none; border: none; padding: 0; font: inherit; font-size: 18px; font-weight: 600; color: var(--color-text); cursor: pointer; line-height: 1.35; }
 .today-row .today-title { font-size: 16px; }
@@ -38,26 +39,35 @@
 @media (hover: hover) {
   .today-btn:hover:not(:disabled) { border-color: var(--color-border-hover); background: var(--color-bg); }
   .today-btn.primary:hover:not(:disabled) { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
+  .today-btn.toggle:hover:not(:disabled) { background: var(--tint); border-color: var(--tone); filter: brightness(0.96); }
+  .today-btn.toggle.on:hover:not(:disabled) { background: var(--tone); }
 }
 .today-btn:disabled { opacity: 0.5; cursor: default; }
 .today-btn.primary { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
 .today-btn.ghost { flex: 0 0 auto; background: none; }
 .decision-ask { margin-top: 12px; }
 .decision-ask textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 8px 10px; border: 1px solid var(--color-border-hover); border-radius: var(--radius-md); }
-.decision-done { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
-.decision-done.compact { margin-top: 8px; }
-.decision-done-label { font-weight: 600; }
-.decision-done-reason { color: var(--color-text-secondary); font-size: 14px; }
-.decision-chip { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-/* Each decision is recognisable at a glance (user's mobile review): Completed green, Later blue, Skip muted;
-   Build is the odd one out — accent-tinted and set apart from the reading-status group. */
-.today-btn.btn-completed { background: #EEF6EF; border-color: #8DBF94; color: #24562C; font-weight: 600; }
-.today-btn.btn-later { background: #EDF3FA; border-color: #93B4D8; color: #234A73; }
-.today-btn.btn-skip { background: transparent; border-style: dashed; border-color: var(--color-border-hover); color: var(--color-text-secondary); }
-.today-btn.btn-build { background: var(--color-accent-subtle); border-color: var(--color-accent); color: var(--color-accent-hover); flex: 0 0 auto; margin-left: auto; }
+/* Decision toggles (user's design, 2026-10-05): unselected = light tint + coloured border, selected = filled,
+   one colour per decision. Tapping a filled button undoes it, so "selected" must be unmistakable. */
+.decision { margin-top: 12px; }
+.decision.compact { margin-top: 8px; }
+.decision > .decision-row { margin-top: 0; }
+.decision-note { margin: 6px 0 0; font-size: 14px; color: var(--color-text-secondary); }
+.today-btn.toggle { --tone: var(--color-text-secondary); --tint: var(--color-bg);
+  background: var(--tint); border: 1.5px solid var(--tone); color: var(--tone); font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease; }
+.today-btn.toggle.on { background: var(--tone); color: #fff; font-weight: 600; }
+.today-btn.tone-completed { --tone: #2E7D3A; --tint: #EEF6EF; }
+.today-btn.tone-later { --tone: #2F6FB0; --tint: #EDF3FA; }
+.today-btn.tone-skip { --tone: #6B6B6A; --tint: #F3F2EE; }
+.today-btn.tone-build { --tone: #C4643F; --tint: #FAEBE3; flex: 0 0 auto; margin-left: auto; }
 .reason-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .reason-chips-label { width: 100%; font-size: 14px; color: var(--color-text-secondary); }
 .today-btn.reason-chip { flex: 0 0 auto; min-height: 40px; border-radius: 999px; font-size: 14px; }
+.decision-ask .reason-chips-label { display: block; margin-bottom: 8px; }
+.decision-ask .reason-chips + textarea { margin-top: 10px; }
+.confirm-row .today-btn { flex: 1 1 0; font-size: 20px; } /* big ✓ / ✕ targets under the pills */
+.confirm-row .today-btn.ghost { border: 1.5px solid var(--color-border-hover); }
 
 .junk-row { display: flex; gap: 12px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding: 10px 0; }
 .junk-text { min-width: 0; overflow-wrap: anywhere; }
