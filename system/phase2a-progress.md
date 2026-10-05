@@ -26,14 +26,12 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## NEXT SESSION START HERE (updated 2026-10-05 ~08:50 UTC)
 1. ~~**P2: self-promo junk rule**~~ **Done** (AICoS `727e5e7`, pushed). See the iteration log.
-2. **P3: go live. Blocked on the user's approval of the workflow edit.**
-   - Claude Code's auto-mode classifier denied the workflow edit as a production deploy. The user makes this edit, or approves it.
-   - **The edit** (`.github/workflows/daily_digest.yml`):
-     - `env.V2` becomes `${{ github.event_name == 'schedule' || github.event.inputs.v2 == 'true' || github.event.inputs.dry_run == 'true' }}`.
-     - The `v2` input default becomes `true`, so a manual run can untick it to fall back to v1.
-   - **Ship it together with the seeded `processed_messages.json`** (written locally, uncommitted). It holds the Gmail IDs of the 3 emails in the 4 Oct v1 digest. Without it, v2's first night re-sends them (see the iteration log).
-   - Push before 21:00 UTC, or tonight's run stays v1.
-   - Then watch 3 nights: the invariants step (no repeats, digest landed) and the coverage line in the email header.
+2. ~~**P3: go live**~~ **Done** (AICoS `16cd408`, pushed 09:29 UTC 5 Oct, after the user said "go live"). The first v2 night is 5 Oct (scheduled 21:30 UTC).
+   - **Now watch 3 nights (5, 6 and 7 Oct):**
+     - The invariants step: no repeats, and the digest landed.
+     - The coverage line in the email header.
+     - Night 1 specifically: none of the 3 seeded 4 Oct emails reappear.
+   - **Rollback if needed:** revert `16cd408`, or run the workflow manually with `v2` unticked.
 3. **B3: store-first ingestion to Neon.** See the milestone below. It can be built while the 3 nights are being watched.
 4. **Then ⏸ Pause 2:** the user's mobile walkthrough with real data.
 - **Test commands:**
@@ -69,7 +67,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - `dry_run` workflow input.
   - Dry run on GitHub.
   - Old-vs-new comparison report written.
-- [ ] ⏸ **Pause 1:** the user reviews the dry-run comparison and the junk disagreements, and approves Release A go-live.
+- [x] ⏸ **Pause 1:** the user reviews the dry-run comparison and the junk disagreements, and approves Release A go-live. *(Approved 5 Oct; P2 `727e5e7`, live `16cd408`)*
 - [x] **B1** Password login on all routes, plus the Neon-backed items/events API (incl. `not_junk` migration). *(KR `cad2b32`; migration 002 applied to Neon)*
 - [x] **B2** Today page (mobile-first): *(KR `11cc47f`)*
   - Cards and the Everything-else list.
@@ -88,6 +86,10 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 09:29 UTC — P3 done: Release A is live (AICoS `16cd408`).**
+  - The user approved ("go live") after the auto-mode denial.
+  - Workflow YAML validated: both values read back as intended.
+  - The workflow change and the seeded processed list shipped in one commit.
 - **2026-10-05 08:50 UTC — P3 prepared; workflow edit blocked pending the user.**
   - **Found a night-one repeat bug before go-live.**
     - The Gmail search covers yesterday plus today. v2 skips emails already in `processed_messages.json`, but that file didn't exist yet, since v1 never kept one on GitHub.
@@ -234,7 +236,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 - **P2 ✅** A newsletter's own self-promo social post is **junk**, like sponsors and referrals.
   - Example: TLDR's LinkedIn "Best Bootstrapped" post, whose context is "Apply here… jobs@tldr.tech… get $1k if we hire them! TLDR is one of Inc.'s Best Bootstrapped businesses".
   - **Built:** AICoS `727e5e7`.
-- **P3 ✅** Go live: switch the nightly digest to v2. **Prepared. The workflow edit awaits the user (auto-mode denial).**
+- **P3 ✅** Go live: switch the nightly digest to v2. **Live:** AICoS `16cd408`, 2026-10-05.
 
 **Answered 2026-10-05 (user reviewed all 27 Pause 1 links: "nothing to change, recommendations spot on"):**
 - Q1: an author's own glossary/explainer pages are **articles**.

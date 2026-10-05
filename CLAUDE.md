@@ -101,7 +101,8 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
   - Release B: Neon store-first, the Today page, and Render hosting with a password login, all in one autonomous loop.
   - GitHub re-test: The Batch 0% → 72%. The Neuron stays email-body-only.
 - **Session 44 (2026-10-04 → 10-05): Phase 2a autonomous loop.**
-  - **Release A** (AICoS digest upgrade) is built and dry-run: coverage 37% → 76%. The user approved go-live at Pause 1, but it is **not switched on yet**.
+  - **Release A** (AICoS digest upgrade) is built and dry-run: coverage 37% → 76%. **Live since 2026-10-05** (AICoS `16cd408`); first v2 night is 5 Oct.
+    - Before switching: added the self-promo junk rule (Pause 1 P2), and fixed a night-one repeat bug by seeding v2's processed-email list from v1's last digest.
   - **Release B:**
     - B1 (login + Neon API), B2 (Today page) and B4 (Vercel hosting) are done. Live at https://knowledge-retriever-today.vercel.app.
     - B3 (Neon ingestion) is still to do.
