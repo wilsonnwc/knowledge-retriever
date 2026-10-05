@@ -72,6 +72,12 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 ~00:20 UTC — Junk judge updated with the user's rulings; fourth unseen holdout.**
+  - **dev:** 0 lost / 98% (no regression).
+  - **Holdout v4** (30 Aug–5 Sep, blind labels committed first): **1 lost / 93% junk caught.** All 6 glossary/guide links are now correct.
+  - The 1 loss is borderline (a "Best Oil Stocks" listicle) → user question 5.
+  - Unseen-set losses so far: 6 → 1 → 1.
+  - Tuning stopped on purpose so the holdouts stay honest. The safety net is that junk is stored and can be rescued with "Not junk".
 - **2026-10-05 ~00:05 UTC — B4 done on Vercel (user present).**
   - Render needed a card. Vercel was verified (Hobby: free, no billing cycle, pauses rather than charges; Python/Flask; London `lhr1`; 5-min limit) and the user chose it.
   - Built as two Vercel Services in one project (React on the CDN, Flask API on `/api/*`). `backend/requirements.txt` was slimmed so the function stays small.
@@ -185,6 +191,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 1. **Junk guideline (a):** inline links to an author's own glossary/explainer pages (Teresa Torres "opportunity solution tree", "customer needs"…). Article, or junk-as-reference like model cards and repos? This decides 4 of holdout v2's 6 misses.
 2. **Junk guideline (b):** a report's landing page (holdout v3 #22, Citi). Article or junk?
 3. **Grade Claude's blind labels:** a random sample of ~20 holdout links will be in the Pause 1 review page.
+5. **Junk bar, last borderline case (Pause 1):** holdout v4 lost 1 "article": a Benzinga "Best Oil Stocks Right Now" listicle, which the judge called a ticker page. Is an evergreen "best X stocks" listicle an article or junk? If junk, every unseen set since the rulings meets the bar.
 4. ~~**Hosting (blocks B4):**~~ **Answered 2026-10-05: Vercel**, after a verified comparison. Recorded in `learning-os-plan.md`. Render refuses to create even a free service through the API without a card on file. Options:
    - (a) Add a card to Render. The free plan stays free, and Claude deploys straight away.
    - (b) Create it yourself: Render dashboard → New → Blueprint → this repo (`render.yaml`), then paste the 3 secrets from `.env`. It's unknown whether the dashboard also asks for a card.
