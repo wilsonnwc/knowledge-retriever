@@ -99,6 +99,20 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 ~15:00 UTC — First mobile review fixes (KR `8c94930`, migration 003 applied to Neon with the user's OK).**
+  - **Lists clipped on the left.**
+    - Cause: App.css's global `* { padding: 0 }` strips list indentation, so outside markers ("10.") fell past the reader's 16px edge.
+    - Fix: lists get their indent back, and the reader can't grow or scroll sideways.
+    - Checked in a 390px frame: no element outside the screen.
+  - **More reading room:**
+    - The title scrolls with the text.
+    - The top bar and the buttons fade and slide away on scroll down, and come back on scroll up, at the top or end, or on a tap.
+  - **Back:** the reader pushes a history entry, so the phone's native back swipe closes it.
+  - **Decisions (user, 5 Oct):**
+    - "Completed" is a new `read` action. "Skip" is still stored as `dismiss`, and its reason is now optional.
+    - Later / Completed / Skip form one reading status. Build is a separate flag beside it.
+    - Old `read_now` presses fold as an open status, like Later (found by code review).
+  - **Tests:** backend 28/28, frontend 15/15. Behaviour was checked in the 390px frame: hide/show bars, back closes the reader, Completed + Build together.
 - **2026-10-05 ~13:00 UTC — Reader shows Markdown with links (AICoS `aa9826d`, KR `e56a8e1`). User decision: option A, no images.**
   - **Problem (found by the user on their phone):** email bodies read as flattened plain text. Lines broke mid-sentence, invisible preheader padding left blank walls, and there were no links.
   - **Emails:** converted with markdownify after the plain-text path's own footer cleanup (`newsletter_digest_prep.email_soup`, now shared). Layout tables are unwrapped and images dropped.
