@@ -32,11 +32,18 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
      - The coverage line in the email header.
      - Night 1 specifically: none of the 3 seeded 4 Oct emails reappear.
    - **Rollback if needed:** revert `16cd408`, or run the workflow manually with `v2` unticked.
-3. **B3: built and pushed, switched OFF** (AICoS `a12fab6`). The user chose option A on 5 Oct: build now, switch on after the 3-night v2 watch, so a problem can be traced to one change.
-   - **Switch-on, morning of 8 Oct, after 3 clean nights.** Edit `.github/workflows/daily_digest.yml` (this needs the user's OK, since auto-mode treats workflow edits as production deploys):
+3. **B3: built and pushed, switched OFF** (AICoS `a12fab6`).
+   - The user first chose option A on 5 Oct: build now, switch on after the 3-night v2 watch.
+   - **Revised the same day:** switch on from **6 Oct**, if v2's first night alone (5 Oct) is clean.
+   - Reasoning: B3 can't break the email or cause repeats, and its failures are labelled separately (the NEON_FAILED step name plus the banner). v2's own checks don't depend on it. The night that matters most for telling the two apart is v2's first one.
+   - **Switch-on, morning of 6 Oct, if the 5 Oct email and invariants are clean.** Edit `.github/workflows/daily_digest.yml` (this needs the user's OK, since auto-mode treats workflow edits as production deploys):
      - Add `"psycopg[binary]"` to the `pip install` line.
      - Add to the job's `env:` block: `NEON_STORE: 'true'` and `DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}` (the secret already exists).
      - Push before 21:00 UTC, then check the next morning's Today page.
+   - **Backfill for review (user decision, 5 Oct; supersedes "no backfill" for this one day):**
+     - 4 Oct was re-fetched from Gmail (read-only) and loaded into the live tables (public schema): 38 items, 3 top / 7 rest / 28 junk (3 borderline).
+     - No processed_messages written. The `runs` row has `sent=false`.
+     - It exists for the user's mobile review before real B3 nights land.
    - Junk-today list: answered (Q6). Borderline calls first, rule-filtered underneath. Built.
 4. **Then ⏸ Pause 2:** the user's mobile walkthrough with real data.
 - **Test commands:**
