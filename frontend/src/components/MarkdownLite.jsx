@@ -1,30 +1,42 @@
 import React from 'react';
 
-const BULLET_RE = /^-\s+(.*)$/;
-const NUMBERED_RE = /^\d+\.\s+(.*)$/;
-const H3_RE = /^### (.*)$/;
+// Leading spaces allowed: newsletter Markdown nests lists ("  - b"); nested items join the list, flattened.
+const BULLET_RE = /^\s*[-*]\s+(.*)$/;
+const NUMBERED_RE = /^\s*\d+\.\s+(.*)$/;
+const H3_RE = /^#{3,6} (.*)$/; // h4-h6 (newsletter Markdown has them) render as h3
 const H2_RE = /^## (.*)$/;
 const H1_RE = /^# (.*)$/;
 const BLOCKQUOTE_RE = /^>\s?(.*)$/;
-// Tries **bold** first at each position, falling back to *italic* — so
-// "**bold**" is never misread as "*" + "*bold*" + "*".
-const BOLD_ITALIC_RE = /\*\*(.+?)\*\*|\*(.+?)\*/g;
+const RULE_RE = /^\s*(-{3,}|\*{3,}|_{3,})\s*$/;
+// At each position tries a backslash-escaped character ("\*" is a literal asterisk), then a [link](target), then
+// **bold**, then *italic* — so "**bold**" is never misread as "*" + "*bold*" + "*". A link target may hold one
+// level of parentheses (Wikipedia-style URLs) and be followed by a "title". Only http(s) targets become anchors;
+// any other target (mailto:, javascript:, relative) renders as its plain link text.
+const INLINE_RE = /\\([\\`*_{}[\]()#+\-.!>|~])|\[([^\]]*)\]\(((?:[^()\s]|\([^()\s]*\))+)(?:\s+"[^"]*")?\)|\*\*(.+?)\*\*|\*(.+?)\*/g;
+const HTTP_RE = /^https?:\/\//i;
 const INLINE_HEADER_RE = /^(#{1,6})\s+(.*)$/gm;
 
-// Renders **bold** and *italic* spans within a line of text; everything
-// else passes through as plain text.
+// Renders [links](https://…), **bold** and *italic* spans within a line of text, nested either way
+// ("**[title](url)**" or "[**title**](url)"); everything else passes through as plain text.
 function renderInline(text) {
   const parts = [];
+  const re = new RegExp(INLINE_RE.source, 'g'); // own instance: renderInline recurses
   let lastIndex = 0;
   let match;
   let key = 0;
-  BOLD_ITALIC_RE.lastIndex = 0;
-  while ((match = BOLD_ITALIC_RE.exec(text)) !== null) {
+  while ((match = re.exec(text)) !== null) {
     if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
     if (match[1] !== undefined) {
-      parts.push(<strong key={key++}>{match[1]}</strong>);
+      parts.push(match[1]);
+    } else if (match[3] !== undefined) {
+      const label = renderInline(match[2] || match[3]);
+      parts.push(HTTP_RE.test(match[3])
+        ? <a key={key++} href={match[3]} target="_blank" rel="noopener noreferrer">{label}</a>
+        : <React.Fragment key={key++}>{label}</React.Fragment>);
+    } else if (match[4] !== undefined) {
+      parts.push(<strong key={key++}>{renderInline(match[4])}</strong>);
     } else {
-      parts.push(<em key={key++}>{match[2]}</em>);
+      parts.push(<em key={key++}>{renderInline(match[5])}</em>);
     }
     lastIndex = match.index + match[0].length;
   }
@@ -96,9 +108,11 @@ function MarkdownLite({ content }) {
     const h2 = line.match(H2_RE);
     const h1 = line.match(H1_RE);
     const blockquote = line.match(BLOCKQUOTE_RE);
+    if (RULE_RE.test(line)) return blocks.push({ type: 'hr' });
     if (h3) return blocks.push({ type: 'h3', text: h3[1] });
     if (h2) return blocks.push({ type: 'h2', text: h2[1] });
     if (h1) return blocks.push({ type: 'h1', text: h1[1] });
+    if (blockquote && !blockquote[1].trim()) return blocks.push({ type: 'br' }); // bare ">" between quoted paragraphs
     if (blockquote) return blocks.push({ type: 'blockquote', text: blockquote[1] });
     if (line.trim()) return blocks.push({ type: 'p', text: line });
     blocks.push({ type: 'br' });
@@ -127,6 +141,7 @@ function MarkdownLite({ content }) {
         if (block.type === 'h3') return <h3 key={idx}>{renderInline(block.text)}</h3>;
         if (block.type === 'blockquote') return <blockquote key={idx}>{renderInline(block.text)}</blockquote>;
         if (block.type === 'p') return <p key={idx}>{renderInline(block.text)}</p>;
+        if (block.type === 'hr') return <hr key={idx} />;
         return <br key={idx} />;
       })}
     </>
