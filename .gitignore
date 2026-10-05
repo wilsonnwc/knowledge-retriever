@@ -10,3 +10,7 @@ system/_data/goals/
 
 # Trashed notes are ephemeral (7-day auto-purge) — never commit them
 notes/.trash/
+
+# design-review run folders (screenshots, evidence)
+.design-review/
+docs/design-reviews/**/screenshots/
