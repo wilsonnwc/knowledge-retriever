@@ -24,22 +24,20 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Put secrets in code, logs or commits.
 - The junk-filter fresh-week check uses Claude's blind labels, written **before** seeing judge output. Disagreements go to the user at Pause 1.
 
-## NEXT SESSION START HERE (written 2026-10-05 ~08:15 UTC; the session ended for fresh context)
-1. **P2: self-promo junk rule** (AICoS `link_pipeline.py`).
-   - Today `classify_destination` returns `article` for every social post before the judge sees it.
-   - Add a rule: a social post is junk when its context is the newsletter's own hiring/award/about-us blurb (e.g. `jobs@`, "if we hire", "we're hiring").
-   - Or let such social posts fall through to the judge.
-   - Add a test using the real context above.
-   - Holdout v4 row #6 is exactly this link (labelled junk). Note it in that eval's results as a known miss, now fixed by a rule. Don't re-run the holdout as if it were unseen.
-2. **P3: go live.**
-   - Make the scheduled run use v2: the one-line change to `env.V2` in `.github/workflows/daily_digest.yml`, for scheduled runs too.
-   - Push before 21:00 UTC (loop rule), or tonight's run stays v1.
-   - Re-run the tests first.
+## NEXT SESSION START HERE (updated 2026-10-05 ~08:50 UTC)
+1. ~~**P2: self-promo junk rule**~~ **Done** (AICoS `727e5e7`, pushed). See the iteration log.
+2. **P3: go live. Blocked on the user's approval of the workflow edit.**
+   - Claude Code's auto-mode classifier denied the workflow edit as a production deploy. The user makes this edit, or approves it.
+   - **The edit** (`.github/workflows/daily_digest.yml`):
+     - `env.V2` becomes `${{ github.event_name == 'schedule' || github.event.inputs.v2 == 'true' || github.event.inputs.dry_run == 'true' }}`.
+     - The `v2` input default becomes `true`, so a manual run can untick it to fall back to v1.
+   - **Ship it together with the seeded `processed_messages.json`** (written locally, uncommitted). It holds the Gmail IDs of the 3 emails in the 4 Oct v1 digest. Without it, v2's first night re-sends them (see the iteration log).
+   - Push before 21:00 UTC, or tonight's run stays v1.
    - Then watch 3 nights: the invariants step (no repeats, digest landed) and the coverage line in the email header.
 3. **B3: store-first ingestion to Neon.** See the milestone below. It can be built while the 3 nights are being watched.
 4. **Then ⏸ Pause 2:** the user's mobile walkthrough with real data.
 - **Test commands:**
-  - AICoS: use the scratchpad venv or any Python with `requirements.txt` and trafilatura, then `python -m pytest -q`. 70 tests pass.
+  - AICoS: AICoS has no `requirements.txt`. Install the package list from `daily_digest.yml`'s `pip install` line plus `pytest` into a venv, then run `python -m pytest -q`. 74 tests pass.
   - KR: `backend` tests, 24 pass.
 
 ## Milestones
@@ -90,6 +88,22 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 08:50 UTC — P3 prepared; workflow edit blocked pending the user.**
+  - **Found a night-one repeat bug before go-live.**
+    - The Gmail search covers yesterday plus today. v2 skips emails already in `processed_messages.json`, but that file didn't exist yet, since v1 never kept one on GitHub.
+    - So v2's first night (5 Oct) would have re-sent the 4 Oct emails that v1's last digest already covered, and turned the new repeats check red.
+    - The dry runs couldn't catch it: they ignore the processed list by design, so they can replay the past.
+  - **Fix:** seeded `processed_messages.json` with the Gmail IDs of exactly the 3 emails in the 4 Oct v1 digest.
+    - Matched read-only by sender and decoded subject, using a one-off scratchpad script that isn't in the repo.
+    - The 4 other emails in the window are not seeded. They're dated 3 Oct or in Trash, so they're outside tonight's search.
+    - There was no v1 digest for 3 Oct (no auto-commit that night). This predates v2 and is noted only for the record.
+  - The workflow edit was denied by the auto-mode classifier as a production deploy. Left for the user (see NEXT SESSION START HERE).
+- **2026-10-05 08:40 UTC — P2 done (AICoS `727e5e7`).**
+  - A social post whose newsletter text is the hiring blurb is now junk. The rule is `SELF_PROMO_CONTEXT`, checked in `classify_destination` after redirects.
+  - **Code review flagged** that the broad phrases "we're hiring" and "want to work at" could junk real headlines. Narrowed the pattern to `jobs@`, "if we hire" and "create your own role", and added a test for that headline case.
+  - **Checked on all 390 labelled links (v1 + holdouts v2–v4):** the pattern touches only holdout v4 #6. There's no footer spillover into real stories' surrounding text.
+  - `run_eval.py` now passes the surrounding text through as well, keeping the eval's decision order identical to production.
+  - The v4 holdout was not re-scored: #6 is now a known case, recorded in `results_v4_holdout.md`. 74/74 tests pass.
 - **2026-10-05 07:55 UTC — A5 done. Loop stopped at ⏸ Pause 1.**
   - **All 3 dry runs succeeded.** Real-article coverage, excl. The Neuron: v1 37% → **v2 76%** (75% / 77% / 75% per day). The Batch: 0/17 → 12/17 (71%).
   - **AC1 "no newsletter worse" FAILS on 2 Oct** (Jenny Wanger 2/8 → 1/8; Daily Rip 7/11 → 6/11). In each case, one link where v1's loose "ok" was a CNBC teaser or an event landing page. Not lowered silently: Pause 1 question P1.
@@ -219,8 +233,8 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 - **P1 ✅** Accepted: the 2 Oct "no newsletter worse" FAIL is a measurement artefact. It was 1 link each, and v1's "ok" was a teaser or event page.
 - **P2 ✅** A newsletter's own self-promo social post is **junk**, like sponsors and referrals.
   - Example: TLDR's LinkedIn "Best Bootstrapped" post, whose context is "Apply here… jobs@tldr.tech… get $1k if we hire them! TLDR is one of Inc.'s Best Bootstrapped businesses".
-  - **Not built yet.**
-- **P3 ✅** Go live: switch the nightly digest to v2. **Not done yet.**
+  - **Built:** AICoS `727e5e7`.
+- **P3 ✅** Go live: switch the nightly digest to v2. **Prepared. The workflow edit awaits the user (auto-mode denial).**
 
 **Answered 2026-10-05 (user reviewed all 27 Pause 1 links: "nothing to change, recommendations spot on"):**
 - Q1: an author's own glossary/explainer pages are **articles**.
