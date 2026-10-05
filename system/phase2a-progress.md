@@ -99,6 +99,11 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 ~17:00 UTC — Decisions as toggles, the user's design (KR `092d44f`).**
+  - **Toggles:** unselected is tinted with a coloured border; selected is filled. Tapping again undoes, history-based (Later → Completed → tap Completed → back to Later). No Undo buttons.
+  - **Skip:** multi-select pills, then ✓ saves or ✕ cancels. ✓ with no pill = no reason. The "Just skip" pill is dropped. Several reasons are stored as one text joined by "; ".
+  - **Done cards** fade their text, not their buttons. Found in the 390px check: the old whole-card fade washed out the filled toggles.
+  - Frontend 18/18.
 - **2026-10-05 ~16:00 UTC — Second mobile review (KR `e4de454`).**
   - **Button order** is Completed · Later · Skip, with Build set apart.
   - **Colours:** Completed green, Later blue, Skip muted/dashed, Build accent.
