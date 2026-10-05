@@ -47,7 +47,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 - [x] **A4** Junk judge (rules + Haiku): *(AICoS `423d3a3`, `2b16fe4`, local; push after 05:30 UTC)*
   - Passes `evals/junk_filter/labels_v1.csv`: 0 articles → junk, ≥ 90% junk recall.
   - Fresh-week blind check prepared.
-- [ ] **A5** Pre-go-live checks and dry run: *(code done, AICoS `ac6ddf4` local. **Waiting:** push after 05:30 UTC, then dispatch dry runs for 2026-09-30, 10-01, 10-02.)*
+- [ ] **A5** Pre-go-live checks and dry run: *(code pushed 07:12 UTC 5 Oct; dry runs dispatched: 37276478843 (09-30), 37276482782 (10-01), 37276486493 (10-02))*
   - Coverage metric in the manifest and log.
   - No-repeat and digest-landed checks.
   - `dry_run` workflow input.
@@ -72,6 +72,10 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 07:12 UTC — AICoS pushed; dry runs dispatched.**
+  - The laptop slept through the scheduled 05:30 check-in; the user prompted the push.
+  - Last night's live v1 digest ran OK at 00:01 UTC, before the push.
+  - Rebased the 11 commits onto it: 67/67 tests pass, actionlint OK.
 - **2026-10-05 ~00:20 UTC — Junk judge updated with the user's rulings; fourth unseen holdout.**
   - **dev:** 0 lost / 98% (no regression).
   - **Holdout v4** (30 Aug–5 Sep, blind labels committed first): **1 lost / 93% junk caught.** All 6 glossary/guide links are now correct.
