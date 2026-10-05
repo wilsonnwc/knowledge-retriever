@@ -37,7 +37,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
      - Add `"psycopg[binary]"` to the `pip install` line.
      - Add to the job's `env:` block: `NEON_STORE: 'true'` and `DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}` (the secret already exists).
      - Push before 21:00 UTC, then check the next morning's Today page.
-   - **Open question for the user (doesn't block the switch):** the Junk-today list scope (Q6 below).
+   - Junk-today list: answered (Q6). Borderline calls first, rule-filtered underneath. Built.
 4. **Then ⏸ Pause 2:** the user's mobile walkthrough with real data.
 - **Test commands:**
   - AICoS: AICoS has no `requirements.txt`. Install the package list from `daily_digest.yml`'s `pip install` line plus `pytest` into a venv, then run `python -m pytest -q`. 74 tests pass.
@@ -251,7 +251,8 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - No code yet.
 
 ## Questions for the user (batched for Pause 2)
-6. **Junk-today list scope (found in the B3 replay, 5 Oct).**
+6. ✅ **Answered 5 Oct: both, ordered.** The judge's borderline calls go at the top ("Borderline calls"), then everything the rules filtered goes underneath ("Filtered by rules"). With little time, the user can do just the borderline ones; with more, the whole list. Built in `TodayView.jsx` `splitJunk()`, and browser-checked on the 4 Oct replay data: 3 borderline, then 25 rule-filtered.
+   - *Original question:* **Junk-today list scope (found in the B3 replay, 5 Oct).**
    - A real day has about 100–130 junk links, and most come from rules: stock tickers (`$CDNA`), poll buttons ("Bearish"), unsubscribe and "view online" links. On 4 Oct the list held 28 rows like that.
    - Option (a): show only junk the Haiku judge decided (`class_reason` starts with `judge:`). Those are the ones worth a "Not junk" correction.
    - Option (b): show everything, collapsed.

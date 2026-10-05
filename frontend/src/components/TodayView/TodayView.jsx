@@ -16,6 +16,13 @@ function lastUpdatedText(lu) {
   return `Last updated ${t.toLocaleString('en-GB', { weekday: 'short', hour: '2-digit', minute: '2-digit' })}`;
 }
 
+// Junk today: the Haiku judge's borderline calls first (worth a look when time is short), then
+// everything the rules filtered (tickers, polls, footer links) underneath.
+export function splitJunk(junk) {
+  const borderline = junk.filter((c) => (c.class_reason || '').startsWith('judge'));
+  return [['Borderline calls', borderline], ['Filtered by rules', junk.filter((c) => !borderline.includes(c))]];
+}
+
 // The daily triage page: Top 3 and Next 7 as cards, everything else as compact rows, plus the
 // Later list and the "Junk today" list with its "Not junk" corrections.
 function TodayView() {
@@ -124,14 +131,19 @@ function TodayView() {
         <>
           <p className="today-muted">Links set aside as not worth reading, and why. Wrong call? Mark it “Not junk” — it moves to Everything else, and the correction becomes a test case for the filter.</p>
           {page.junk.length === 0 && <p className="today-muted">No junk today.</p>}
-          {page.junk.map((c) => (
-            <div key={c.id} className="junk-row">
-              <div className="junk-text">
-                <a href={c.url} target="_blank" rel="noopener noreferrer">{c.title}</a>
-                <div className="today-meta">{c.source} · {c.class_reason}</div>
-              </div>
-              <button className="today-btn" onClick={() => notJunk(c.id)}>Not junk</button>
-            </div>
+          {splitJunk(page.junk).map(([heading, rows]) => rows.length > 0 && (
+            <React.Fragment key={heading}>
+              <h2 className="today-section">{heading} ({rows.length})</h2>
+              {rows.map((c) => (
+                <div key={c.id} className="junk-row">
+                  <div className="junk-text">
+                    <a href={c.url} target="_blank" rel="noopener noreferrer">{c.title}</a>
+                    <div className="today-meta">{c.source} · {c.class_reason}</div>
+                  </div>
+                  <button className="today-btn" onClick={() => notJunk(c.id)}>Not junk</button>
+                </div>
+              ))}
+            </React.Fragment>
           ))}
         </>
       )}
