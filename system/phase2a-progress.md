@@ -32,7 +32,12 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
      - The coverage line in the email header.
      - Night 1 specifically: none of the 3 seeded 4 Oct emails reappear.
    - **Rollback if needed:** revert `16cd408`, or run the workflow manually with `v2` unticked.
-3. **B3: store-first ingestion to Neon.** See the milestone below. It can be built while the 3 nights are being watched.
+3. **B3: built and pushed, switched OFF** (AICoS `a12fab6`). The user chose option A on 5 Oct: build now, switch on after the 3-night v2 watch, so a problem can be traced to one change.
+   - **Switch-on, morning of 8 Oct, after 3 clean nights.** Edit `.github/workflows/daily_digest.yml` (this needs the user's OK, since auto-mode treats workflow edits as production deploys):
+     - Add `"psycopg[binary]"` to the `pip install` line.
+     - Add to the job's `env:` block: `NEON_STORE: 'true'` and `DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}` (the secret already exists).
+     - Push before 21:00 UTC, then check the next morning's Today page.
+   - **Open question for the user (doesn't block the switch):** the Junk-today list scope (Q6 below).
 4. **Then ⏸ Pause 2:** the user's mobile walkthrough with real data.
 - **Test commands:**
   - AICoS: AICoS has no `requirements.txt`. Install the package list from `daily_digest.yml`'s `pip install` line plus `pytest` into a venv, then run `python -m pytest -q`. 74 tests pass.
@@ -78,14 +83,29 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Previous days.
   - Metrics strip and "Last updated".
   - Browser QA.
-- [ ] **B3** (after Pause 1) Store-first ingestion to Neon:
-  - Neon becomes the processed record.
+- [x] **B3** (after Pause 1) Store-first ingestion to Neon. *(AICoS `a12fab6`, built behind `NEON_STORE`, off until 8 Oct)*
+  - Neon becomes the processed record: Neon OR the JSON file, so there's no cold start.
   - Neon-failure banner plus the run marked failed.
+  - Tests: unit tests offline; integration tests on a throwaway Neon schema; replay of 4 Oct real emails.
 - [x] **B4** Hosting, on **Vercel** (user decision), plus desktop local-run instructions. *(KR `4ff21c2`; live at https://knowledge-retriever-today.vercel.app)*
 - [ ] ⏸ **Pause 2:** the user's mobile walkthrough.
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
+- **2026-10-05 09:50 UTC — B3 built behind `NEON_STORE` (AICoS `a12fab6`); 85/85 tests pass.**
+  - **Design:**
+    - Layer 1 writes `$DATE/store/items.json` (never committed), plus an `ITEM_ID` line per cleaned item. That line is never sent to Claude.
+    - Layer 2 writes `$DATE/store/enrichment.json`. Summaries map to items by Call 1's per-batch index; Call 2's ranks map by URL, then by title.
+    - `run_daily` stores after Layer 1 (store-first), enriches after Layer 2, and closes the run once the email is sent.
+  - **Found and fixed while building:**
+    - Articles and email bodies were capped at 8000 chars, the cap for Claude's input. The reader now gets the full text, and Claude's input is unchanged.
+    - Cold start: processed means Neon OR JSON, so an empty Neon table can't repeat emails.
+    - Code review found 3 bugs, all fixed with tests: a real class now beats junk on merge; the email-body placeholder URL is no longer used to match ranks; a later full-text fetch updates the title.
+  - **Flag off is proven inert:** Layer 1 output with the flag on equals flag off, minus the ITEM_ID lines.
+  - **Real replay of 4 Oct** (read-only Gmail, throwaway schema, about $0.15 of Haiku):
+    - 43 records became 38 unique items, and Neon holds exactly 38.
+    - The Today page's own `today_store.today()` read it back as 3 top / 1 next / 6 rest / 28 junk, with summaries, one-liners and "Last updated".
+    - The 28 junk rows are mostly noise, which raised question 6.
 - **2026-10-05 09:29 UTC — P3 done: Release A is live (AICoS `16cd408`).**
   - The user approved ("go live") after the auto-mode denial.
   - Workflow YAML validated: both values read back as intended.
@@ -229,6 +249,13 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
     - (2) The dry-run comparison was skewed by `recent_urls.json`.
   - Added milestone A1b (email context recovery), because Gmail Trash expires after 30 days.
   - No code yet.
+
+## Questions for the user (batched for Pause 2)
+6. **Junk-today list scope (found in the B3 replay, 5 Oct).**
+   - A real day has about 100–130 junk links, and most come from rules: stock tickers (`$CDNA`), poll buttons ("Bearish"), unsubscribe and "view online" links. On 4 Oct the list held 28 rows like that.
+   - Option (a): show only junk the Haiku judge decided (`class_reason` starts with `judge:`). Those are the ones worth a "Not junk" correction.
+   - Option (b): show everything, collapsed.
+   - Neon stores all junk with its reason either way, so this is a filter on the page, not a pipeline change.
 
 ## Questions for the user (batched for Pause 1)
 **Pause 1 answered 2026-10-05 ~08:10 UTC: user "Agree with all 3".**
