@@ -24,16 +24,18 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Put secrets in code, logs or commits.
 - The junk-filter fresh-week check uses Claude's blind labels, written **before** seeing judge output. Disagreements go to the user at Pause 1.
 
-## NEXT SESSION START HERE (updated 2026-10-05 ~16:20 UTC, end of Session 45)
-1. **Morning of 6 Oct: check v2's first live night (the 5 Oct digest).**
-   - The email arrived. None of the 3 seeded 4 Oct emails reappear. The coverage line is in the header.
-   - GitHub → Actions → that night's run: the **Check invariants** step is green.
-   - Rollback if needed: revert AICoS `16cd408`, or run the workflow manually with `v2` unticked.
-2. **If clean, switch B3 on** (needs the user's OK; auto-mode treats workflow edits as production deploys). Edit AICoS `.github/workflows/daily_digest.yml`:
-   - `pip install` line: add `"psycopg[binary]" markdownify`. The same line already passed in `neon_smoke.yml` (run 37338992019).
-   - Job `env:` block: add `NEON_STORE: 'true'` and `DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}`.
-   - Push before 21:00 UTC. On the morning of 7 Oct, check the Today page shows the 6 Oct day, and that no "⚠ Today page not updated" banner is in the email.
-   - Keep watching v2's invariants on 6 and 7 Oct, as planned.
+## NEXT SESSION START HERE (updated 2026-10-06 ~21:40 UTC)
+1. ✅ **v2's first live night (5 Oct) was clean.** The user checked the email: no repeats, coverage line present. Run 37401021733 (started 01:48 UTC): every step green, including **Check invariants** (`repeats` and `landed` both hold). Coverage 30/46 (65%).
+2. ✅ **B3 switched on** (AICoS `c7dab9b`, user OK, pushed 21:38 UTC on 6 Oct, before tonight's run was created).
+   - Added `"psycopg[binary]" markdownify` to the install line, plus `NEON_STORE: 'true'` and `DATABASE_URL` to the job env (same as the passing `neon_smoke.yml`).
+   - Dry runs stay Neon-free (`run_daily.py` skips the writer when `dry_run`).
+   - **Morning of 7 Oct, check:**
+     - the 6 Oct email has no "⚠ Today page not updated" banner
+     - the Today page shows the 6 Oct day
+     - the run's **Check invariants** step is green
+     - the run log shows no Neon error
+   - **Switch off if needed:** set `NEON_STORE: 'false'` in `daily_digest.yml` (or revert `c7dab9b`). The email digest doesn't depend on Neon.
+   - Keep watching v2's invariants on 7 and 8 Oct, as planned.
 3. **Then ⏸ Pause 2:** the user's mobile walkthrough with real nightly data (TLDR included, which isn't in the 4 Oct backfill).
 4. **Open questions and parked items (none block 1–3):**
    - **Junk corrections are now automatic** (AICoS `40095ee`, active once B3 is on):
@@ -88,7 +90,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Previous days.
   - Metrics strip and "Last updated".
   - Browser QA.
-- [x] **B3** (after Pause 1) Store-first ingestion to Neon. *(AICoS `a12fab6`, built behind `NEON_STORE`, off until 8 Oct)*
+- [x] **B3** (after Pause 1) Store-first ingestion to Neon. *(AICoS `a12fab6`, built behind `NEON_STORE`; **switched on 6 Oct**, `c7dab9b`)*
   - Neon becomes the processed record: Neon OR the JSON file, so there's no cold start.
   - Neon-failure banner plus the run marked failed.
   - Tests: unit tests offline; integration tests on a throwaway Neon schema; replay of 4 Oct real emails.
