@@ -131,7 +131,7 @@ function TodayView() {
             {page.rest.length > 0 && <h2 className="today-section">Everything else ({page.rest.length})</h2>}
             {groupBySource(page.rest).map(([source, rows]) => (
               <React.Fragment key={source}>
-                <h3 className="today-group">{source} · {rows.length}</h3>
+                <h3 className="today-group">{source} <span className="today-group-count">· {rows.length}</span></h3>
                 {rows.map((c) => <TodayCard key={c.id} card={c} variant="row" {...handlers} />)}
               </React.Fragment>
             ))}

@@ -35,7 +35,28 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
      - the run's **Check invariants** step is green
      - the run log shows no Neon error
    - **Switch off if needed:** set `NEON_STORE: 'false'` in `daily_digest.yml` (or revert `c7dab9b`). The email digest doesn't depend on Neon.
-   - Keep watching v2's invariants on 7 and 8 Oct, as planned.
+   - ✅ **Checked 7 Oct (B3's first live night, run 37554199709):** every step green; `repeats` and `landed` hold; coverage 67/86 (78%); Neon has 6 Oct (3 top / 6 next / 85 rest / 51 junk); the user's 25 Today-page presses (Completed, Skip with reasons) are all stored. No banner.
+   - **Unreadable link titles: fixed, committed, NOT pushed** (AICoS `8067d90`, the user chose option b). **User decision (7 Oct): push after 05:30 UTC on 8 Oct, no rush; don't backfill 6 Oct's 13 titles.**
+     - Cause: Benedict Evans links a bare word ("LINK", "DELAY", "INSTINCT"), and Daily Rip / The Batch link mid-sentence phrases. A blocked article's title was its link text.
+     - The fix applies only when the page gives no title. A title becomes "section heading — first 10 words of the newsletter's text".
+     - Dry run on 198 recovered Aug–Oct emails: Benedict is fixed; real headlines are kept (including TLDR's lowercase "iOS…" and Daily Rip's run-on headline lists).
+     - Known limit: two links in one paragraph can still share a title.
+     - 119 tests pass. Code review found 1 bug (could take the next story's sentence), fixed with a test.
+     - The missing summaries are by design: these are hybrid emails, whose body item carries the text.
+   - **New sender: The Pragmatic Engineer deep dives** (AICoS `2660608`, committed, NOT pushed; goes out with `8067d90` after 05:30 UTC on 8 Oct).
+     - Checked on the 6 Oct issue with the real Layer 1: self-contained, 5,575 words, a public post, 0 links fetched, 0 junk.
+     - No GitHub dry run needed: nothing is fetched, so where the request comes from doesn't matter.
+     - Watch: a paid-only deep dive would arrive as a preview ending in an upgrade prompt. Email bodies have no paywall check, so the reader would show the preview with no marker. Not seen yet.
+     - Existing for all essays: Claude summarises the first ~8,000 characters (~1,400 of 5,575 words here). The reader shows everything.
+   - **Today page feedback (7 Oct, after first real use):**
+     - The Neuron as one item: the user likes it (the D1 email-body-only rule, confirmed in use).
+     - "Everything else" was alphabetical by title, an accident: rest items have no rank. **User decision:** group by newsletter, one heading with a count, oldest email first. **No learning from taps yet** (deliberately deferred: "more to focus on").
+     - Built: KR `75550a6` (migration 004 `sightings.received_at` + `position`, API sort, headings) and AICoS `a4a45e6` (writer saves the Date header + run position). Tests: KR backend 29, React 19, AICoS 121. Code review: no bugs.
+     - **Deploy order:** (1) apply migration 004 to Neon (needs the user's OK; real events exist) → (2) push KR (Vercel) → (3) push AICoS with `8067d90` + `2660608` after 05:30 UTC on 8 Oct. Days before the AICoS push have no delivery time, so their groups fall back to alphabetical by newsletter.
+     - ✅ Migration 004 applied to Neon (user OK, 7 Oct ~23:40 local); 183 sightings / 65 events intact.
+     - Design quick check: round 1 found 1 Major (group headings too faint: 15px/600, no separation), fixed (17px bold, 2px rule, 28px gap, muted count); round 2 clean. Not verified: real iOS Safari; whether the 27-item Benedict group should collapse (owner decision, not raised).
+     - Known edge, pre-existing: an item that one newsletter junked and another linked as a story stays under the first newsletter.
+   - Keep watching v2's invariants on 8 Oct, as planned.
 3. **Then ⏸ Pause 2:** the user's mobile walkthrough with real nightly data (TLDR included, which isn't in the 4 Oct backfill).
 4. **Open questions and parked items (none block 1–3):**
    - **Junk corrections are now automatic** (AICoS `40095ee`, active once B3 is on):
