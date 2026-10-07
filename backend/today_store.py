@@ -88,6 +88,8 @@ def _card(row: dict, events: list[dict]) -> dict:
         "category": row["category"], "summary": row["summary"], "one_liner": row["one_liner"],
         "read_time_min": row["read_time_min"], "section": row["section"], "rank": row["rank"],
         "why": row["why"], "class_reason": row["class_reason"],
+        "received_at": row["received_at"].isoformat() if row.get("received_at") else None,
+        "position": row.get("position"),
         "state": state_from_events(events),
     }
 
@@ -110,7 +112,7 @@ def today(day: str | None = None) -> dict:
         return page
     with tx() as conn:
         rows = list(conn.execute(
-            """SELECT i.*, s.source, s.section, s.rank, s.why
+            """SELECT i.*, s.source, s.section, s.rank, s.why, s.received_at, s.position
                FROM sightings s JOIN items i ON i.id = s.item_id
                WHERE s.digest_date = %s""", (day,)))
         events = _events_by_item(conn, [r["id"] for r in rows])
@@ -119,7 +121,19 @@ def today(day: str | None = None) -> dict:
         card = _card(r, events[r["id"]])
         section = "rest" if r["section"] == "junk" and card["state"]["not_junk"] else r["section"]
         page[section].append(card)
+    page["rest"] = by_newsletter(page["rest"])
     return page
+
+
+def by_newsletter(cards: list[dict]) -> list[dict]:
+    """Everything else, grouped by newsletter: the oldest email first, each newsletter in its own order.
+    Days stored before delivery times were kept (6 Oct and earlier) fall back to newsletter name, then title."""
+    first = {}
+    for c in cards:
+        if c["received_at"] and (c["source"] not in first or c["received_at"] < first[c["source"]]):
+            first[c["source"]] = c["received_at"]
+    return sorted(cards, key=lambda c: (c["source"] not in first, first.get(c["source"], ""), c["source"],
+                                        c["position"] if c["position"] is not None else 1 << 30, c["title"]))
 
 
 def item(item_id: str) -> dict:

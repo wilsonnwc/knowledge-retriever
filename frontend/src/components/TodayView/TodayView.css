@@ -13,6 +13,7 @@
 .today-tabs button.active { color: var(--color-text); border-bottom-color: var(--color-accent); font-weight: 600; }
 
 .today-section { font-size: 18px; margin: 20px 0 8px; }
+.today-group { font-size: 15px; font-weight: 600; margin: 16px 0 6px; }
 
 .today-card, .today-row { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 12px; }
 .today-row { padding: 12px 14px; margin-bottom: 8px; }

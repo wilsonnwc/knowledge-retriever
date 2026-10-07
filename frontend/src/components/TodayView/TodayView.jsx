@@ -23,6 +23,18 @@ export function splitJunk(junk) {
   return [['Borderline calls', borderline], ['Filtered by rules', junk.filter((c) => !borderline.includes(c))]];
 }
 
+// Everything else arrives sorted (oldest email first, each newsletter in its own order): split it into
+// one group per newsletter, keeping that order.
+export function groupBySource(rows) {
+  const groups = [];
+  for (const row of rows) {
+    const last = groups[groups.length - 1];
+    if (last && last[0] === row.source) last[1].push(row);
+    else groups.push([row.source, [row]]);
+  }
+  return groups;
+}
+
 // The daily triage page: Top 3 and Next 7 as cards, everything else as compact rows, plus the
 // Later list and the "Junk today" list with its "Not junk" corrections.
 function TodayView() {
@@ -117,7 +129,12 @@ function TodayView() {
             {page.next.length > 0 && <h2 className="today-section">Next 7</h2>}
             {page.next.map((c) => <TodayCard key={c.id} card={c} {...handlers} />)}
             {page.rest.length > 0 && <h2 className="today-section">Everything else ({page.rest.length})</h2>}
-            {page.rest.map((c) => <TodayCard key={c.id} card={c} variant="row" {...handlers} />)}
+            {groupBySource(page.rest).map(([source, rows]) => (
+              <React.Fragment key={source}>
+                <h3 className="today-group">{source} · {rows.length}</h3>
+                {rows.map((c) => <TodayCard key={c.id} card={c} variant="row" {...handlers} />)}
+              </React.Fragment>
+            ))}
           </>
         )
       )}

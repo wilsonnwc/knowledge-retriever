@@ -77,6 +77,28 @@ def test_today_defaults_to_latest_day_with_sections_in_rank_order(logged_in, sch
     assert logged_in.get("/api/today?date=yesterday").status_code == 400
 
 
+def test_everything_else_is_grouped_by_newsletter_oldest_email_first(logged_in, schema):
+    rows = [  # (id, title, source, received_at, position)
+        ("b2", "Alpha", "Benedict Evans", "2026-10-06 07:00+00", 5),
+        ("t1", "Zebra", "TLDR", "2026-10-06 06:00+00", 1),
+        ("b1", "Zulu", "Benedict Evans", "2026-10-06 07:00+00", 4),
+        ("t2", "Apple", "TLDR", "2026-10-06 06:00+00", 2),
+        ("x1", "Old day item", "Daily Rip", None, None),  # stored before delivery times were kept
+        ("a1", "Also old", "Aakash", None, None),
+    ]
+    with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+        from conftest import migrate
+        migrate.use_schema(conn, schema)
+        for item_id, title, source, received, pos in rows:
+            conn.execute("INSERT INTO items (id, digest_date, source, kind, title, retrieval_status) "
+                         "VALUES (%s, %s, %s, 'article', %s, 'ok')", (item_id, DAY, source, title))
+            conn.execute("INSERT INTO sightings (item_id, digest_date, source, section, received_at, position) "
+                         "VALUES (%s, %s, %s, 'rest', %s, %s)", (item_id, DAY, source, received, pos))
+    rest = logged_in.get("/api/today").get_json()["page"]["rest"]
+    # TLDR arrived first; inside a newsletter its own order wins over the title; undated newsletters go last, by name
+    assert [c["id"] for c in rest] == ["t1", "t2", "b1", "b2", "a1", "x1"]
+
+
 def test_reader_and_unknown_item(logged_in, schema):
     _seed_day(schema)
     assert logged_in.get("/api/item?id=a1").get_json()["item"]["seen_on"] == [DAY]
