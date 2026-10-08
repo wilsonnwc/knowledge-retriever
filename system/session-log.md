@@ -46,7 +46,7 @@ At the end of each session, copy the template below and fill it in at the top of
 
 **Where to pick up next:**
 - Unchanged: `system/phase2a-progress.md` → "NEXT SESSION START HERE".
-- The next *build* starts at Stage 0: size it, then Stage 1, Specify, using `system/specs/TEMPLATE.md`.
+- The next *build* starts at Stage 0: size it, then Stage 1, Specify, using `system/global-claude/spec-template.md`.
 
 **What worked:**
 - Formalised what Phase 2a already did informally (locked decisions, locked ACs, pause points, the autonomous loop) into a repeatable framework.
@@ -60,8 +60,17 @@ At the end of each session, copy the template below and fill it in at the top of
   - flag ACs that can't be tested, vague words, "how" leaking into "what", and missing non-goals
   - name the PM skill in play while doing it
 
+- **Made global (same session):**
+  - `system/global-claude/` holds:
+    - `rules.md`: spec-driven development, plus guidance on agents in the build
+    - `spec-template.md`: now with an "Agents and automation" table at Plan
+    - `agent-pipeline.md`: a stage-by-stage map of production-team agents, how each maps onto Claude Code (hooks, subagents, skills, CI, routines), trust rules, a starter set, and the gates these projects already have
+    - `install.sh`: symlinks `~/.claude/global-rules` to this folder and adds one `@` import line to `~/.claude/CLAUDE.md`. Tested against a fake home: it keeps existing content and is safe to re-run.
+  - The project CLAUDE.md now points to the global rules instead of duplicating them.
+
 **What didn't work / got stuck on:**
 - Nothing yet. It's untested until the first real build runs through it.
+- Cloud sessions don't keep `~/.claude`. Here the project CLAUDE.md says to read the rules file directly. Other repos used in the cloud need the same pointer line, or an environment setup script.
 
 **Learnings:**
 - In spec-driven development, the PM's job shifts from coordination to precise writing plus checking the result against intent. A coding agent never asks a clarifying question; it fills the gap with a guess.

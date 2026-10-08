@@ -18,56 +18,18 @@ Do not ask the user to explain the project. Lead with context, then ask how they
 
 ## Build workflow: spec-driven development (every build, from 2026-10-08)
 
-The user wants to be able to show that they can run spec-driven projects. So every build follows the framework below, and **Claude guides the user through it.** The user is the PM: they own the *what* and *why*. Claude facilitates the spec, owns the *how*, and builds. Every build leaves a spec file behind, so `system/specs/` doubles as a portfolio of evidence.
+The rule is **global** (every project). It lives in `system/global-claude/rules.md`:
+- Section 1 covers spec-driven development: sizing, the stages, coaching, change control and the retro.
+- Section 2 covers agents in the build pipeline.
 
-**Step 0: size the build first.** Say the size in one line before anything else.
+On a laptop, `system/global-claude/install.sh` imports it into `~/.claude/CLAUDE.md`.
 
-| Size | When | Spec |
-|---|---|---|
-| **Full** | A new feature, a schema or data-model change, cross-repo work, an autonomous loop, or anything over one session | `system/specs/YYYY-MM-DD-<slug>.md`, from `system/specs/TEMPLATE.md`, all sections |
-| **Light** | A small change or a QA fix: one session, a few files | Same template, required sections only (marked ★) |
-| **None** | Docs, typos, config, record-keeping | No spec. Say "no spec: <reason>" |
+**If those global rules aren't already in your context** (e.g. a cloud session), read `system/global-claude/rules.md` before starting any build. Also read `system/global-claude/agent-pipeline.md` at Plan on a Full build.
 
-**The stages.** Name the current stage in replies ("Stage 1, Specify"), so the process stays visible.
-
-1. **Specify (the user owns this; Claude coaches).**
-   - Use structured questions (AskUserQuestion) to draw out the problem, the users, the outcome and how it's measured, the scope and non-goals, the acceptance criteria (ACs), the edge cases and failure states, and the open questions.
-   - Claude drafts. The user decides.
-   - **Coach, don't just transcribe.**
-     - Flag any AC that can't be tested ("fast" → "first token in under 1s").
-     - Flag a vague word that an agent would guess at.
-     - Flag a "how" that has crept into the "what".
-     - Flag a missing non-goal.
-     - Keep it to one line each, and explain the PM skill in play.
-   - Every AC has an ID (AC1, AC2…) and a **"Verified by"** line saying what evidence will prove it (an eval number, a test, a command's output, a screenshot at 390px).
-2. **Lock.**
-   - Only the user can lock a spec, by saying so explicitly.
-   - The status changes from `DRAFT` to `LOCKED (date)`.
-   - **No production code before the lock.** A throwaway spike to answer an open question is allowed if it's labelled `spike` and its result goes back into the spec.
-3. **Plan (Claude owns this; the user reviews it against intent).**
-   - Write the technical approach into the spec's Plan section.
-   - Explain trade-offs in plain English and ask about real choices (Key Design Principles still apply).
-   - The user checks that the plan serves the intent, not that the code is right.
-4. **Tasks.** Break the plan into small, checkable tasks. Each task lists the AC IDs it serves, and pause points are marked ⏸.
-5. **Build.**
-   - Work task by task.
-   - Stop at ⏸ pause points.
-   - Questions the spec doesn't answer go into its Open questions section. Carry on with unblocked work rather than guessing.
-6. **Verify.**
-   - Fill in the AC table: pass or fail, plus the actual evidence.
-   - An AC that fails is never quietly reworded to pass. Bring it to the user.
-7. **Change control (any time).**
-   - When reality contradicts the spec, stop.
-   - Propose the change as a Change log entry (what, why, which ACs are affected) and get the user's OK.
-   - Then update the spec, then the code.
-   - Implementation details the spec never covered don't need this.
-8. **Retro.**
-   - Fill in "Spec vs reality": what the spec got right, what it missed, what changed and why, and what to specify differently next time. This is the interview evidence.
-   - Add a row to `system/specs/README.md`.
-
-**How it fits with the rest of this file:**
-- Session log entries and Current Status point to the spec file rather than repeating it.
-- `system/phase2a-spec.md` (Session 43) is the first full example, written before this framework was formalised. It is indexed in `system/specs/README.md` but stays where it is.
+Specifics for this project:
+- **Specs** live in `system/specs/YYYY-MM-DD-<slug>.md`, copied from `system/global-claude/spec-template.md`. Index each one in `system/specs/README.md`, which is the portfolio.
+- **First example:** `system/phase2a-spec.md` (Session 43) predates the framework. It's indexed but stays where it is.
+- **Cross-references:** session log entries and Current Status point to the spec rather than repeating it.
 
 ---
 
@@ -169,7 +131,7 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
     - Junk eval loop: "Not junk" taps → `labels_corrections.csv` → `run_eval.py --split corrections`.
   - **Session 45 (2026-10-05):** see `system/session-log.md`.
   - **Pick up from** `system/phase2a-progress.md` → "NEXT SESSION START HERE".
-- **Session 46 (2026-10-08): working method changed to spec-driven development for every build.** See "Build workflow" near the top of this file, plus `system/specs/` (template and index). The next build is the first one under the formal framework.
+- **Session 46 (2026-10-08): working method changed to spec-driven development for every build.** Made global the same day: `system/global-claude/` holds the rules (spec-driven development, plus guidance on agents across the build/release pipeline), the spec template and an installer for `~/.claude/CLAUDE.md`. Specs go in `system/specs/`. The next build is the first one under the formal framework.
 - **IMMEDIATE NEXT (superseded by the line above; kept for history):**
   1. The user labels ~150 links as junk or real. Claude prepares the label file.
   2. The user does the Render signup and adds the `NEON_DATABASE_URL` GitHub secret, following Claude's steps.
@@ -234,7 +196,8 @@ knowledge-retriever/
 │   └── system.txt                ← Claude system prompt
 ├── system/
 │   ├── session-log.md            ← progress and learnings log (append each session)
-│   ├── specs/                    ← one spec per build (spec-driven development); TEMPLATE.md + README.md index
+│   ├── specs/                    ← one spec per build (spec-driven development) + README.md index
+│   ├── global-claude/            ← GLOBAL rules for all projects (rules.md, spec-template.md, agent-pipeline.md, install.sh)
 │   ├── project-context.md        ← full session briefing document
 │   ├── taxonomy.md               ← controlled vocabulary and note format rules
 │   ├── evaluation/                ← test set, eval script, results, and root-cause diagnosis

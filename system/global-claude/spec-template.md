@@ -48,6 +48,14 @@
 ## 8. Plan (Claude, reviewed by the user)
 <!-- The technical approach in plain English, the trade-offs, and the alternatives considered. -->
 
+### Agents and automation for this build
+<!-- See ~/.claude/global-rules/agent-pipeline.md. For each stage this build touches:
+     what checks it automatically, what kind of check (deterministic check, hook, subagent, CI bot, LLM-as-judge),
+     whether that exists already or is proposed, and where the human gate is. A new agent is proposed here but built as its own spec. -->
+| Stage | Automated help | Kind | Exists / proposed | Human gate |
+|---|---|---|---|---|
+| | | | | |
+
 ## 9. Tasks
 <!-- Small and checkable. Each lists the ACs it serves. Mark pause points with ⏸. -->
 - [ ] T1 — … (AC1)
