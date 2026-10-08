@@ -38,6 +38,38 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 46 — 2026-10-08 (spec-driven development adopted as the working method)
+
+**Phase/step completed:**
+- Process change, no product code.
+- Every build now follows spec-driven development, at the user's request, so the project shows the ability to run spec-driven work.
+
+**Where to pick up next:**
+- Unchanged: `system/phase2a-progress.md` → "NEXT SESSION START HERE".
+- The next *build* starts at Stage 0: size it, then Stage 1, Specify, using `system/specs/TEMPLATE.md`.
+
+**What worked:**
+- Formalised what Phase 2a already did informally (locked decisions, locked ACs, pause points, the autonomous loop) into a repeatable framework.
+- Added the missing pieces:
+  - AC IDs, each with a "Verified by" line written before the build
+  - an evidence column filled in at Verify
+  - a change log for spec changes after the lock
+  - a "Spec vs reality" retro section
+- Sizing (Full / Light / None) keeps small fixes from turning into waterfall paperwork.
+- Claude's role is explicitly coach as well as builder:
+  - flag ACs that can't be tested, vague words, "how" leaking into "what", and missing non-goals
+  - name the PM skill in play while doing it
+
+**What didn't work / got stuck on:**
+- Nothing yet. It's untested until the first real build runs through it.
+
+**Learnings:**
+- In spec-driven development, the PM's job shifts from coordination to precise writing plus checking the result against intent. A coding agent never asks a clarifying question; it fills the gap with a guess.
+- The interview evidence isn't the spec itself. It's the retro: what the spec missed, and how the change was handled.
+
+**Open questions to come back to:**
+- After two or three builds, is the Light spec light enough, or does it slow down small QA fixes? Adjust the framework from real use.
+---
 ### Session 45 — 2026-10-05 (Release A live; B3 built behind a switch; Today page refined through two mobile reviews; junk eval loop)
 
 **Phase/step completed:**
