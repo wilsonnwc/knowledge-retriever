@@ -1,8 +1,8 @@
 # Specs: index
 
-Every build follows spec-driven development (a global rule: see `../global-claude/rules.md`). This folder holds one spec per build. Together, they are the evidence that this project was run spec-first: intent was written down and locked, every acceptance criterion was verified, and the retro compares the spec with what really happened.
+Every build follows spec-driven development (a global rule: see "Spec-Driven Development" in `claude-brain/CLAUDE.md`). This folder holds one spec per build. Together, they are the evidence that this project was run spec-first: intent was written down and locked, every acceptance criterion was verified, and the retro compares the spec with what really happened.
 
-- New spec: copy `../global-claude/spec-template.md` to `YYYY-MM-DD-<slug>.md`. The template is shared by all projects.
+- New spec: copy `claude-brain/docs/spec-template.md` to `YYYY-MM-DD-<slug>.md`. The template is shared by all projects.
 - Add a row below when the spec is created, and update it at retro.
 
 | Spec | Size | Status | ACs passed | Key "spec vs reality" lesson |

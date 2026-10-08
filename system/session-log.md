@@ -38,6 +38,45 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 47 — 2026-10-08 (spec-driven development adopted as the global working method)
+
+**Phase/step completed:**
+- Process change, no product code.
+- Every build, in every project, now follows spec-driven development, at the user's request, so there's evidence of running spec-driven work.
+- Also added guidance on designing agents across the build and release pipeline.
+
+**Where to pick up next:**
+- Unchanged: `system/phase2a-progress.md` → "NEXT SESSION START HERE".
+- The next *build* starts at Stage 0: size it, then Stage 1, Specify.
+
+**What worked:**
+- Formalised what Phase 2a already did informally (locked decisions, locked ACs, pause points, the autonomous loop). Added the missing pieces:
+  - AC IDs, each with a "Verified by" line written before the build
+  - an evidence column filled in at Verify
+  - a change log for spec changes after the lock
+  - a "Spec vs reality" retro
+- Sizing (Full / Light / None) keeps small fixes from turning into paperwork.
+- **The final home is the global `claude-brain/CLAUDE.md`:**
+  - New sections: "Spec-Driven Development" and "Agents in the Build". They plug into the existing PM-Driven Development, Build Autonomy, Design Review and Code Review sections rather than duplicating them.
+  - `claude-brain/docs/spec-template.md` (with an "Agents and automation" table at Plan) and `claude-brain/docs/agent-pipeline.md` (a stage-by-stage map of production agents, Claude Code mechanisms, trust rules, a starter set, and the gates already in these projects).
+- `system/specs/` here holds this project's specs and the portfolio index.
+
+**What didn't work / got stuck on:**
+- **First attempt:** the rules lived in this public repo (`system/global-claude/`) with an `install.sh`.
+  - The user ran it. Because `~/.claude/CLAUDE.md` is a link to `claude-brain/CLAUDE.md`, it wrote an import line into the private brain, and the SessionEnd auto-sync pushed it.
+  - Undone by hand (remove the `~/.claude/global-rules` link, delete the two lines). The rules then moved to claude-brain, and `system/global-claude/` was deleted.
+  - Root cause: claude-brain's `setup-machine.sh` wiring wasn't checked before a second mechanism was added.
+- Pasted terminal commands with `#` comments failed in zsh: interactive comments are off by default. Give commands without inline comments.
+- **Numbering:** a parallel session had already logged Session 46, so this entry is 47.
+
+**Learnings:**
+- Claude Code loads `CLAUDE.md`, `.claude/` settings and project memory from the session's *working folder*. A VS Code multi-root workspace session started at the top level opened in claude-brain, not this repo, so this project's rules and memory didn't load. Open Claude Code from the project folder, and check `/status`.
+- In spec-driven development the PM's output is the spec plus the ACs. The interview evidence is the retro.
+
+**Open questions to come back to:**
+- After two or three builds, is the Light spec light enough? Adjust the framework from real use.
+- Cloud sessions are skipped for now (user's call: rarely used). They won't see the global rules unless claude-brain is attached.
+---
 ### Session 46 — 2026-10-07 → 10-08 (B3 verified live; first real-use feedback; Phase 2a closed)
 
 **Phase/step completed:** Phase 2a. B3's first live night checked; Today page feedback built and shipped; Pause 2 closed by the user.
@@ -75,47 +114,6 @@ At the end of each session, copy the template below and fill it in at the top of
 - Whether to build the "silent source" check and a whole-email promo check (the user's call).
 - Benedict's 27-item group is ~8,000px on a phone: collapse it? (Not raised as an issue yet.)
 
----
-### Session 46 — 2026-10-08 (spec-driven development adopted as the working method)
-
-**Phase/step completed:**
-- Process change, no product code.
-- Every build now follows spec-driven development, at the user's request, so the project shows the ability to run spec-driven work.
-
-**Where to pick up next:**
-- Unchanged: `system/phase2a-progress.md` → "NEXT SESSION START HERE".
-- The next *build* starts at Stage 0: size it, then Stage 1, Specify, using `system/global-claude/spec-template.md`.
-
-**What worked:**
-- Formalised what Phase 2a already did informally (locked decisions, locked ACs, pause points, the autonomous loop) into a repeatable framework.
-- Added the missing pieces:
-  - AC IDs, each with a "Verified by" line written before the build
-  - an evidence column filled in at Verify
-  - a change log for spec changes after the lock
-  - a "Spec vs reality" retro section
-- Sizing (Full / Light / None) keeps small fixes from turning into waterfall paperwork.
-- Claude's role is explicitly coach as well as builder:
-  - flag ACs that can't be tested, vague words, "how" leaking into "what", and missing non-goals
-  - name the PM skill in play while doing it
-
-- **Made global (same session):**
-  - `system/global-claude/` holds:
-    - `rules.md`: spec-driven development, plus guidance on agents in the build
-    - `spec-template.md`: now with an "Agents and automation" table at Plan
-    - `agent-pipeline.md`: a stage-by-stage map of production-team agents, how each maps onto Claude Code (hooks, subagents, skills, CI, routines), trust rules, a starter set, and the gates these projects already have
-    - `install.sh`: symlinks `~/.claude/global-rules` to this folder and adds one `@` import line to `~/.claude/CLAUDE.md`. Tested against a fake home: it keeps existing content and is safe to re-run.
-  - The project CLAUDE.md now points to the global rules instead of duplicating them.
-
-**What didn't work / got stuck on:**
-- Nothing yet. It's untested until the first real build runs through it.
-- Cloud sessions don't keep `~/.claude`. Here the project CLAUDE.md says to read the rules file directly. Other repos used in the cloud need the same pointer line, or an environment setup script.
-
-**Learnings:**
-- In spec-driven development, the PM's job shifts from coordination to precise writing plus checking the result against intent. A coding agent never asks a clarifying question; it fills the gap with a guess.
-- The interview evidence isn't the spec itself. It's the retro: what the spec missed, and how the change was handled.
-
-**Open questions to come back to:**
-- After two or three builds, is the Light spec light enough, or does it slow down small QA fixes? Adjust the framework from real use.
 ---
 ### Session 45 — 2026-10-05 (Release A live; B3 built behind a switch; Today page refined through two mobile reviews; junk eval loop)
 

@@ -18,18 +18,13 @@ Do not ask the user to explain the project. Lead with context, then ask how they
 
 ## Build workflow: spec-driven development (every build, from 2026-10-08)
 
-The rule is **global** (every project). It lives in `system/global-claude/rules.md`:
-- Section 1 covers spec-driven development: sizing, the stages, coaching, change control and the retro.
-- Section 2 covers agents in the build pipeline.
-
-On a laptop, `system/global-claude/install.sh` imports it into `~/.claude/CLAUDE.md`.
-
-**If those global rules aren't already in your context** (e.g. a cloud session), read `system/global-claude/rules.md` before starting any build. Also read `system/global-claude/agent-pipeline.md` at Plan on a Full build.
+Every build follows **"Spec-Driven Development"** and **"Agents in the Build"** in the global `claude-brain/CLAUDE.md`. Those are global rules, loaded from `~/.claude/CLAUDE.md`. The spec template and the agent-pipeline guide are in `claude-brain/docs/`.
 
 Specifics for this project:
-- **Specs** live in `system/specs/YYYY-MM-DD-<slug>.md`, copied from `system/global-claude/spec-template.md`. Index each one in `system/specs/README.md`, which is the portfolio.
+- **Specs** live in `system/specs/YYYY-MM-DD-<slug>.md`. Index each one in `system/specs/README.md`, which is the portfolio.
 - **First example:** `system/phase2a-spec.md` (Session 43) predates the framework. It's indexed but stays where it is.
 - **Cross-references:** session log entries and Current Status point to the spec rather than repeating it.
+- **Open Claude Code in this folder,** not the workspace root. Otherwise this file and this project's memory may not load; check `/status` → "Working folder".
 
 ---
 
@@ -135,7 +130,7 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
   - First real-use feedback acted on: readable titles for "LINK"-style links; "Everything else" grouped by newsletter, oldest email first (migration 004); 4 sender addresses added after silent address changes.
   - Pause 2 closed by the user. **Next: Phase 4** (skill map + Later queue + resurfacing): acceptance criteria first.
   - **Pick up from** `system/phase2a-progress.md` → "NEXT SESSION START HERE".
-- **Session 46 (2026-10-08): working method changed to spec-driven development for every build.** Made global the same day: `system/global-claude/` holds the rules (spec-driven development, plus guidance on agents across the build/release pipeline), the spec template and an installer for `~/.claude/CLAUDE.md`. Specs go in `system/specs/`. The next build is the first one under the formal framework.
+- **Session 47 (2026-10-08): spec-driven development adopted for every build, in all projects.** The rules live in the global `claude-brain/CLAUDE.md` ("Spec-Driven Development" and "Agents in the Build"), with the template and agent-pipeline guide in `claude-brain/docs/`. This project's specs go in `system/specs/`. The next build is the first one under the formal framework.
 - **IMMEDIATE NEXT (superseded by the line above; kept for history):**
   1. The user labels ~150 links as junk or real. Claude prepares the label file.
   2. The user does the Render signup and adds the `NEON_DATABASE_URL` GitHub secret, following Claude's steps.
@@ -201,7 +196,6 @@ knowledge-retriever/
 ├── system/
 │   ├── session-log.md            ← progress and learnings log (append each session)
 │   ├── specs/                    ← one spec per build (spec-driven development) + README.md index
-│   ├── global-claude/            ← GLOBAL rules for all projects (rules.md, spec-template.md, agent-pipeline.md, install.sh)
 │   ├── project-context.md        ← full session briefing document
 │   ├── taxonomy.md               ← controlled vocabulary and note format rules
 │   ├── evaluation/                ← test set, eval script, results, and root-cause diagnosis
@@ -338,7 +332,7 @@ cd frontend && npm start                # opens http://localhost:3000 → sideba
 - Never move to the next step without measuring whether the current one actually works
 - No skipping evaluation — retrieval quality must be scored and measurable, not just qualitative
 - One step at a time — do not write the whole system upfront
-- Spec before code: every build follows the "Build workflow: spec-driven development" section above. Specs stay lean; one step at a time still applies, so a spec covers one build, not the whole system
+- Spec before code: every build follows the global "Spec-Driven Development" rules (see "Build workflow" above). Specs stay lean; one step at a time still applies, so a spec covers one build, not the whole system
 - When there is a design choice (chunking strategy, embedding model, retrieval approach), explain trade-offs and ask before proceeding
 - Keep it simple — real enough to discuss in an interview, not production quality
 - If something fails, diagnose the root cause — do not just patch it
