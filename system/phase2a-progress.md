@@ -58,6 +58,8 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
      - Known edge, pre-existing: an item that one newsletter junked and another linked as a story stays under the first newsletter.
    - **🚀 All pushed 7 Oct 22:58 UTC (user's call, before tonight's run; no run in flight):** AICoS `8067d90` titles + `2660608` Pragmatic Engineer + `a4a45e6` delivery times; KR `e361d5d` (Vercel). Hosted API checked after deploy: 6 Oct shows 85 items in 8 newsletter groups.
    - **Morning of 8 Oct, check (first night on the new code):** run green incl. invariants; no Neon error (the writer now fills `received_at`/`position`); on the Today page, 7 Oct's groups are oldest email first; Benedict items have readable titles instead of "LINK"; Pragmatic Engineer appears if it sent anything.
+   - **8 Oct morning (user):** ✅ no banner; ✅ groups oldest-email-first. Deferred until they next send: Benedict readable titles, Pragmatic Engineer appearing. Run 8 Oct 01:08 UTC: success.
+   - **New sender address: `hi@simple.ai`** (AICoS `5f4e5d4`, pushed 07:22 UTC). simple.ai moved off `agentai@mail.beehiiv.com` (last email 11 Jun), so it had silently dropped out of the digest for ~4 months. 7 Oct sample: hybrid, full 1,463-word essay as the email item, 1 linked post fetched, poll/profile/own-product links junked by rule.
    - Keep watching v2's invariants on 8 Oct, as planned.
 3. **Then ⏸ Pause 2:** the user's mobile walkthrough with real nightly data (TLDR included, which isn't in the 4 Oct backfill).
 4. **Open questions and parked items (none block 1–3):**
