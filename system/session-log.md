@@ -38,6 +38,44 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 46 — 2026-10-07 → 10-08 (B3 verified live; first real-use feedback; Phase 2a closed)
+
+**Phase/step completed:** Phase 2a. B3's first live night checked; Today page feedback built and shipped; Pause 2 closed by the user.
+**Where to pick up next:** `system/phase2a-progress.md` → "NEXT SESSION START HERE": confirm the reminder routine, then Phase 4 acceptance criteria.
+
+**What worked:**
+- **B3 morning check:** run green, both invariants hold, no Neon error, 6 Oct stored, all 25 of the user's presses stored.
+- **Looked past the green checks** and found 13 "Everything else" items titled "LINK"/"DELAY". Benedict Evans links a bare word, and Daily Rip / The Batch link mid-sentence phrases.
+- **Title fix (AICoS `8067d90`, user chose "heading — first words"):**
+  - Dry-run on 198 recovered real emails *before* writing tests. That caught real headlines the first rule would have broken (TLDR's lowercase "iOS…", Daily Rip's run-on headline lists).
+  - Code review found one more bug (the title could take the next story's sentence), fixed with a test.
+- **"Everything else" grouped by newsletter, oldest email first** (user decision; learning from taps deliberately deferred):
+  - Migration 004 adds `sightings.received_at` and `position` (user OK).
+  - Rolled out expand-then-migrate: database first, then the page that reads it, then the writer.
+  - Design quick check: 1 Major (faint headings), fixed; round 2 clean.
+- **New senders:**
+  - The Pragmatic Engineer (2 addresses), `hi@simple.ai`, `peteryang@substack.com`.
+  - Each checked by running the real Layer 1 on a real Gmail sample before adding.
+
+**What didn't work / got stuck on:**
+- **Three sources had silently dropped out** after sender address changes; simple.ai's had been missing since June. Nothing alerted.
+- **Peter Yang's only recent email is a course promo.** The junk filter judges links, not whole emails, so it passes through.
+- **Miscounted word cut-offs in hand-written test expectations, three times.** Lesson: compute expected strings, don't count by eye.
+
+**Learnings:**
+- **Green invariants ≠ good output.** Pair automated checks with a look at the actual data.
+- **Dry-run a new rule on real data before writing tests.** Tests only cover the cases you already thought of.
+- **Expand-then-migrate:** make schema changes backward-compatible so the rollout order can't break production.
+- **Silent source failures:** a sender list keyed on addresses misses address changes. A "no email in N days" check would catch it.
+- **Context-triggered vs time-triggered recall** (the Phase 4 design principle).
+
+**Open questions to come back to:**
+- Phase 4 success criteria (asked, unanswered).
+- The reminder routine (proposed, not created).
+- Whether to build the "silent source" check and a whole-email promo check (the user's call).
+- Benedict's 27-item group is ~8,000px on a phone: collapse it? (Not raised as an issue yet.)
+
+---
 ### Session 46 — 2026-10-08 (spec-driven development adopted as the working method)
 
 **Phase/step completed:**

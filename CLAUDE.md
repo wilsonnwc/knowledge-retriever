@@ -130,6 +130,10 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
       - Skip reasons as multi-select pills
     - Junk eval loop: "Not junk" taps → `labels_corrections.csv` → `run_eval.py --split corrections`.
   - **Session 45 (2026-10-05):** see `system/session-log.md`.
+- **Session 46 (2026-10-07 → 08): Phase 2a complete.**
+  - B3's first live night was checked clean.
+  - First real-use feedback acted on: readable titles for "LINK"-style links; "Everything else" grouped by newsletter, oldest email first (migration 004); 4 sender addresses added after silent address changes.
+  - Pause 2 closed by the user. **Next: Phase 4** (skill map + Later queue + resurfacing): acceptance criteria first.
   - **Pick up from** `system/phase2a-progress.md` → "NEXT SESSION START HERE".
 - **Session 46 (2026-10-08): working method changed to spec-driven development for every build.** Made global the same day: `system/global-claude/` holds the rules (spec-driven development, plus guidance on agents across the build/release pipeline), the spec template and an installer for `~/.claude/CLAUDE.md`. Specs go in `system/specs/`. The next build is the first one under the formal framework.
 - **IMMEDIATE NEXT (superseded by the line above; kept for history):**

@@ -24,7 +24,13 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Put secrets in code, logs or commits.
 - The junk-filter fresh-week check uses Claude's blind labels, written **before** seeing judge output. Disagreements go to the user at Pause 1.
 
-## NEXT SESSION START HERE (updated 2026-10-06 ~21:40 UTC)
+## NEXT SESSION START HERE (updated 2026-10-08 ~21:45 UTC)
+**Phase 2a is complete** (Pause 2 closed by the user on 8 Oct). Pick up with:
+1. **Confirm the reminder routine. NOT created yet**: the user restarted before answering. Proposal: one-time cloud agent, Sun 11 Oct 08:00 London (07:00 UTC), Sonnet 5.5, repo knowledge-retriever. It reads this file and emails the user (Gmail connector) the parked items (junk tuning, idea bank, skip-reason analysis, learn-from-taps), the watch items (promo emails passing the junk filter, "silent source" check) and the deferred checks.
+2. **Phase 4 kickoff:** Claude elaborated Phase 4 on 8 Oct (skill map `skills.yaml` with an evidence-based level ladder, a Later queue tagged by skill, resurfacing on skill activation rather than a timer). **Open question to the user:** "As a PM, what does success look like for Phase 4?" Then the design questions: what makes a skill "active", who tags Later items, where `skills.yaml` lives, and how the 32 prose items migrate. Data on 8 Oct: 81 presses in 3 days (17 Completed, 11 Skip, 5 Later, 1 Build).
+3. **Deferred checks (from 9 Oct):** Benedict Evans readable titles; Pragmatic Engineer (both addresses), simple.ai and Peter Yang appearing in the digest.
+
+### Earlier (6–8 Oct), kept for history
 1. ✅ **v2's first live night (5 Oct) was clean.** The user checked the email: no repeats, coverage line present. Run 37401021733 (started 01:48 UTC): every step green, including **Check invariants** (`repeats` and `landed` both hold). Coverage 30/46 (65%).
 2. ✅ **B3 switched on** (AICoS `c7dab9b`, user OK, pushed 21:38 UTC on 6 Oct, before tonight's run was created).
    - Added `"psycopg[binary]" markdownify` to the install line, plus `NEON_STORE: 'true'` and `DATABASE_URL` to the job env (same as the passing `neon_smoke.yml`).
@@ -65,7 +71,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
      - **Open gap:** the junk filter judges links, never whole emails, so a promotional email passes through. It needs the user's call if it bothers them.
      - **Pattern (3 cases on 8 Oct):** senders change or add addresses, and the digest silently misses them. A "silent source" check (no email in N days) has been suggested and not built. Backlog candidate for the user to decide.
    - Keep watching v2's invariants on 8 Oct, as planned.
-3. **Then ⏸ Pause 2:** the user's mobile walkthrough with real nightly data (TLDR included, which isn't in the 4 Oct backfill).
+3. ✅ **Pause 2 closed 8 Oct** (user, after two days of real use).
 4. **Open questions and parked items (none block 1–3):**
    - **Junk corrections are now automatic** (AICoS `40095ee`, active once B3 is on):
      - At 10 corrections since the last tuning, the morning digest carries a scored report with Claude-drafted fixes at the bottom. A line at the top every day says a tuning session is due.
@@ -124,7 +130,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Neon-failure banner plus the run marked failed.
   - Tests: unit tests offline; integration tests on a throwaway Neon schema; replay of 4 Oct real emails.
 - [x] **B4** Hosting, on **Vercel** (user decision), plus desktop local-run instructions. *(KR `4ff21c2`; live at https://knowledge-retriever-today.vercel.app)*
-- [ ] ⏸ **Pause 2:** the user's mobile walkthrough.
+- [x] ⏸ **Pause 2:** the user's mobile walkthrough. *(Closed 8 Oct by the user after two days of real nightly use on the phone: 7 and 8 Oct. Feedback acted on: grouping by newsletter, new senders, readable titles.)* **Phase 2a complete.**
 
 ## Iteration log
 *(newest first; times corrected at 21:58 UTC to match commit times, as earlier entries had been estimated)*
