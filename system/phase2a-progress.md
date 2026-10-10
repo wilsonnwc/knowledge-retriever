@@ -26,7 +26,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 
 ## NEXT SESSION START HERE (updated 2026-10-11 ~00:05)
 **Phase 2a is complete** (Pause 2 closed by the user on 8 Oct). Pick up with:
-0. **Useful / Not useful signals shipped 11 Oct ~00:00** (`42f83d7`, spec `system/specs/2026-10-10-useful-signals.md`). **Confirm AC7:** the hosted Today page shows Useful · Later · Not useful; after the first real press, check that `surface` is filled in (`SELECT action, surface FROM events ORDER BY id DESC LIMIT 5`). Then fill in AC7 in the spec and the index. Open: D2/Q1 (keep `read`/`dismiss` codes or rename).
+0. **Useful / Not useful signals shipped 11 Oct ~00:00** (`42f83d7`, spec `system/specs/2026-10-10-useful-signals.md`). ✅ User confirmed the new buttons are live on the phone (11 Oct). **Still to confirm for AC7:** after the first real press, check that `surface` is filled in (`SELECT action, surface FROM events ORDER BY id DESC LIMIT 5`). Then fill in AC7 in the spec and the index. Open: D2/Q1 (keep `read`/`dismiss` codes or rename).
 1. **Reminder (user decision 10 Oct: no email, no cloud agent).** In the first Claude Code session on this project **on or after Sun 11 Oct 08:00 London**, before anything else, remind the user of: the parked items (junk tuning, idea bank, skip-reason analysis, learn-from-taps), the watch items (promo emails passing the junk filter, the "silent source" check) and the deferred checks in item 3. Then mark this item done.
 2. **Phase 4 kickoff:** Claude elaborated Phase 4 on 8 Oct (skill map `skills.yaml` with an evidence-based level ladder, a Later queue tagged by skill, resurfacing on skill activation rather than a timer). **Open question to the user:** "As a PM, what does success look like for Phase 4?" Then the design questions: what makes a skill "active", who tags Later items, where `skills.yaml` lives, and how the 32 prose items migrate. Data on 8 Oct: 81 presses in 3 days (17 Completed, 11 Skip, 5 Later, 1 Build).
 3. **Deferred checks (from 9 Oct):** Benedict Evans readable titles (still on watch: no Benedict email received as of 10 Oct); Pragmatic Engineer (both addresses), simple.ai and Peter Yang appearing in the digest.
@@ -39,6 +39,8 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
 5. **Future ideas logged by the user (10 Oct), not scheduled:**
    - Read on the train with poor signal: either a native app or better offline caching of the Today page and reader.
    - Save a quote or a passage from an article into a note.
+   - Dark mode: follow the device setting automatically (added 11 Oct).
+6. **To discuss next session (user, 11 Oct; not now):** how to interpret a card with no button press at all. Is it unseen, seen and ignored, or implicitly not useful?
 
 ### Earlier (6–8 Oct), kept for history
 1. ✅ **v2's first live night (5 Oct) was clean.** The user checked the email: no repeats, coverage line present. Run 37401021733 (started 01:48 UTC): every step green, including **Check invariants** (`repeats` and `landed` both hold). Coverage 30/46 (65%).
