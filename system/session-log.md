@@ -38,6 +38,39 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 48 — 2026-10-10 (Useful / Not useful signals shipped; a test-caused production incident)
+
+**Phase/step completed:**
+- First build run fully under spec-driven development: `system/specs/2026-10-10-useful-signals.md` (Full, small), plus the data contract `system/signal-model.md`.
+- Completed → **Useful**, Skip → **Not useful** on the card and in the reader. Each press records `surface` (card = judged from the summary, reader = from the article). The reader's Not useful prompt adds "Summary was enough".
+- Migration 005 applied to Neon (user OK; 118 events before and after). Pushed `42f83d7`.
+
+**Where to pick up next:**
+- `system/phase2a-progress.md` → "NEXT SESSION START HERE" (AC7 confirmation first, then the reminder, then Phase 4).
+
+**What worked:**
+- **The user simplified Claude's design.** Claude proposed a 2×2 grid (skimmed or read fully × useful or not). The user cut it to two buttons, where the screen gives the depth. That was honestly better: fewer, more reliable labels, the same taps as before, and a clean mapping of old data.
+- Checked first that AICoS reads only `build`/`not_junk` events, so keeping the codes `read`/`dismiss` was safe.
+- Code review: 2 fixes. The design quick check was clean (0 Critical, 0 Major).
+
+**What didn't work / got stuck on:**
+- **Incident (~23:30–23:55):**
+  - What happened: the new backend test used a session-level `SET search_path` on Neon's *pooled* connection. The setting stuck after the throwaway schema was dropped, and `use_schema` skipped public, so the hosted Today API returned 500s.
+  - Found by: the design-review capture failing locally.
+  - Fixed by: always running `SET LOCAL search_path`, including for public (KR `21fa5c7`, AICoS `0799edd` rebased). The user confirmed that the hosted page loads.
+- The auto-mode classifier blocked a direct reset of production connections and the polling of production, so the user verified on their phone.
+- Remote control: one user reply was lost in transit.
+
+**Learnings:**
+- Tests that share production's database pool can break production. Ask what the tests share with production, not only what they check.
+- Behavioural signals are cheap to log but ambiguous. Explicit signals are clear but cost effort. Pair them (see signal-model.md).
+
+**Open questions to come back to:**
+- D2/Q1: keep the codes `read`/`dismiss`, or rename them to `useful`/`not_useful`?
+- Run the tests on a Neon branch instead of production (the user's call).
+- Retry presses made offline (parked).
+- Future ideas: offline reading or a native app; save a quote to notes.
+---
 ### Session 47 — 2026-10-08 (spec-driven development adopted as the global working method)
 
 **Phase/step completed:**

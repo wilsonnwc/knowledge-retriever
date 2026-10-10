@@ -7,6 +7,7 @@ Every build follows spec-driven development (a global rule: see "Spec-Driven Dev
 
 | Spec | Size | Status | ACs passed | Key "spec vs reality" lesson |
 |---|---|---|---|---|
+| [Useful / Not useful signals](2026-10-10-useful-signals.md) | Full (small) | Shipped, AC7 pending | 6/7 (AC7 pending a real press) | The spec checked the data contract but not test isolation: a test shared production's connection pool and took the hosted API down. Every DB build now asks "what do the tests share with production?" |
 | [Phase 2a: digest upgrade + Today page](../phase2a-spec.md) | Full | Shipped (pre-framework) | See `phase2a-progress.md` | Written before this framework existed: locked decisions, locked ACs and pause points were already there. Missing: an AC-by-AC evidence table and a formal change log. Scope changes (e.g. hosting moved from Render to Vercel) are recorded across docs, not in one place. |
 
 ## Earlier builds without a written spec (for contrast)

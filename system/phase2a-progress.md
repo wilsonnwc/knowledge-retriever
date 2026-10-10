@@ -24,8 +24,9 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Put secrets in code, logs or commits.
 - The junk-filter fresh-week check uses Claude's blind labels, written **before** seeing judge output. Disagreements go to the user at Pause 1.
 
-## NEXT SESSION START HERE (updated 2026-10-10)
+## NEXT SESSION START HERE (updated 2026-10-11 ~00:05)
 **Phase 2a is complete** (Pause 2 closed by the user on 8 Oct). Pick up with:
+0. **Useful / Not useful signals shipped 11 Oct ~00:00** (`42f83d7`, spec `system/specs/2026-10-10-useful-signals.md`). **Confirm AC7:** the hosted Today page shows Useful · Later · Not useful; after the first real press, check that `surface` is filled in (`SELECT action, surface FROM events ORDER BY id DESC LIMIT 5`). Then fill in AC7 in the spec and the index. Open: D2/Q1 (keep `read`/`dismiss` codes or rename).
 1. **Reminder (user decision 10 Oct: no email, no cloud agent).** In the first Claude Code session on this project **on or after Sun 11 Oct 08:00 London**, before anything else, remind the user of: the parked items (junk tuning, idea bank, skip-reason analysis, learn-from-taps), the watch items (promo emails passing the junk filter, the "silent source" check) and the deferred checks in item 3. Then mark this item done.
 2. **Phase 4 kickoff:** Claude elaborated Phase 4 on 8 Oct (skill map `skills.yaml` with an evidence-based level ladder, a Later queue tagged by skill, resurfacing on skill activation rather than a timer). **Open question to the user:** "As a PM, what does success look like for Phase 4?" Then the design questions: what makes a skill "active", who tags Later items, where `skills.yaml` lives, and how the 32 prose items migrate. Data on 8 Oct: 81 presses in 3 days (17 Completed, 11 Skip, 5 Later, 1 Build).
 3. **Deferred checks (from 9 Oct):** Benedict Evans readable titles (still on watch: no Benedict email received as of 10 Oct); Pragmatic Engineer (both addresses), simple.ai and Peter Yang appearing in the digest.
@@ -34,7 +35,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
    - A useful summary alone should still count as positive for ranking, even if the full article wasn't opened.
    - A summary can look interesting while the full article turns out not useful.
    - Signals feed a periodic ranking review, not immediate re-ranking.
-   - **Decided (10 Oct): a small build of its own, before Phase 4.**
+   - **Decided (10 Oct): a small build of its own, before Phase 4.** Shipped 11 Oct, see item 0.
 5. **Future ideas logged by the user (10 Oct), not scheduled:**
    - Read on the train with poor signal: either a native app or better offline caching of the Today page and reader.
    - Save a quote or a passage from an article into a note.
