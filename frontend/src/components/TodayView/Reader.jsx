@@ -11,7 +11,7 @@ const EDGE_PX = 40;       // near the top or the end of the text, the bars alway
 // Reading room (user's mobile review, 2026-10-05): the title scrolls with the text, and the top bar and the
 // decision buttons fade away while scrolling down, back on scrolling up, at the top or end, or on a tap.
 // Back: opening pushes a history entry, so the phone's own back swipe / back button closes the reader.
-// Keyboard: when a note box is open (Skip "Other…", Build), the buttons sit just above the phone keyboard.
+// Keyboard: when a note box is open (Not useful "Other…", Build), the buttons sit just above the phone keyboard.
 function Reader({ card, onClose, onDecide, onUndo }) {
   const [item, setItem] = useState(null);
   const [error, setError] = useState(null);
@@ -123,7 +123,7 @@ function Reader({ card, onClose, onDecide, onUndo }) {
           )}
         </div>
         <footer ref={footerRef} className={`reader-footer ${keyboard ? '' : hidden}`} style={keyboard ? { bottom: keyboard } : undefined}>
-          <DecisionButtons state={card.state} onDecide={(a, o) => onDecide(card.id, a, o)} onUndo={(e) => onUndo(card.id, e)} />
+          <DecisionButtons state={card.state} surface="reader" onDecide={(a, o) => onDecide(card.id, a, o)} onUndo={(e) => onUndo(card.id, e)} />
         </footer>
       </div>
     </div>

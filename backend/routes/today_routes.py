@@ -3,7 +3,7 @@ Today page routes — HTTP adapter over backend/today_store.py.
 
 - GET  /api/today?date=YYYY-MM-DD   the day's cards (default: latest digest), junk list, metrics
 - GET  /api/items/<id>              the reader: full text or the newsletter's own description
-- POST /api/events                  a button press {item_id, action, reason?, undoes_event_id?}
+- POST /api/events                  a button press {item_id, action, reason?, undoes_event_id?, surface?}
 - GET  /api/later                   the Later list
 """
 
@@ -48,7 +48,8 @@ def post_event():
     if not data.get("item_id") or not data.get("action") or (undoes is not None and not isinstance(undoes, int)):
         return jsonify({"status": "error", "message": "item_id and action are required"}), 400
     try:
-        result = today_store.record_event(data["item_id"], data["action"], data.get("reason"), undoes)
+        result = today_store.record_event(data["item_id"], data["action"], data.get("reason"), undoes,
+                                          data.get("surface"))
     except today_store.InvalidEvent as e:
         return jsonify({"status": "error", "message": str(e)}), 400
     except today_store.NotFound:

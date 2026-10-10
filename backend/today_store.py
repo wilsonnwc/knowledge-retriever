@@ -24,13 +24,16 @@ load_dotenv(ROOT / ".env")  # local only; hosted platforms provide the variables
 
 LONDON = ZoneInfo("Europe/London")          # metrics count calendar days where the user lives
 # Decisions (count toward the success metrics). Revised with the user on 2026-10-05:
-#   reading status — later / read ("Completed") / dismiss ("Skip"): one at a time, the latest live one wins;
+#   reading status — later / read / dismiss: one at a time, the latest live one wins;
+#   'read' is labelled Useful and 'dismiss' Not useful since 2026-10-10 (Completed / Skip before; see
+#   system/signal-model.md). A press's `surface` says where it was judged: 'card' (summary) or 'reader' (article).
 #   build — a separate flag that can sit beside any status.
 # 'read_now' (the old "Read now", meaning "about to read") only exists in history: it still folds as a
 # status, but new presses can't write it.
 STATUSES = ("later", "read", "dismiss", "read_now")
 DECISIONS = STATUSES + ("build",)
 ACTIONS = ("later", "read", "dismiss", "build", "open", "undo", "not_junk")  # what a button may write
+SURFACES = ("card", "reader")
 SECTION_ORDER = {"top": 0, "next": 1, "rest": 2, "junk": 3}
 
 
@@ -192,10 +195,14 @@ def metrics(now: datetime | None = None) -> dict:
 
 # ── Writes ────────────────────────────────────────────────────────────────────
 
-def record_event(item_id: str, action: str, reason: str | None = None, undoes_event_id: int | None = None) -> dict:
-    """Validate and append one button press. Returns the event and the item's new state."""
+def record_event(item_id: str, action: str, reason: str | None = None, undoes_event_id: int | None = None,
+                 surface: str | None = None) -> dict:
+    """Validate and append one button press. Returns the event and the item's new state.
+    `surface` is optional so a page loaded before 2026-10-10 still saves (stored as NULL)."""
     if action not in ACTIONS:
         raise InvalidEvent(f"unknown action: {action}")
+    if surface is not None and (surface not in SURFACES or action not in DECISIONS):
+        raise InvalidEvent(f"surface {surface!r} is not allowed on {action}")
     if reason is not None and not isinstance(reason, str):
         raise InvalidEvent("reason must be text")
     reason = (reason or "").strip() or None
@@ -214,9 +221,9 @@ def record_event(item_id: str, action: str, reason: str | None = None, undoes_ev
             if conn.execute("SELECT 1 FROM events WHERE undoes_event_id = %s", (undoes_event_id,)).fetchone():
                 raise InvalidEvent("already undone")
         event = conn.execute(
-            """INSERT INTO events (item_id, action, reason, undoes_event_id) VALUES (%s, %s, %s, %s)
-               RETURNING id, item_id, action, reason, undoes_event_id, occurred_at""",
-            (item_id, action, reason, undoes_event_id if action == "undo" else None)).fetchone()
+            """INSERT INTO events (item_id, action, reason, undoes_event_id, surface) VALUES (%s, %s, %s, %s, %s)
+               RETURNING id, item_id, action, reason, undoes_event_id, surface, occurred_at""",
+            (item_id, action, reason, undoes_event_id if action == "undo" else None, surface)).fetchone()
         state = state_from_events(_events_by_item(conn, [item_id])[item_id])
     event["occurred_at"] = event["occurred_at"].isoformat()
     return {"event": event, "state": state}

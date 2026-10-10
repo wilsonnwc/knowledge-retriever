@@ -136,6 +136,27 @@ def test_completed_and_build_go_together_and_status_switches(logged_in, schema):
     assert (undo["status"], undo["build"]) == ("read", False)      # undoing Build leaves Completed alone
 
 
+def test_useful_and_not_useful_record_where_they_were_pressed(logged_in, schema):
+    # user decision 2026-10-10 (spec 2026-10-10-useful-signals): 'read' = Useful, 'dismiss' = Not useful,
+    # and `surface` says whether it was judged from the summary card or the article reader
+    _seed_day(schema)
+    useful = press(logged_in, "a1", "read", surface="card").get_json()
+    assert (useful["event"]["surface"], useful["state"]["status"]) == ("card", "read")
+    not_useful = press(logged_in, "a2", "dismiss", reason="Summary was enough", surface="reader").get_json()
+    assert (not_useful["event"]["surface"], not_useful["event"]["reason"]) == ("reader", "Summary was enough")
+    with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+        rows = conn.execute(f"SELECT item_id, surface FROM {schema}.events ORDER BY id").fetchall()
+    assert rows == [("a1", "card"), ("a2", "reader")]
+
+
+def test_surface_is_optional_but_must_be_known(logged_in, schema):
+    # a page loaded before the change sends no surface: still saved, as NULL (the old meaning)
+    _seed_day(schema)
+    assert press(logged_in, "a1", "read").get_json()["event"]["surface"] is None
+    assert press(logged_in, "a2", "read", surface="email").status_code == 400
+    assert press(logged_in, "j1", "not_junk", surface="card").status_code == 400  # only decisions carry a surface
+
+
 def test_old_read_now_can_no_longer_be_written(logged_in, schema):
     _seed_day(schema)
     assert press(logged_in, "a1", "read_now").status_code == 400

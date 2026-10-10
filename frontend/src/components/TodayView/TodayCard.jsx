@@ -20,7 +20,7 @@ function Meta({ card }) {
 // A full card (Top 3 / Next 7) or a compact row (Everything else). Tapping the title opens the reader.
 function TodayCard({ card, variant = 'card', onOpen, onDecide, onUndo }) {
   const tag = availabilityTag(card);
-  const done = Boolean(card.state.status) && !OPEN_STATUSES.includes(card.state.status); // Completed / Skipped grey out
+  const done = Boolean(card.state.status) && !OPEN_STATUSES.includes(card.state.status); // Useful / Not useful grey out
   return (
     <article className={`today-${variant} ${done ? 'done' : ''}`}>
       <button className="today-title" onClick={() => onOpen(card)}>
@@ -37,7 +37,7 @@ function TodayCard({ card, variant = 'card', onOpen, onDecide, onUndo }) {
       ) : (
         card.one_liner && <p className="today-oneliner">{card.one_liner}</p>
       )}
-      <DecisionButtons state={card.state} compact={variant !== 'card'}
+      <DecisionButtons state={card.state} compact={variant !== 'card'} surface="card"
                        onDecide={(action, opts) => onDecide(card.id, action, opts)}
                        onUndo={(eventId) => onUndo(card.id, eventId)} />
     </article>

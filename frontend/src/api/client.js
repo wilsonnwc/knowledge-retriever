@@ -68,10 +68,10 @@ export function fetchLater() {
 }
 
 // Returns {event, state}: the card's new state after this press.
-export function recordEvent(itemId, action, { reason, undoesEventId } = {}) {
+export function recordEvent(itemId, action, { reason, undoesEventId, surface } = {}) {
   return request('/events', {
     method: 'POST',
-    body: JSON.stringify({ item_id: itemId, action, reason, undoes_event_id: undoesEventId })
+    body: JSON.stringify({ item_id: itemId, action, reason, undoes_event_id: undoesEventId, surface })
   });
 }
 

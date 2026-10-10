@@ -24,11 +24,20 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Put secrets in code, logs or commits.
 - The junk-filter fresh-week check uses Claude's blind labels, written **before** seeing judge output. Disagreements go to the user at Pause 1.
 
-## NEXT SESSION START HERE (updated 2026-10-08 ~21:45 UTC)
+## NEXT SESSION START HERE (updated 2026-10-10)
 **Phase 2a is complete** (Pause 2 closed by the user on 8 Oct). Pick up with:
-1. **Confirm the reminder routine. NOT created yet**: the user restarted before answering. Proposal: one-time cloud agent, Sun 11 Oct 08:00 London (07:00 UTC), Sonnet 5.5, repo knowledge-retriever. It reads this file and emails the user (Gmail connector) the parked items (junk tuning, idea bank, skip-reason analysis, learn-from-taps), the watch items (promo emails passing the junk filter, "silent source" check) and the deferred checks.
+1. **Reminder (user decision 10 Oct: no email, no cloud agent).** In the first Claude Code session on this project **on or after Sun 11 Oct 08:00 London**, before anything else, remind the user of: the parked items (junk tuning, idea bank, skip-reason analysis, learn-from-taps), the watch items (promo emails passing the junk filter, the "silent source" check) and the deferred checks in item 3. Then mark this item done.
 2. **Phase 4 kickoff:** Claude elaborated Phase 4 on 8 Oct (skill map `skills.yaml` with an evidence-based level ladder, a Later queue tagged by skill, resurfacing on skill activation rather than a timer). **Open question to the user:** "As a PM, what does success look like for Phase 4?" Then the design questions: what makes a skill "active", who tags Later items, where `skills.yaml` lives, and how the 32 prose items migrate. Data on 8 Oct: 81 presses in 3 days (17 Completed, 11 Skip, 5 Later, 1 Build).
-3. **Deferred checks (from 9 Oct):** Benedict Evans readable titles; Pragmatic Engineer (both addresses), simple.ai and Peter Yang appearing in the digest.
+3. **Deferred checks (from 9 Oct):** Benedict Evans readable titles (still on watch: no Benedict email received as of 10 Oct); Pragmatic Engineer (both addresses), simple.ai and Peter Yang appearing in the digest.
+
+4. **Signal model discussion (10 Oct, in progress).** User wants "read" separated from "useful", and "read summary" separated from "read full". User's points so far:
+   - A useful summary alone should still count as positive for ranking, even if the full article wasn't opened.
+   - A summary can look interesting while the full article turns out not useful.
+   - Signals feed a periodic ranking review, not immediate re-ranking.
+   - **Decided (10 Oct): a small build of its own, before Phase 4.**
+5. **Future ideas logged by the user (10 Oct), not scheduled:**
+   - Read on the train with poor signal: either a native app or better offline caching of the Today page and reader.
+   - Save a quote or a passage from an article into a note.
 
 ### Earlier (6–8 Oct), kept for history
 1. ✅ **v2's first live night (5 Oct) was clean.** The user checked the email: no repeats, coverage line present. Run 37401021733 (started 01:48 UTC): every step green, including **Check invariants** (`repeats` and `landed` both hold). Coverage 30/46 (65%).
