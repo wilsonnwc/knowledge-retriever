@@ -13,5 +13,6 @@ def check_schema(schema: str) -> str:
 def use_schema(conn, schema: str) -> None:
     """Scope this transaction to `schema`. Neon's pooled endpoint rejects search_path as a startup
     option and pools by transaction, so it is set per transaction (SET LOCAL), never per session."""
-    if schema != "public":
-        conn.execute(f"SET LOCAL search_path TO {check_schema(schema)}")
+    # Always set, even for public: a session-level SET left on a pooled server connection (10 Oct: a test's
+    # `SET search_path`, its schema then dropped) would otherwise silently redirect every later query.
+    conn.execute(f"SET LOCAL search_path TO {check_schema(schema)}")
