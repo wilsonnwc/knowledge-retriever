@@ -6,9 +6,10 @@ cancels, so "what is this card's state now?" is always computed from the full hi
 """
 
 import os
+import re
 import sys
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -34,6 +35,7 @@ STATUSES = ("later", "read", "dismiss", "read_now")
 DECISIONS = STATUSES + ("build",)
 ACTIONS = ("later", "read", "dismiss", "build", "open", "undo", "not_junk")  # what a button may write
 SURFACES = ("card", "reader")
+UNDOABLE = DECISIONS + ("not_junk",)  # never 'open', 'seen' or another 'undo'
 SECTION_ORDER = {"top": 0, "next": 1, "rest": 2, "junk": 3}
 
 
@@ -79,7 +81,9 @@ def state_from_events(events: list[dict]) -> dict:
 def _events_by_item(conn, item_ids: list[str]) -> dict[str, list[dict]]:
     out: dict[str, list[dict]] = {i: [] for i in item_ids}
     if item_ids:
-        for e in conn.execute("SELECT * FROM events WHERE item_id = ANY(%s::text[]) ORDER BY id", (item_ids,)):
+        # 'seen' impressions never affect a card's state, and there is one per card per day: leave them out
+        for e in conn.execute("SELECT * FROM events WHERE item_id = ANY(%s::text[]) AND action <> 'seen' ORDER BY id",
+                              (item_ids,)):
             out[e["item_id"]].append(e)
     return out
 
@@ -183,8 +187,8 @@ def metrics(now: datetime | None = None) -> dict:
     month_start = now.date().replace(day=1)
     with tx() as conn:
         events = list(conn.execute(
-            "SELECT * FROM events WHERE occurred_at >= %s ORDER BY id",
-            (datetime(month_start.year, month_start.month, 1, tzinfo=LONDON),)))
+            "SELECT * FROM events WHERE occurred_at >= %s AND action = ANY(%s) ORDER BY id",
+            (datetime(month_start.year, month_start.month, 1, tzinfo=LONDON), list(DECISIONS + ("undo",)))))
     undone = {e["undoes_event_id"] for e in events if e["action"] == "undo"}
     live = [e for e in events if e["action"] in DECISIONS and e["id"] not in undone]
     local_day = lambda e: e["occurred_at"].astimezone(LONDON).date()  # noqa: E731
@@ -216,7 +220,7 @@ def record_event(item_id: str, action: str, reason: str | None = None, undoes_ev
             raise InvalidEvent("only junk items can be marked not junk")
         if action == "undo":
             target = conn.execute("SELECT * FROM events WHERE id = %s", (undoes_event_id,)).fetchone()
-            if not target or target["item_id"] != item_id or target["action"] in ("undo", "open"):
+            if not target or target["item_id"] != item_id or target["action"] not in UNDOABLE:
                 raise InvalidEvent("that press can't be undone")
             if conn.execute("SELECT 1 FROM events WHERE undoes_event_id = %s", (undoes_event_id,)).fetchone():
                 raise InvalidEvent("already undone")
@@ -228,3 +232,33 @@ def record_event(item_id: str, action: str, reason: str | None = None, undoes_ev
     event["occurred_at"] = event["occurred_at"].isoformat()
     return {"event": event, "state": state}
 
+
+MAX_SEEN_BATCH = 200  # a day has ~100 cards; anything bigger is not the page talking
+
+
+def record_seen(item_ids: list, digest_date: str) -> int:
+    """Append one 'seen' impression per card on the given day's page, at most once per card per page
+    (spec 2026-10-11-seen-impressions). Not a button press: no status change, no undo. Ids that weren't on that
+    day's page are skipped, so every impression joins to exactly one sighting. Returns how many were recorded."""
+    if not isinstance(item_ids, list) or not all(isinstance(i, str) and i for i in item_ids):
+        raise InvalidEvent("item_ids must be a list of ids")
+    if len(item_ids) > MAX_SEEN_BATCH:
+        raise InvalidEvent(f"at most {MAX_SEEN_BATCH} ids per batch")
+    if not isinstance(digest_date, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", digest_date):
+        raise InvalidEvent("digest_date must be YYYY-MM-DD")
+    try:
+        day = date.fromisoformat(digest_date)
+    except ValueError:
+        raise InvalidEvent("digest_date must be a real date") from None
+    with tx() as conn:
+        # only cards the Today tab showed that day: junk stays out unless it was corrected to "Not junk";
+        # one per card per page is the unique index's job (two devices can send the same card at once)
+        rows = conn.execute(
+            """INSERT INTO events (item_id, action, digest_date)
+               SELECT s.item_id, 'seen', s.digest_date FROM sightings s
+               WHERE s.item_id = ANY(%s::text[]) AND s.digest_date = %s
+                 AND (s.section <> 'junk' OR EXISTS (SELECT 1 FROM events n WHERE n.item_id = s.item_id
+                                                     AND n.action = 'not_junk'))
+               ON CONFLICT (item_id, digest_date) WHERE action = 'seen' DO NOTHING
+               RETURNING id""", (list(dict.fromkeys(item_ids)), day)).fetchall()
+    return len(rows)

@@ -4,6 +4,7 @@ Today page routes — HTTP adapter over backend/today_store.py.
 - GET  /api/today?date=YYYY-MM-DD   the day's cards (default: latest digest), junk list, metrics
 - GET  /api/items/<id>              the reader: full text or the newsletter's own description
 - POST /api/events                  a button press {item_id, action, reason?, undoes_event_id?, surface?}
+- POST /api/seen                    impressions {item_ids: [...], digest_date}, at most one per card per day's page
 - GET  /api/later                   the Later list
 """
 
@@ -39,6 +40,16 @@ def get_item():
         return jsonify({"status": "success", "item": today_store.item(item_id)}), 200
     except today_store.NotFound:
         return jsonify({"status": "error", "message": "no such item"}), 404
+
+
+@today_bp.route("/seen", methods=["POST"])
+def post_seen():
+    data = request.get_json(silent=True) or {}
+    try:
+        recorded = today_store.record_seen(data.get("item_ids"), data.get("digest_date"))
+    except today_store.InvalidEvent as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
+    return jsonify({"status": "success", "recorded": recorded}), 200
 
 
 @today_bp.route("/events", methods=["POST"])

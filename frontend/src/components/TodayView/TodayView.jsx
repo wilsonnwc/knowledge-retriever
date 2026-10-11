@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import TodayCard from './TodayCard';
 import Reader from './Reader';
+import { useSeenTracker } from './seenTracker';
 import * as api from '../../api/client';
 import './TodayView.css';
 
@@ -44,6 +45,8 @@ function TodayView() {
   const [tab, setTab] = useState('today'); // today | later | junk
   const [reading, setReading] = useState(null);
   const [error, setError] = useState(null);
+  // impressions belong to the day's page shown (older pages too); paused while the reader covers the list
+  const { refFor, markSeen } = useSeenTracker(page && page.date, tab === 'today' && !reading);
 
   const load = useCallback(() => {
     setError(null);
@@ -83,6 +86,12 @@ function TodayView() {
   if (!page && !error) return <div className="today"><p className="today-muted">Loading today…</p></div>;
   const m = page && page.metrics;
   const handlers = { onOpen: setReading, onDecide: decide, onUndo: undo };
+  // Today-tab cards also report "seen": on screen long enough, or pressed / opened (which proves it).
+  const todayCard = (c, variant) => (
+    <TodayCard key={c.id} card={c} variant={variant} seenRef={refFor(c.id)} onUndo={undo}
+               onOpen={(card) => { markSeen(card.id); setReading({ ...card, fromToday: true }); }}
+               onDecide={(id, action, opts) => { markSeen(id); return decide(id, action, opts); }} />
+  );
 
   return (
     <div className="today">
@@ -125,14 +134,14 @@ function TodayView() {
         ) : (
           <>
             {page.top.length > 0 && <h2 className="today-section">Top 3</h2>}
-            {page.top.map((c) => <TodayCard key={c.id} card={c} {...handlers} />)}
+            {page.top.map((c) => todayCard(c))}
             {page.next.length > 0 && <h2 className="today-section">Next 7</h2>}
-            {page.next.map((c) => <TodayCard key={c.id} card={c} {...handlers} />)}
+            {page.next.map((c) => todayCard(c))}
             {page.rest.length > 0 && <h2 className="today-section">Everything else ({page.rest.length})</h2>}
             {groupBySource(page.rest).map(([source, rows]) => (
               <React.Fragment key={source}>
                 <h3 className="today-group">{source} <span className="today-group-count">· {rows.length}</span></h3>
-                {rows.map((c) => <TodayCard key={c.id} card={c} variant="row" {...handlers} />)}
+                {rows.map((c) => todayCard(c, 'row'))}
               </React.Fragment>
             ))}
           </>
@@ -165,7 +174,8 @@ function TodayView() {
         </>
       )}
 
-      {reading && <Reader card={reading} onClose={() => setReading(null)} onDecide={decide} onUndo={undo} />}
+      {reading && <Reader card={reading} onClose={() => setReading(null)} onUndo={undo}
+                          onDecide={(id, action, opts) => { if (reading.fromToday) markSeen(id); return decide(id, action, opts); }} />}
     </div>
   );
 }

@@ -75,6 +75,11 @@ export function recordEvent(itemId, action, { reason, undoesEventId, surface } =
   });
 }
 
+// Batch of "seen" impressions on one day's page; keepalive lets it finish while the page is being hidden or closed.
+export function recordSeen(itemIds, digestDate, { keepalive = false } = {}) {
+  return request('/seen', { method: 'POST', body: JSON.stringify({ item_ids: itemIds, digest_date: digestDate }), keepalive });
+}
+
 export function fetchNotes() {
   return request('/notes').then((data) => data.notes);
 }

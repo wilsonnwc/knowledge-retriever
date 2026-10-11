@@ -18,11 +18,11 @@ function Meta({ card }) {
 }
 
 // A full card (Top 3 / Next 7) or a compact row (Everything else). Tapping the title opens the reader.
-function TodayCard({ card, variant = 'card', onOpen, onDecide, onUndo }) {
+function TodayCard({ card, variant = 'card', onOpen, onDecide, onUndo, seenRef }) {
   const tag = availabilityTag(card);
   const done = Boolean(card.state.status) && !OPEN_STATUSES.includes(card.state.status); // Useful / Not useful grey out
   return (
-    <article className={`today-${variant} ${done ? 'done' : ''}`}>
+    <article ref={seenRef} className={`today-${variant} ${done ? 'done' : ''}`}>
       <button className="today-title" onClick={() => onOpen(card)}>
         {variant === 'card' && card.rank && <span className="today-rank">#{card.rank}</span>}
         {card.title}

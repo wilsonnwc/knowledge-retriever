@@ -29,7 +29,8 @@ def press(c, item_id, action, **kw):
 # ── Login guard ───────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("method,path", [("GET", "/api/today"), ("GET", "/api/item?id=a1"), ("POST", "/api/events"),
-                                         ("GET", "/api/later"), ("GET", "/api/notes"), ("DELETE", "/api/notes")])
+                                         ("GET", "/api/later"), ("GET", "/api/notes"), ("DELETE", "/api/notes"),
+                                         ("POST", "/api/seen")])
 def test_every_api_route_requires_login(client, method, path):
     assert client.open(path, method=method).status_code == 401
 
@@ -225,3 +226,52 @@ def test_events_cannot_be_edited_or_deleted(schema):
         today_store.use_schema(conn, schema)
         with pytest.raises(psycopg.errors.RaiseException):
             conn.execute("UPDATE events SET action = 'dismiss'")
+
+
+# ── Seen impressions (spec 2026-10-11-seen-impressions) ───────────────────────
+
+def test_seen_is_batched_and_recorded_once_per_card_per_page(logged_in, schema):
+    _seed_day(schema)
+    r = logged_in.post("/api/seen", json={"item_ids": ["a1", "n4", "a1", "nope"], "digest_date": DAY})
+    assert (r.status_code, r.get_json()["recorded"]) == (200, 2)   # repeat and unknown id skipped
+    again = logged_in.post("/api/seen", json={"item_ids": ["a1", "n4", "r1"], "digest_date": DAY})
+    assert again.get_json()["recorded"] == 1                        # a1, n4 already seen on this page; r1 is new
+    with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+        rows = conn.execute(f"SELECT item_id, digest_date::text FROM {schema}.events WHERE action = 'seen' ORDER BY id")
+        assert rows.fetchall() == [("a1", DAY), ("n4", DAY), ("r1", DAY)]
+
+
+def test_catching_up_on_an_older_page_records_against_that_page(logged_in, schema):
+    # user, 11 Oct: on busy days older pages get read later — each impression belongs to the page it was seen on
+    _seed_day(schema)
+    seed(schema, [("a1", "article", "Top story", "rest", None, "2026-10-04")])   # a1 was also on 4 Oct's page
+    assert logged_in.post("/api/seen", json={"item_ids": ["a1", "old"], "digest_date": "2026-10-04"}).get_json()["recorded"] == 2
+    assert logged_in.post("/api/seen", json={"item_ids": ["a1"], "digest_date": DAY}).get_json()["recorded"] == 1
+    assert logged_in.post("/api/seen", json={"item_ids": ["n4"], "digest_date": "2026-10-04"}).get_json()["recorded"] == 0  # not on that page
+
+
+def test_seen_is_not_a_press(logged_in, schema):
+    _seed_day(schema)
+    logged_in.post("/api/seen", json={"item_ids": ["a1"], "digest_date": DAY})
+    page = logged_in.get("/api/today").get_json()["page"]
+    card = next(c for c in page["top"] if c["id"] == "a1")
+    assert card["state"]["status"] is None and page["metrics"]["actioned_today"] == 0
+    assert press(logged_in, "a1", "seen").status_code == 400               # can't be written as a button press
+    with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+        seen_id = conn.execute(f"SELECT id FROM {schema}.events WHERE action = 'seen'").fetchone()[0]
+    assert press(logged_in, "a1", "undo", undoes_event_id=seen_id).status_code == 400
+
+
+def test_seen_rejects_malformed_batches(logged_in, schema):
+    _seed_day(schema)
+    for body in [{"digest_date": DAY}, {"item_ids": "a1", "digest_date": DAY}, {"item_ids": [1], "digest_date": DAY},
+                 {"item_ids": ["a1"] * 201, "digest_date": DAY}, {"item_ids": ["a1"]}, {"item_ids": ["a1"], "digest_date": "5 Oct"},
+                 {"item_ids": ["a1"], "digest_date": "2026-W41-6"}, {"item_ids": ["a1"], "digest_date": "2026-02-30"}]:
+        assert logged_in.post("/api/seen", json=body).status_code == 400
+
+
+def test_junk_counts_as_seen_only_once_corrected(logged_in, schema):
+    _seed_day(schema)
+    assert logged_in.post("/api/seen", json={"item_ids": ["j1"], "digest_date": DAY}).get_json()["recorded"] == 0
+    press(logged_in, "j1", "not_junk")                                   # now shown in Everything else
+    assert logged_in.post("/api/seen", json={"item_ids": ["j1"], "digest_date": DAY}).get_json()["recorded"] == 1

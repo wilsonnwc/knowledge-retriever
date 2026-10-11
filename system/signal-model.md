@@ -19,6 +19,8 @@
 | | `later` | Not now. Not a value judgement. |
 | | `build` | Build idea, a flag beside any status. |
 | | `open` | Reader opened. Recorded automatically. |
+| | `seen` | A Today-tab card was ≥50% visible (or filled half the screen) for ≥1 s, or was pressed/opened, on any day's page. At most one per card per page. Automatic; never changes status; can't be undone. **From 11 Oct.** |
+| `digest_date` | date | On `seen` only: which day's page it was seen on. `(item_id, digest_date)` joins to exactly one `sightings` row, giving that page's section and rank. |
 | `surface` | `card`, `reader` | Where a `read`/`dismiss`/`later`/`build` press was made. **NULL = a press from before 10 Oct**, which used the old meaning. |
 | `reason` | text | For Not useful: chosen reasons joined by `; `. |
 
@@ -36,6 +38,22 @@
 - **"Opened before pressing"** is derived when analysing, not stored: a card press with an earlier `open` event for the same item counts as an article-level judgement (for example, after reading, swiping back and tapping on the card).
 - **Known gap:** `open` events made with no signal (on a train) fail silently and are lost.
 - **Signals are used in periodic ranking reviews, not to re-rank live** (user, 10 Oct), the same pattern as junk-filter tuning.
+
+## Cards with no press (user, 11 Oct)
+
+A card with no press is not one signal. `seen` splits it in two:
+
+| What happened | Signal strength |
+|---|---|
+| Useful (reader) | Strong positive |
+| Useful (card) | Positive |
+| Later | Neutral: not now |
+| **Seen, no press** | **Weak negative:** "not irrelevant, just not interesting enough" |
+| **Not seen, no press** | **No signal:** never reached (about 30% of the time, no time to scroll). Never count it as negative, or low-ranked items get punished for being low (position bias) |
+| Not useful + reason | Strong negative: actively push down |
+
+- **Invariant:** every card pressed on the Today tab has a `seen` event for the page it was pressed on. If it breaks, the tracker is missing cards.
+- **Days before 11 Oct** have no `seen` events. Infer instead: cards above the lowest pressed card that day were probably seen; days with no presses are all "not seen".
 
 ## Old presses (before 10 Oct)
 
