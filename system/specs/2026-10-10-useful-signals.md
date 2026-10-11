@@ -1,6 +1,6 @@
 # Spec: Useful / Not useful signals on the Today page
 
-**Status:** SHIPPED, pending AC7 (locked 2026-10-10 on the user's "go build and push it") · **Size:** Full (it changes the events table), but small · **Owner (what/why):** PM (the user) · **Builder (how):** Claude
+**Status:** SHIPPED, all 7 ACs pass (locked 2026-10-10 on the user's "go build and push it") · **Size:** Full (it changes the events table), but small · **Owner (what/why):** PM (the user) · **Builder (how):** Claude
 **Created:** 2026-10-10 · **Locked:** 2026-10-10 · **Shipped:** 2026-10-11 (`42f83d7`)
 **Repos/areas touched:** knowledge-retriever only: `db/migrations/005`, `backend/today_store.py`, `backend/routes/today_routes.py`, `frontend/src/components/TodayView/`, `frontend/src/api/client.js`. AI Chief of Staff was checked and is not affected: it reads only `build` and `not_junk` events.
 **Data contract:** [`system/signal-model.md`](../signal-model.md)
@@ -40,7 +40,7 @@
 | AC4 | The API rejects an unknown `surface` with a 400 and still accepts a press with no surface (an old page still open in a tab keeps working) | Backend tests | ✅ Pass | `test_surface_is_optional_but_must_be_known` (also rejects a surface on non-decision actions, added after code review) |
 | AC5 | Existing history is untouched: old events keep `surface` NULL, undo/toggle behaviour is unchanged, and every existing test still passes | Full backend and React suites; read-only event count on live Neon before and after the migration | ✅ Pass | Backend 31/31, React 20/20. Neon: 118 events before, 118 after, 0 with a surface |
 | AC6 | The saved-reason note under a card reads "Not useful: “…”" | React test | ✅ Pass | React test; also seen live on card #1 in the design capture |
-| AC7 | Live on the hosted Today page by the evening of 10 Oct, so presses from 11 Oct carry the new signal | Hosted API check after the Vercel deploy; one real press shows `surface` in the database | ⏳ Pending | Pushed `42f83d7` ~00:00 11 Oct. Waiting for the user to confirm the new buttons on the phone and make the first real press |
+| AC7 | Live on the hosted Today page by the evening of 10 Oct, so presses from 11 Oct carry the new signal | Hosted API check after the Vercel deploy; one real press shows `surface` in the database | ✅ Pass | Pushed `42f83d7` ~00:00 11 Oct; the user confirmed the new buttons on the phone. Neon on 11 Oct: 2 real `dismiss` presses with `surface='reader'` |
 
 ## 5. Edge cases and failure states
 - **A tab still open from before the deploy** sends no surface → stored as NULL and accepted (AC4). It's indistinguishable from an old press, which is acceptable for one day.
