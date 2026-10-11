@@ -1,7 +1,7 @@
 # Spec: "Seen" impressions on the Today page
 
-**Status:** LOCKED (2026-10-11) · **Size:** Full (a new event type in the events table), but small · **Owner (what/why):** PM (the user) · **Builder (how):** Claude
-**Created:** 2026-10-11 · **Locked:** 2026-10-11 · **Shipped:** —
+**Status:** SHIPPED, AC5 pending (locked 2026-10-11) · **Size:** Full (a new event type in the events table), but small · **Owner (what/why):** PM (the user) · **Builder (how):** Claude
+**Created:** 2026-10-11 · **Locked:** 2026-10-11 · **Shipped:** 2026-10-11 (`4a285b7`, build fix `f1cfecf`)
 **Repos/areas touched:** knowledge-retriever only: `db/migrations/006`, `backend/today_store.py` + route, `frontend/src/components/TodayView/`, `frontend/src/api/client.js`, `system/signal-model.md`.
 **Builds on:** [`2026-10-10-useful-signals.md`](2026-10-10-useful-signals.md) and the data contract [`system/signal-model.md`](../signal-model.md)
 
@@ -38,12 +38,12 @@
 
 | ID | Criterion | Verified by | Result | Evidence |
 |---|---|---|---|---|
-| AC1 | A card that is ≥50% visible for ≥1 second gets exactly one `seen` event that day. Scrolling past it quickly (<1 s) records nothing | React test (visibility timing, mocked); browser check by scrolling | — | |
-| AC2 | Seeing the same card again on the same day's page (re-scroll, reload, a second device, a later catch-up) does not add a second `seen`. The same card on another day's page is its own impression, recorded against that page | Backend tests (dedupe per card per page; older-page catch-up); React test (day switch) | — | |
-| AC3 | Seen events go out in batches: one request carries several cards, and pending ones are sent when the page is hidden or closed | React test; network check in the browser | — | |
-| AC4 | `seen` has no effect on the card's status, the Later list, the metrics strip or undo | Backend tests (state and metrics unchanged) | — | |
-| AC5 | Invariant: every card pressed on the Today tab after release also has a `seen` event | SQL check on live data after 1–2 days of real use | — | |
-| AC6 | Nothing visible changes, and the page stays as fast as before. A failed send is silent and never shows an error | Design quick check is not needed (no UI change); browser check that there are no console errors | — | |
+| AC1 | A card that is ≥50% visible for ≥1 second gets exactly one `seen` event that day. Scrolling past it quickly (<1 s) records nothing | React test (visibility timing, mocked); browser check by scrolling | ✅ Pass | React tests (1 s rule, flick, tall card, paused states). Live 11 Oct: the user's scroll recorded 2 cards on 10 Oct's page (Top #1–2, on screen at load) and 7 of 10 on 4 Oct's page |
+| AC2 | Seeing the same card again on the same day's page (re-scroll, reload, a second device, a later catch-up) does not add a second `seen`. The same card on another day's page is its own impression, recorded against that page | Backend tests (dedupe per card per page; older-page catch-up); React test (day switch) | ✅ Pass | Backend tests (once per card per page, enforced by the database's unique index; catch-up on an older page; junk only once corrected); React test (day switch) |
+| AC3 | Seen events go out in batches: one request carries several cards, and pending ones are sent when the page is hidden or closed | React test; network check in the browser | ✅ Pass | React tests (batching, keepalive on hide). Live: the two 10 Oct rows share one timestamp (one request); 4 Oct arrived in several batches during the scroll |
+| AC4 | `seen` has no effect on the card's status, the Later list, the metrics strip or undo | Backend tests (state and metrics unchanged) | ✅ Pass | Backend test `test_seen_is_not_a_press` (status, metrics and undo unchanged) |
+| AC5 | Invariant: every card pressed on the Today tab after release also has a `seen` event | SQL check on live data after 1–2 days of real use | ⏳ Pending | Run the invariant query after 1–2 days of real presses |
+| AC6 | Nothing visible changes, and the page stays as fast as before. A failed send is silent and never shows an error | Design quick check is not needed (no UI change); browser check that there are no console errors | ✅ Pass | No UI change. The user used the hosted page normally after the deploy. A failed send is caught silently (React test) |
 
 ## 5. Edge cases and failure states
 - **Offline (train):** the batch fails and is dropped silently, as with "open" today. Those cards look unseen, which is the safe direction: they're ignored, not punished.
@@ -85,7 +85,7 @@ No new agent: the invariant is a single query, and it will become a check in the
 - [x] T2: Backend `record_seen`, the route and tests (AC2, AC4)
 - [x] T3: Frontend tracker, batching, mark-on-press, and tests (AC1, AC3, AC6)
 - [x] T4: Full suites (backend 37, React 28). Code review round 1: 9 findings, all fixed. Round 2, after the change control: 8 findings; 6 fixed (the database unique index replaces the lock; junk only once corrected; reader presses mark seen; strict date check; skip already-seen cards; dead helper removed), 1 not applicable (keepalive preflight: production API is same-origin `/api`), 1 skipped (minor memory growth in very long sessions). The local browser check was skipped: the local app uses the live database, so verify on the hosted page after release instead (AC1, AC3, AC6)
-- [ ] ⏸ T5: User OK → apply 006 → push → the hosted page sends `seen` (AC1, AC3)
+- [x] ⏸ T5: User OK → apply 006 → push → the hosted page sends `seen` (AC1, AC3)
 - [ ] T6: After 1–2 days, run the AC5 invariant query (AC5)
 
 ---
@@ -93,11 +93,19 @@ No new agent: the invariant is a single query, and it will become a check in the
 ## 10. Change log
 | Date | Change | Why | ACs affected | OK'd |
 |---|---|---|---|---|
+| 2026-10-11 | Build fix `f1cfecf`: the hook dependencies that lint requires | The Vercel build failed: CRA treats lint warnings as errors under CI, and the tests don't run lint. The live site was unaffected (Vercel kept the last good deploy) | none | Claude's call (no behaviour change) |
 | 2026-10-11 | Paused while the reader is open or the page is hidden | Code review: the clocks kept running behind a locked screen or the reader | AC1 | Claude's call (craftsmanship) |
 | 2026-10-11 | ~~Latest day only~~ → **every day's page, tagged with `digest_date`; one per card per page** (replaces "one per card per London day"). Migration 006 also adds `events.digest_date` | User: "there could be days I'm not available and go back to older days to read". Latest-only would drop exactly those catch-up sessions | AC2, D2, D4 | **User OK, 11 Oct** |
 
 ## 11. Spec vs reality (retro) ★
 - **What the spec got right:**
+  - Pinning "seen" to a measurable rule (≥50% for ≥1 s) made it testable, and the AC5 invariant gives a standing health check.
+  - Batching plus a database-enforced dedupe kept cost and noise down.
 - **What it missed (found during build or QA):**
-- **What changed and why:**
+  - **Catch-up reading.** The PM spotted it: an impression needs to say *which day's page* it was on, not just which card. Without `digest_date`, older-page reading would have been misdated, or dropped entirely under the "latest day only" patch.
+  - **Edge cases of impression logging**, found by two rounds of code review: two devices at once, a locked phone, the reader overlay, failed sends, the London midnight edge, junk cards.
+  - **The production build is stricter than the tests** (lint as errors): the first deploy failed.
+- **What changed and why:** see the Change log (catch-up pages; paused states; the build fix).
 - **What I'd specify differently next time:**
+  - For any event spec, list the context keys up front: "which page or day, which position". An event without its context can't be analysed, and context can't be backfilled.
+  - Run the production build (`CI=true npm run build`) before every push. Now a standing step for this project.

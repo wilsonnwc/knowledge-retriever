@@ -24,7 +24,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Put secrets in code, logs or commits.
 - The junk-filter fresh-week check uses Claude's blind labels, written **before** seeing judge output. Disagreements go to the user at Pause 1.
 
-## NEXT SESSION START HERE (updated 2026-10-11 18:10)
+## NEXT SESSION START HERE (updated 2026-10-11 23:15)
 **Phase 2a is complete** (Pause 2 closed by the user on 8 Oct). Pick up with:
 0. ✅ **Useful / Not useful signals: all 7 ACs pass** (11 Oct, 2 real reader presses carry `surface`). Open: D2/Q1 (keep the `read`/`dismiss` codes or rename them).
 1. ✅ **Reminder delivered** (11 Oct 18:05, first session after Sun 08:00).
@@ -40,7 +40,11 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
    - Read on the train with poor signal: either a native app or better offline caching of the Today page and reader.
    - Save a quote or a passage from an article into a note.
    - Dark mode: follow the device setting automatically (added 11 Oct).
-6. **To discuss next session (user, 11 Oct; not now):** how to interpret a card with no button press at all. Is it unseen, seen and ignored, or implicitly not useful?
+6. ✅ **"No press" interpretation, decided and shipped 11 Oct** (spec `system/specs/2026-10-11-seen-impressions.md`, `4a285b7` + build fix `f1cfecf`, migration 006 applied). "Seen, no press" = weak negative; "not seen" = no signal (see `system/signal-model.md`). Verified live: 2 seen on 10 Oct's page, 7 on 4 Oct's page.
+   - **Next session, first thing:** run the AC5 invariant (every Today-tab press has a seen for that page; presses from 11 Oct ~23:15 on):
+     `SELECT e.item_id FROM events e WHERE e.action IN ('read','dismiss','later','build') AND e.surface IS NOT NULL AND e.occurred_at > '2026-10-11 22:15+00' AND NOT EXISTS (SELECT 1 FROM events s WHERE s.item_id = e.item_id AND s.action = 'seen')` should return no rows. Allow for presses from the Later tab, which are out of scope, and the junk tab. Then fill in AC5.
+   - **Standing step:** run `CI=true REACT_APP_API_URL=/api npm run build` in `frontend/` before every push (the Vercel build treats lint warnings as errors).
+7. **Next up:** Phase 4 kickoff (item 2). Small items: D2/Q1 code rename; dark mode; offline reading; save quotes.
 
 ### Earlier (6–8 Oct), kept for history
 1. ✅ **v2's first live night (5 Oct) was clean.** The user checked the email: no repeats, coverage line present. Run 37401021733 (started 01:48 UTC): every step green, including **Check invariants** (`repeats` and `landed` both hold). Coverage 30/46 (65%).

@@ -38,6 +38,35 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 49 — 2026-10-11 ("No press" interpretation; "seen" impressions shipped)
+
+**Phase/step completed:**
+- AC7 of the Useful/Not useful spec verified (2 real reader presses carry `surface`). The reminder list was delivered.
+- The "no press" question decided with the user: "seen, no press" = weak negative; "never reached" (~30%, no time) = no signal. Spec `system/specs/2026-10-11-seen-impressions.md` (Full, small), `4a285b7` + build fix `f1cfecf`, migration 006 applied (user OK).
+
+**Where to pick up next:**
+- `system/phase2a-progress.md` → item 6 (AC5 invariant query), then Phase 4 kickoff.
+
+**What worked:**
+- **Change control worked as designed.** After the lock, the user caught that "latest day only" would drop catch-up reading on older pages. The spec was changed (with a change-log entry and the user's OK) before release: each `seen` now carries `digest_date`, and `(item_id, digest_date)` joins to exactly one sighting.
+- The user played back the data model ("an event ties back to an article") before approving, which is a good PM habit for data decisions.
+- Two code-review rounds caught real impression-logging edge cases: two devices, a locked phone, the reader overlay, failed sends, the midnight edge, junk cards. The dedupe moved from an app lock to a database unique index.
+- Live check: 2 seen on 10 Oct's page (at load), 7 of 10 on 4 Oct's page (catch-up). Every event joined to one sighting.
+
+**What didn't work / got stuck on:**
+- The first Vercel deploy failed: CRA treats lint warnings as errors under `CI=true`, and the tests don't run lint. The live site was unaffected. New standing step: run the production build before pushing.
+- Two test-file slips: an apostrophe in a test name silently dropped a whole test file (caught by the test count falling from 24 to 20); and CRA resets mocks between tests.
+
+**Learnings:**
+- Position bias: never treat "no press" as negative without knowing the card was seen.
+- An event is only as useful as its context keys (which page, which position). Specify them up front, because they can't be backfilled.
+- "Tests pass" ≠ "it builds for production".
+
+**Open questions to come back to:**
+- AC5 invariant after 1–2 days.
+- D2/Q1: rename the `read`/`dismiss` codes?
+- Phase 4 success criteria.
+---
 ### Session 48 — 2026-10-10 (Useful / Not useful signals shipped; a test-caused production incident)
 
 **Phase/step completed:**
