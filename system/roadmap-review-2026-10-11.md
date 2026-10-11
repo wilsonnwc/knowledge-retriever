@@ -1,5 +1,6 @@
 # Roadmap review: Learning OS phases, re-sequenced (2026-10-11)
 
+**Readable page:** https://claude.ai/artifact/CDoD2AaqP6BbF2goyS7FyK (private).
 **Status:** a recommendation for the user to decide on. It doesn't change `learning-os-plan.md` Section G until the user approves.
 **Why now:** the plan's phase order was written on 27 Aug, before any real use. Since then, 6 days of real use, three shipped signal builds and the user's own discussion have changed what we know.
 

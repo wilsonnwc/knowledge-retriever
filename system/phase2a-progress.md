@@ -45,7 +45,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
      `SELECT e.item_id FROM events e WHERE e.action IN ('read','dismiss','later','build') AND e.surface IS NOT NULL AND e.occurred_at > '2026-10-11 22:15+00' AND NOT EXISTS (SELECT 1 FROM events s WHERE s.item_id = e.item_id AND s.action = 'seen')` should return no rows. Allow for presses from the Later tab, which are out of scope, and the junk tab. Then fill in AC5.
    - **Standing step:** run `CI=true REACT_APP_API_URL=/api npm run build` in `frontend/` before every push (the Vercel build treats lint warnings as errors).
 7. **Phase 4 kickoff in progress (Stage 1, Specify), behind a feature toggle (user: no need to wait for AC5). Start the next session here:**
-   - **Read with the user:** `system/roadmap-review-2026-10-11.md`. Three decisions for the user: approve the order R1→R2→R3/R4→R5…; promote offline reading?; the multi-agent (R6) trade-off.
+   - **Read with the user:** `system/roadmap-review-2026-10-11.md` (phone-friendly page: https://claude.ai/artifact/CDoD2AaqP6BbF2goyS7FyK, private). Three decisions for the user: approve the order R1→R2→R3/R4→R5…; promote offline reading?; the multi-agent (R6) trade-off.
    - **Then:** `system/specs/2026-10-12-learn-loop.md`, open questions Q1–Q5 (success measures; Learn sub-options Build + Deep dive (+ Apply at work?); skills in Neon vs a file; ~15 baseline labels; Later resurfacing in v1?). Ask one or two at a time (the user is often on mobile). Lock only when the user says so.
    - **Already decided (11 Oct):**
      - drop "attention" from the skill map
