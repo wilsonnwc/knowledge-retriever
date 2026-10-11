@@ -7,6 +7,7 @@ Every build follows spec-driven development (a global rule: see "Spec-Driven Dev
 
 | Spec | Size | Status | ACs passed | Key "spec vs reality" lesson |
 |---|---|---|---|---|
+| [Phase 4: the Learn loop](2026-10-12-learn-loop.md) | Full | DRAFT, Stage 1 (5 open questions) | — | — |
 | ["Seen" impressions](2026-10-11-seen-impressions.md) | Full (small) | Shipped, AC5 pending | 5/6 (AC5 needs 1–2 days of presses) | The PM caught a missing context key (which day's page) through change control before release. Events need their context keys specified up front; the production build is stricter than the tests |
 | [Useful / Not useful signals](2026-10-10-useful-signals.md) | Full (small) | Shipped | 7/7 | The spec checked the data contract but not test isolation: a test shared production's connection pool and took the hosted API down. Every DB build now asks "what do the tests share with production?" |
 | [Phase 2a: digest upgrade + Today page](../phase2a-spec.md) | Full | Shipped (pre-framework) | See `phase2a-progress.md` | Written before this framework existed: locked decisions, locked ACs and pause points were already there. Missing: an AC-by-AC evidence table and a formal change log. Scope changes (e.g. hosting moved from Render to Vercel) are recorded across docs, not in one place. |

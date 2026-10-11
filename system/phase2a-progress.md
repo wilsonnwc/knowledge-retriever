@@ -24,7 +24,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Put secrets in code, logs or commits.
 - The junk-filter fresh-week check uses Claude's blind labels, written **before** seeing judge output. Disagreements go to the user at Pause 1.
 
-## NEXT SESSION START HERE (updated 2026-10-11 23:15)
+## NEXT SESSION START HERE (updated 2026-10-12)
 **Phase 2a is complete** (Pause 2 closed by the user on 8 Oct). Pick up with:
 0. ✅ **Useful / Not useful signals: all 7 ACs pass** (11 Oct, 2 real reader presses carry `surface`). Open: D2/Q1 (keep the `read`/`dismiss` codes or rename them).
 1. ✅ **Reminder delivered** (11 Oct 18:05, first session after Sun 08:00).
@@ -44,7 +44,14 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
    - **Next session, first thing:** run the AC5 invariant (every Today-tab press has a seen for that page; presses from 11 Oct ~23:15 on):
      `SELECT e.item_id FROM events e WHERE e.action IN ('read','dismiss','later','build') AND e.surface IS NOT NULL AND e.occurred_at > '2026-10-11 22:15+00' AND NOT EXISTS (SELECT 1 FROM events s WHERE s.item_id = e.item_id AND s.action = 'seen')` should return no rows. Allow for presses from the Later tab, which are out of scope, and the junk tab. Then fill in AC5.
    - **Standing step:** run `CI=true REACT_APP_API_URL=/api npm run build` in `frontend/` before every push (the Vercel build treats lint warnings as errors).
-7. **Next up:** Phase 4 kickoff (item 2). Small items: D2/Q1 code rename; dark mode; offline reading; save quotes.
+7. **Phase 4 kickoff in progress (Stage 1, Specify), behind a feature toggle (user: no need to wait for AC5). Start the next session here:**
+   - **Read with the user:** `system/roadmap-review-2026-10-11.md`. Three decisions for the user: approve the order R1→R2→R3/R4→R5…; promote offline reading?; the multi-agent (R6) trade-off.
+   - **Then:** `system/specs/2026-10-12-learn-loop.md`, open questions Q1–Q5 (success measures; Learn sub-options Build + Deep dive (+ Apply at work?); skills in Neon vs a file; ~15 baseline labels; Later resurfacing in v1?). Ask one or two at a time (the user is often on mobile). Lock only when the user says so.
+   - **Already decided (11 Oct):**
+     - drop "attention" from the skill map
+     - Build → Learn with sub-options
+     - an explicit tap is the source of truth, and AI pre-fills the skill
+     - Jev (System One) added to `skills-to-learn.md`, as R5's champion/challenger candidate
 
 ### Earlier (6–8 Oct), kept for history
 1. ✅ **v2's first live night (5 Oct) was clean.** The user checked the email: no repeats, coverage line present. Run 37401021733 (started 01:48 UTC): every step green, including **Check invariants** (`repeats` and `landed` both hold). Coverage 30/46 (65%).

@@ -38,6 +38,40 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 50 — 2026-10-11 → 10-12 (Phase 4 discovery; roadmap re-sequenced; Learn loop spec drafted)
+
+**Phase/step completed:**
+- Phase 4 kickoff, Stage 1 (Specify). No code.
+- Discovery with the user reframed Phase 4 from "Later queue + resurfacing" into the **Learn loop**.
+- Wrote a roadmap review of all Learning OS phases (`system/roadmap-review-2026-10-11.md`) and a draft spec (`system/specs/2026-10-12-learn-loop.md`).
+
+**Where to pick up next:**
+- `system/phase2a-progress.md` → item 7: walk the user through the roadmap decisions, then the spec's Q1–Q5.
+
+**What worked:**
+- **Checking the plan against real use** changed the plan:
+  - Later: 6 presses, 1 item waiting.
+  - Build: 1 press in 6 days (a test).
+  - The skill signal sits in Useful presses and in the user's own judgement.
+- **The user sharpened the design three times:**
+  - "Later just means read later", so the skill signal is elsewhere.
+  - Embeddings can't tell a market update from a how-to, so an explicit CTA is needed.
+  - "Attention" adds nothing, so track level only.
+- **Honest limits stated:** embeddings match topic, not "teaches a skill". The recommended design is an explicit Learn tap as the source of truth, with AI pre-filling the skill. The confirmations become labels for a later classifier (Haiku vs Jev).
+
+**What didn't work / got stuck on:**
+- The success question for Phase 4 is still unanswered. It's proposed as Q1 in the spec.
+
+**Learnings:**
+- Re-validate a planned feature against live usage before building it. A plan written before real use encodes guesses.
+- Human-in-the-loop labelling: explicit taps first, AI suggests, measure the agreement, automate later.
+- Measure before building agents: a cheap SQL signal review (R4) should decide which agents are worth it.
+
+**Open questions to come back to:**
+- The roadmap decisions (order, offline promotion, the R6 multi-agent trade-off).
+- Learn loop spec Q1–Q5.
+- AC5 of the seen-impressions spec (the invariant query).
+---
 ### Session 49 — 2026-10-11 ("No press" interpretation; "seen" impressions shipped)
 
 **Phase/step completed:**
