@@ -49,21 +49,21 @@ export function useSeenTracker(digestDate, active = true) {
     queue.current.push([day, id]);
   }, []);
 
-  const stopTimer = (el) => {
+  const stopTimer = useCallback((el) => {
     clearTimeout(timers.current.get(el));
     timers.current.delete(el);
-  };
-  const stopAllTimers = () => timers.current.forEach((_, el) => stopTimer(el));
+  }, []);
+  const stopAllTimers = useCallback(() => timers.current.forEach((_, el) => stopTimer(el)), [stopTimer]);
   // Re-observing makes the observer report each card's current visibility again, restarting the clocks.
-  const restart = () => elementIds.current.forEach((_, el) => {
+  const restart = useCallback(() => elementIds.current.forEach((_, el) => {
     if (observer.current) { observer.current.unobserve(el); observer.current.observe(el); }
-  });
+  }), []);
 
   useEffect(() => {
     activeRef.current = active && Boolean(digestDate);
     stopAllTimers(); // a clock started on another day's page must not finish on this one
     if (activeRef.current) restart();
-  }, [active, digestDate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [active, digestDate, stopAllTimers, restart]);
 
   useEffect(() => {
     if (typeof IntersectionObserver === 'undefined') return undefined;
@@ -99,7 +99,7 @@ export function useSeenTracker(digestDate, active = true) {
       window.removeEventListener('pagehide', onPageHide);
       flush(true); // leaving the Today page
     };
-  }, [flush, markSeen]);
+  }, [flush, markSeen, stopTimer, stopAllTimers, restart]);
 
   const refFor = useCallback((id) => {
     if (!refs.current.has(id)) {
@@ -119,7 +119,7 @@ export function useSeenTracker(digestDate, active = true) {
       });
     }
     return refs.current.get(id);
-  }, []);
+  }, [stopTimer]);
 
   return { refFor, markSeen };
 }
