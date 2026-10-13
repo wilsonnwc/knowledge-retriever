@@ -38,6 +38,38 @@ At the end of each session, copy the template below and fill it in at the top of
 *(most recent at the top)*
 
 ---
+### Session 51 — 2026-10-13 (Jev explained, first Jev spike, roadmap updated)
+
+**Phase/step completed:**
+- Explained Jev's long-term role in plain terms. It is a fast decision layer, and it doesn't learn by itself: daily presses feed it through a rewritten brief, as its answer key, and later through a tuned formula.
+- Ran an offline spike: Jev vs Haiku vs today's ranking on 122 articles.
+- Updated the roadmap: library merge first (the user's request), plus a Jev track J0–J4.
+
+**Where to pick up next:**
+- `system/phase2a-progress.md` → item 8.
+
+**What worked:**
+- **Labels came from existing presses, with no new labelling.** The brief was written without looking at the labels, which avoids flattering the result.
+- **The failing metric was informative:** relevance can't separate Useful from Not useful, because most Not-useful reasons are novelty, quality or promo. That is evidence for the August plan's Novelty/Gap/Authority split, and for moving the library merge up.
+- **Measured, not assumed:** Jev was about 20× cheaper than Haiku on this task (the vendor claims up to 444×), about 2× faster, and stable run to run. Haiku's AUC swung 54–62% between runs.
+
+**What didn't work / got stuck on:**
+- Anthropic SDK 1.0.0 rejected `temperature`, so I dropped it, and Haiku runs aren't deterministic as a result.
+- The user's first attempt to add the Jev key hadn't saved (count 0); the second worked.
+
+**Learnings:**
+- Don't tune on the test set: write the brief before looking at the labels.
+- Small samples: 18 clean labels, where one article moves AUC by several points. Report ranges across runs.
+- Separate the "engagement" signal (pressed vs scrolled past) from the "value" signal (Useful vs Not useful). Models can be good at one and blind to the other.
+
+**Open questions to come back to:**
+- the final OK on the order
+- the user editing brief v0
+- offline reading
+- R6
+- Learn loop Q1–Q5
+- seen-impressions AC5
+---
 ### Session 50 — 2026-10-11 → 10-12 (Phase 4 discovery; roadmap re-sequenced; Learn loop spec drafted)
 
 **Phase/step completed:**

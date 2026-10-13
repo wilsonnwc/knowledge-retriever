@@ -24,7 +24,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Put secrets in code, logs or commits.
 - The junk-filter fresh-week check uses Claude's blind labels, written **before** seeing judge output. Disagreements go to the user at Pause 1.
 
-## NEXT SESSION START HERE (updated 2026-10-12)
+## NEXT SESSION START HERE (updated 2026-10-13)
 **Phase 2a is complete** (Pause 2 closed by the user on 8 Oct). Pick up with:
 0. ✅ **Useful / Not useful signals: all 7 ACs pass** (11 Oct, 2 real reader presses carry `surface`). Open: D2/Q1 (keep the `read`/`dismiss` codes or rename them).
 1. ✅ **Reminder delivered** (11 Oct 18:05, first session after Sun 08:00).
@@ -44,6 +44,23 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
    - **Next session, first thing:** run the AC5 invariant (every Today-tab press has a seen for that page; presses from 11 Oct ~23:15 on):
      `SELECT e.item_id FROM events e WHERE e.action IN ('read','dismiss','later','build') AND e.surface IS NOT NULL AND e.occurred_at > '2026-10-11 22:15+00' AND NOT EXISTS (SELECT 1 FROM events s WHERE s.item_id = e.item_id AND s.action = 'seen')` should return no rows. Allow for presses from the Later tab, which are out of scope, and the junk tab. Then fill in AC5.
    - **Standing step:** run `CI=true REACT_APP_API_URL=/api npm run build` in `frontend/` before every push (the Vercel build treats lint warnings as errors).
+8. **13 Oct: Jev spike done; roadmap updated (library merge first, plus a Jev track).**
+   - **Results:** `system/spikes/2026-10-13-jev-relevance/results.md`.
+     - **Engagement (pressed vs scrolled past):** Jev 86%, Haiku and today's ranking 81–82%.
+     - **Useful vs Not useful:** no scorer beats a coin flip yet, because only about a third of Not-useful reasons are about topic.
+     - **Jev's profile:** about 2× faster and about 20× cheaper than Haiku, and stable run to run.
+   - **Roadmap:** `system/roadmap-review-2026-10-11.md`, "Update, 13 Oct", and the page https://claude.ai/artifact/CDoD2AaqP6BbF2goyS7FyK.
+     - **Proposed order:** R3 library merge + R2 silent-source check now; then R1 Learn loop; R4 + J2 (Jev shadow scoring) in early November.
+     - **Awaiting the user's final OK.**
+   - **Reader brief v0:** `claude-brain/briefs/reader-brief-v0.md` (private). **The user should edit it.**
+   - **Environment:** `TYPESAFE_API_KEY` is in `.env`. `typesafe-sdk` 0.7.4 is installed in `.venv`, but **not added to requirements**: it's only needed by the spike for now.
+   - **Re-run the spike at R4:** `python system/spikes/2026-10-13-jev-relevance/run.py --brief ~/claude-brain/briefs/reader-brief-v1.md --out <dir>` (costs about $0.16, mostly Haiku).
+   - **Still open:**
+     - the user's final OK on the order
+     - offline reading (promote or not)
+     - the R6 multi-agent trade-off
+     - Learn loop spec Q1–Q5
+     - AC5 of the seen-impressions spec
 7. **Phase 4 kickoff in progress (Stage 1, Specify), behind a feature toggle (user: no need to wait for AC5). Start the next session here:**
    - **Read with the user:** `system/roadmap-review-2026-10-11.md` (phone-friendly page: https://claude.ai/artifact/CDoD2AaqP6BbF2goyS7FyK, private). Three decisions for the user: approve the order R1→R2→R3/R4→R5…; promote offline reading?; the multi-agent (R6) trade-off.
    - **Then:** `system/specs/2026-10-12-learn-loop.md`, open questions Q1–Q5 (success measures; Learn sub-options Build + Deep dive (+ Apply at work?); skills in Neon vs a file; ~15 baseline labels; Later resurfacing in v1?). Ask one or two at a time (the user is often on mobile). Lock only when the user says so.

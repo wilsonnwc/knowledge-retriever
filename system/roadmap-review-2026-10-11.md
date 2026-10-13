@@ -6,6 +6,43 @@
 
 ---
 
+## Update, 13 Oct: library merge moved earlier, and a Jev track added (user)
+
+**Order now proposed** (the user asked for the library merge and Jev earlier; awaiting final OK):
+
+| When | What |
+|---|---|
+| **Now** | **R3, library merge v1** (moved up; the Jev spike shows novelty is the biggest ranking gap, and novelty needs the merged library) · R2, silent-source check |
+| **Next** | **R1, the Learn loop** (spec drafted; Deep dive gets related library items from day one) |
+| **Early Nov** | **R4, signal review + J2, Jev relevance scoring in shadow** |
+| **Later** | R5 onwards, as below |
+
+### The Jev track (System One as the fast "decision layer")
+**The idea:**
+- **Jev** makes fast, cheap, typed decisions with a confidence score.
+- **LLMs** write: summaries and "why it ranks".
+- **The user** keeps the gates.
+- An unsure Jev escalates to an LLM or to the user (a confidence-gated cascade).
+
+**Jev doesn't learn from presses by itself.** Daily use feeds it in three ways:
+1. A **reader brief** rewritten at each signal review.
+2. **Presses as its answer key** (how we measure it).
+3. Later, a **tuned final formula**: Jev score + source track record − topics marked "Already know it". Training a model on the presses ("learning to rank") is months away at about 10 presses a day.
+
+| Step | What | When | Status |
+|---|---|---|---|
+| **J0** | Relevance spike: Jev vs Haiku vs today's ranking against the user's presses | 13 Oct | ✅ Done. See `system/spikes/2026-10-13-jev-relevance/results.md`. Jev predicts engagement best (86%), is about 2× faster and about 20× cheaper than Haiku, and is stable run to run. **Nobody predicts Useful vs Not useful yet:** only about a third of Not-useful reasons are about relevance |
+| **J1** | Warm-up in production code: Jev vs the Haiku junk judge on the ~390 links already labelled. Builds the shared "decide" interface (Haiku as fallback, champion/challenger) | Small, any time | Proposed |
+| **J2** | Jev relevance scoring in **shadow** on every nightly item: logged, not shown. Measured at R4 against 3–4 weeks of clean labels, with brief v1 | With R4 (early Nov) | Proposed |
+| **J3** | **Ranking cascade:** Jev scores all items, Haiku picks Top 3 / Next 7 from the top ~15 and writes "why it ranks"; unsure items get a second look | After J2 shows it beats today's ranking | Proposed |
+| **J4+** | Other decisions: Learn skill pre-fill (Choice), whole-email promo filter, orchestrator routing (R6), binary eval judges (old Phase 7) | As each phase arrives | Ideas |
+
+**Guardrails:**
+- every Jev call goes behind one "decide" interface, so Haiku can stand in
+- a permanent champion/challenger
+- calibration is measured by us, not taken from the vendor
+- the user decides what personal data goes into the brief
+
 ## 1. The vision these phases serve (user, 11 Oct)
 
 > "Every day, what I read helps me decide what I should learn or build. Then it merges with the knowledge library I built before, to search articles on a topic, prepare for a project, etc."
