@@ -134,7 +134,7 @@ Same underlying test both times: *"if this disappeared tonight, could I get it b
 
 ## G. Build sequence
 
-> **Under review (2026-10-12):** a re-sequenced order based on real use is proposed in `system/roadmap-review-2026-10-11.md`, awaiting the user's decision. Phase 4 is re-scoped as the "Learn loop" (`system/specs/2026-10-12-learn-loop.md`). The table below is the August order, kept until the user approves the change.
+> **Superseded (approved by the user on 2026-10-13):** the build order now lives in `system/roadmap-review-2026-10-11.md` ("Update, 13 Oct"): library merge + silent-source check + brief review loop → Learn loop (the re-scoped Phase 4) → signal review with Jev in shadow → agents. The table below is the original August order, kept for history.
 
 Ordered by dependency and by what cannot be recovered later.
 

@@ -8,13 +8,14 @@
 
 ## Update, 13 Oct: library merge moved earlier, and a Jev track added (user)
 
-**Order now proposed** (the user asked for the library merge and Jev earlier; awaiting final OK):
+**Order APPROVED by the user on 13 Oct** (they asked for the library merge and Jev earlier):
 
 | When | What |
 |---|---|
 | **Now** | **R3, library merge v1** (moved up; the Jev spike shows novelty is the biggest ranking gap, and novelty needs the merged library) · R2, silent-source check |
+| **Now (small)** | **Brief review loop** (user, 13 Oct: trigger-based, not monthly). When about 15 new judged presses have built up since the last review, the morning digest says "brief review due". AI drafts brief changes with evidence; the user approves; the new brief is scored by Jev on the **next** ~15 presses it hasn't seen. This pulls J2's scoring forward in a small way |
 | **Next** | **R1, the Learn loop** (spec drafted; Deep dive gets related library items from day one) |
-| **Early Nov** | **R4, signal review + J2, Jev relevance scoring in shadow** |
+| **Early Nov** | **R4, the bigger signal review** (source scorecards, position bias, whether Jev moves from shadow into real ranking) **+ J2, Jev relevance scoring in shadow on every nightly item** |
 | **Later** | R5 onwards, as below |
 
 ### The Jev track (System One as the fast "decision layer")

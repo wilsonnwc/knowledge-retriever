@@ -44,6 +44,9 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
    - **Next session, first thing:** run the AC5 invariant (every Today-tab press has a seen for that page; presses from 11 Oct ~23:15 on):
      `SELECT e.item_id FROM events e WHERE e.action IN ('read','dismiss','later','build') AND e.surface IS NOT NULL AND e.occurred_at > '2026-10-11 22:15+00' AND NOT EXISTS (SELECT 1 FROM events s WHERE s.item_id = e.item_id AND s.action = 'seen')` should return no rows. Allow for presses from the Later tab, which are out of scope, and the junk tab. Then fill in AC5.
    - **Standing step:** run `CI=true REACT_APP_API_URL=/api npm run build` in `frontend/` before every push (the Vercel build treats lint warnings as errors).
+9. **NEXT SESSION: start the library merge (R3) at Stage 0/1 (Specify).**
+   - **First design question for the user:** Chroma (local only) vs pgvector in Neon (searchable from the phone and the hosted app).
+   - **Then the small items:** R2 (silent-source check) and the brief review loop.
 8. **13 Oct: Jev spike done; roadmap updated (library merge first, plus a Jev track).**
    - **Results:** `system/spikes/2026-10-13-jev-relevance/results.md`.
      - **Engagement (pressed vs scrolled past):** Jev 86%, Haiku and today's ranking 81–82%.
@@ -51,12 +54,11 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
      - **Jev's profile:** about 2× faster and about 20× cheaper than Haiku, and stable run to run.
    - **Roadmap:** `system/roadmap-review-2026-10-11.md`, "Update, 13 Oct", and the page https://claude.ai/artifact/CDoD2AaqP6BbF2goyS7FyK.
      - **Proposed order:** R3 library merge + R2 silent-source check now; then R1 Learn loop; R4 + J2 (Jev shadow scoring) in early November.
-     - **Awaiting the user's final OK.**
+     - ✅ **Approved by the user on 13 Oct**, plus a trigger-based brief review loop (about every 15 judged presses; AI drafts, the user approves, then it's checked on the next unseen batch).
    - **Reader brief v0:** `claude-brain/briefs/reader-brief-v0.md` (private). **The user should edit it.**
    - **Environment:** `TYPESAFE_API_KEY` is in `.env`. `typesafe-sdk` 0.7.4 is installed in `.venv`, but **not added to requirements**: it's only needed by the spike for now.
    - **Re-run the spike at R4:** `python system/spikes/2026-10-13-jev-relevance/run.py --brief ~/claude-brain/briefs/reader-brief-v1.md --out <dir>` (costs about $0.16, mostly Haiku).
    - **Still open:**
-     - the user's final OK on the order
      - offline reading (promote or not)
      - the R6 multi-agent trade-off
      - Learn loop spec Q1–Q5
