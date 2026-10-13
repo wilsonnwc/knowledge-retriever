@@ -131,6 +131,14 @@ Built as a hands-on learning project to develop RAG experience for a PM job inte
   - Pause 2 closed by the user. **Next: Phase 4** (skill map + Later queue + resurfacing): acceptance criteria first.
   - **Pick up from** `system/phase2a-progress.md` → "NEXT SESSION START HERE".
 - **Session 47 (2026-10-08): spec-driven development adopted for every build, in all projects.** The rules live in the global `claude-brain/CLAUDE.md` ("Spec-Driven Development" and "Agents in the Build"), with the template and agent-pipeline guide in `claude-brain/docs/`. This project's specs go in `system/specs/`. The next build is the first one under the formal framework.
+- **Sessions 48–51 (2026-10-10 → 13): signals, roadmap re-sequenced, first Jev test.**
+  - **Shipped** (each with a spec in `system/specs/`):
+    - Useful / Not useful with surface (migration 005)
+    - "seen" impressions tagged with the day's page (migration 006)
+  - **Data contract:** `system/signal-model.md`.
+  - **Roadmap re-sequenced and approved 13 Oct:** `system/roadmap-review-2026-10-11.md` (page: https://claude.ai/artifact/CDoD2AaqP6BbF2goyS7FyK). Library merge + silent-source check + a trigger-based brief review loop first, then the Learn loop (Phase 4), then a signal review with Jev in shadow.
+  - **Jev spike:** `system/spikes/2026-10-13-jev-relevance/results.md`.
+  - **Next: the library merge, starting with a grilling session.** Pick up from `system/phase2a-progress.md` → item 9.
 - **IMMEDIATE NEXT (superseded by the line above; kept for history):**
   1. The user labels ~150 links as junk or real. Claude prepares the label file.
   2. The user does the Render signup and adds the `NEON_DATABASE_URL` GitHub secret, following Claude's steps.
