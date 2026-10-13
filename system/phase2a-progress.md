@@ -44,8 +44,23 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
    - **Next session, first thing:** run the AC5 invariant (every Today-tab press has a seen for that page; presses from 11 Oct ~23:15 on):
      `SELECT e.item_id FROM events e WHERE e.action IN ('read','dismiss','later','build') AND e.surface IS NOT NULL AND e.occurred_at > '2026-10-11 22:15+00' AND NOT EXISTS (SELECT 1 FROM events s WHERE s.item_id = e.item_id AND s.action = 'seen')` should return no rows. Allow for presses from the Later tab, which are out of scope, and the junk tab. Then fill in AC5.
    - **Standing step:** run `CI=true REACT_APP_API_URL=/api npm run build` in `frontend/` before every push (the Vercel build treats lint warnings as errors).
-9. **NEXT SESSION: start the library merge (R3) at Stage 0/1 (Specify).**
-   - **First design question for the user:** Chroma (local only) vs pgvector in Neon (searchable from the phone and the hosted app).
+9. **NEXT SESSION: library merge (R3). Start with a GRILLING SESSION, then spec-driven development** (user, 13 Oct).
+   - **Format:** the user's grill-me format, run by hand. It's not yet a skill: show-ai-lab plans to package it after its manual runs, and this is the **second manual example**. Source: `show-ai-lab/system/session-log.md`, Session 5.
+     - **Steps:** Diverge → Grill → Converge, then the spec's Outcome and ACs, then the lock.
+     - **Rounds are the "frontier":** only questions whose prerequisites are settled, numbered and answerable by number.
+     - **Claude looks up facts itself and asks only for decisions.**
+     - **Hold back recommendations on product-judgement questions** until the PM has answered. Show them up front for factual or technical questions.
+     - "I don't know" is valid; prototype what talking can't settle. The Multi-Question Rounds rule applies.
+     - **End with: "Are you happy with this grill session?"**, and log the answer as the skill's eval.
+   - **User concern to grill first: don't blindly add full-page articles.** The current library holds curated excerpts, highlights and quotes as well as whole articles.
+     - **Facts (13 Oct):** 28 notes, median ~285 words (half under 300). Types: article 16, book 6, quote 3, podcast 2.
+     - **Today-page articles:** 280 with full text, median ~1,080 words, and Useful presses grow by about 5 a day. Merging all of them would quickly swamp the curated notes.
+     - This links to the "citation unit vs retrieval unit" skill in `skills-to-learn.md`, and to the planned "save a quote to notes".
+   - **Other grill topics already known:**
+     - Chroma (local) vs pgvector in Neon (phone and hosted search)
+     - what qualifies an article for the library (Useful? reader-depth only? Learn?)
+     - provenance ("from your 9 Oct digest")
+     - how novelty ("already know it") uses the merged library
    - **Then the small items:** R2 (silent-source check) and the brief review loop.
 8. **13 Oct: Jev spike done; roadmap updated (library merge first, plus a Jev track).**
    - **Results:** `system/spikes/2026-10-13-jev-relevance/results.md`.
