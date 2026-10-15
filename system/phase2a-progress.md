@@ -63,6 +63,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
      - how novelty ("already know it") uses the merged library
    - **Then the small items:** R2 (silent-source check) and the brief review loop.
    - **UI feedback (user, 14 Oct, sent from the phone but lost in transit; reconstructed 15 Oct):** the four decision buttons don't fit one row at phone width: 🛠 Build wraps alone onto line 2. This matches the Minor finding from the 11 Oct design check. **Plan:** fix it in the Learn-loop build, where Build becomes Learn and the row changes anyway, unless the user wants a quick fix sooner. A second piece of feedback from the same day is lost; the user doesn't remember it.
+   - **Feedback (user, 15 Oct; possibly the lost second item):** "Build sometimes doesn't reflect my desire just to save the page as it's useful." There's no "keep this" action, so Build gets used as a stand-in. That makes some `build` events mean "save", not "build" (a label-noise flag for the Learn loop and the R5 labels). **Input to the library-merge grill:** what earns a place in the library, and how the user says so. It also questions the Learn spec's assumption that every Useful article joins the library automatically.
 8. **13 Oct: Jev spike done; roadmap updated (library merge first, plus a Jev track).**
    - **Results:** `system/spikes/2026-10-13-jev-relevance/results.md`.
      - **Engagement (pressed vs scrolled past):** Jev 86%, Haiku and today's ranking 81–82%.
