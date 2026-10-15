@@ -44,7 +44,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
    - **Next session, first thing:** run the AC5 invariant (every Today-tab press has a seen for that page; presses from 11 Oct ~23:15 on):
      `SELECT e.item_id FROM events e WHERE e.action IN ('read','dismiss','later','build') AND e.surface IS NOT NULL AND e.occurred_at > '2026-10-11 22:15+00' AND NOT EXISTS (SELECT 1 FROM events s WHERE s.item_id = e.item_id AND s.action = 'seen')` should return no rows. Allow for presses from the Later tab, which are out of scope, and the junk tab. Then fill in AC5.
    - **Standing step:** run `CI=true REACT_APP_API_URL=/api npm run build` in `frontend/` before every push (the Vercel build treats lint warnings as errors).
-9. **NEXT SESSION: library merge (R3). Start with a GRILLING SESSION, then spec-driven development** (user, 13 Oct).
+9. **NEXT SESSION: library merge (R3). Start with a GRILLING SESSION, then spec-driven development** (user, 13 Oct). **In progress since 15 Oct: working notes in `system/grill-library-merge.md` (Diverge round 1, Q2 open).** The button discussion is parked until after the library merge (user).
    - **Format:** the user's grill-me format, run by hand. It's not yet a skill: show-ai-lab plans to package it after its manual runs, and this is the **second manual example**. Source: `show-ai-lab/system/session-log.md`, Session 5.
      - **Steps:** Diverge → Grill → Converge, then the spec's Outcome and ACs, then the lock.
      - **Rounds are the "frontier":** only questions whose prerequisites are settled, numbered and answerable by number.
