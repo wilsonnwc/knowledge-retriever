@@ -42,9 +42,23 @@
 6. interview evidence pack: job-ad requirements × read / saved / built (with the skill map)
 7. library hygiene: aged items and near-duplicates
 
-*User reactions to 1–7: open.*
+*User reactions (15 Oct):* most don't excite them. **Only 4, "quiz me", is worth further discussion, later.** The others are dropped.
 
-**Q2. When you save by hand today, how do you decide between the whole article, an excerpt, or just a quote?** *(open)*
+**Q2. When you save by hand today, how do you decide between the whole article, an excerpt, or just a quote?** (user, 15 Oct)
+- **Too long:** save part of it only.
+- **Only part of it is worth remembering:** save that part only.
+- **Golden article, or a comprehensive insight or opinion on a topic:** save the whole.
+- **Not new knowledge, but a really cool take worth reusing:** save just the quote.
+- *Reading:* three save units (whole / excerpt / quote), chosen by value density and length. This matches the existing `type:` frontmatter (article / quote).
+
+**Diverge complete (15 Oct).**
+
+## Grill plan (frontier order)
+- **Round 1:** G1 library vs reading history (P7) · G2 how a save unit is chosen (P1, P2)
+- **Round 2:** storage, Git notes vs the database (P3; technical, so a recommendation up front) · tags (P5) · the "why" field (P4) · provenance (P6)
+- **Round 3:** duplicates (P8) · how search results show saved parts vs the full source (P9) · is job-ad preparation in v1 or later?
+- **Round 4, Converge:** v1 scope and non-goals, outcome and metric, ACs → spec → lock
+
 
 ## Parked follow-ups (for the Grill step; not asked yet)
 - P1. Highlighting on a phone: select text in the reader, or tap whole paragraphs?
