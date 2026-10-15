@@ -28,6 +28,22 @@
     5. the content is copied into the library automatically, with **suggested tags and metadata**
     6. done
 
+- **Search by meaning, or AI search, over everything saved** (quotes, excerpts, articles).
+- **Project or job-ad preparation:** paste a job ad; get the relevant saved content mapped to each requirement.
+- **Future phase (parked, not now):** merge the user's Claude Code learnings (`learnings.md`, `skills-learned.md`) into the library: "show me what I've done in {topic}", "everything related to this job ad".
+- *Existing building blocks (fact check):* semantic search over notes (Search/Chat and MCP); `research_goal` (CLI only, in `scripts/chat.py`); `suggest_related` (service layer and MCP).
+
+**Claude's ideas offered (Diverge, not recommendations):**
+1. "Already saved something like this" marker on Today cards (novelty)
+2. merge into an existing note at save time instead of duplicating
+3. resurface saved gold weekly
+4. quiz me from my highlights (teach-back)
+5. topic brief on demand (`research_goal` on web and phone)
+6. interview evidence pack: job-ad requirements × read / saved / built (with the skill map)
+7. library hygiene: aged items and near-duplicates
+
+*User reactions to 1–7: open.*
+
 **Q2. When you save by hand today, how do you decide between the whole article, an excerpt, or just a quote?** *(open)*
 
 ## Parked follow-ups (for the Grill step; not asked yet)
