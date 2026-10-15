@@ -24,7 +24,7 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
   - Put secrets in code, logs or commits.
 - The junk-filter fresh-week check uses Claude's blind labels, written **before** seeing judge output. Disagreements go to the user at Pause 1.
 
-## NEXT SESSION START HERE (updated 2026-10-13)
+## NEXT SESSION START HERE (updated 2026-10-15)
 **Phase 2a is complete** (Pause 2 closed by the user on 8 Oct). Pick up with:
 0. ✅ **Useful / Not useful signals: all 7 ACs pass** (11 Oct, 2 real reader presses carry `surface`). Open: D2/Q1 (keep the `read`/`dismiss` codes or rename them).
 1. ✅ **Reminder delivered** (11 Oct 18:05, first session after Sun 08:00).
@@ -77,7 +77,6 @@ Source of truth for *what* to build: `system/phase2a-spec.md`. This file tracks 
      - offline reading (promote or not)
      - the R6 multi-agent trade-off
      - Learn loop spec Q1–Q5
-     - AC5 of the seen-impressions spec
 7. **Phase 4 kickoff in progress (Stage 1, Specify), behind a feature toggle (user: no need to wait for AC5). Start the next session here:**
    - **Read with the user:** `system/roadmap-review-2026-10-11.md` (phone-friendly page: https://claude.ai/artifact/CDoD2AaqP6BbF2goyS7FyK, private). Three decisions for the user: approve the order R1→R2→R3/R4→R5…; promote offline reading?; the multi-agent (R6) trade-off.
    - **Then:** `system/specs/2026-10-12-learn-loop.md`, open questions Q1–Q5 (success measures; Learn sub-options Build + Deep dive (+ Apply at work?); skills in Neon vs a file; ~15 baseline labels; Later resurfacing in v1?). Ask one or two at a time (the user is often on mobile). Lock only when the user says so.

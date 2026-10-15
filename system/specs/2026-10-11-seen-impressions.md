@@ -1,6 +1,6 @@
 # Spec: "Seen" impressions on the Today page
 
-**Status:** SHIPPED, AC5 pending (locked 2026-10-11) · **Size:** Full (a new event type in the events table), but small · **Owner (what/why):** PM (the user) · **Builder (how):** Claude
+**Status:** SHIPPED, all 6 ACs pass (locked 2026-10-11) · **Size:** Full (a new event type in the events table), but small · **Owner (what/why):** PM (the user) · **Builder (how):** Claude
 **Created:** 2026-10-11 · **Locked:** 2026-10-11 · **Shipped:** 2026-10-11 (`4a285b7`, build fix `f1cfecf`)
 **Repos/areas touched:** knowledge-retriever only: `db/migrations/006`, `backend/today_store.py` + route, `frontend/src/components/TodayView/`, `frontend/src/api/client.js`, `system/signal-model.md`.
 **Builds on:** [`2026-10-10-useful-signals.md`](2026-10-10-useful-signals.md) and the data contract [`system/signal-model.md`](../signal-model.md)
@@ -42,7 +42,7 @@
 | AC2 | Seeing the same card again on the same day's page (re-scroll, reload, a second device, a later catch-up) does not add a second `seen`. The same card on another day's page is its own impression, recorded against that page | Backend tests (dedupe per card per page; older-page catch-up); React test (day switch) | ✅ Pass | Backend tests (once per card per page, enforced by the database's unique index; catch-up on an older page; junk only once corrected); React test (day switch) |
 | AC3 | Seen events go out in batches: one request carries several cards, and pending ones are sent when the page is hidden or closed | React test; network check in the browser | ✅ Pass | React tests (batching, keepalive on hide). Live: the two 10 Oct rows share one timestamp (one request); 4 Oct arrived in several batches during the scroll |
 | AC4 | `seen` has no effect on the card's status, the Later list, the metrics strip or undo | Backend tests (state and metrics unchanged) | ✅ Pass | Backend test `test_seen_is_not_a_press` (status, metrics and undo unchanged) |
-| AC5 | Invariant: every card pressed on the Today tab after release also has a `seen` event | SQL check on live data after 1–2 days of real use | ⏳ Pending | Run the invariant query after 1–2 days of real presses |
+| AC5 | Invariant: every card pressed on the Today tab after release also has a `seen` event | SQL check on live data after 1–2 days of real use | ✅ Pass | Live, 15 Oct: 28 presses since release (11 Oct ~23:15), 0 without a matching `seen`; 219 `seen` events across 6 day-pages |
 | AC6 | Nothing visible changes, and the page stays as fast as before. A failed send is silent and never shows an error | Design quick check is not needed (no UI change); browser check that there are no console errors | ✅ Pass | No UI change. The user used the hosted page normally after the deploy. A failed send is caught silently (React test) |
 
 ## 5. Edge cases and failure states
@@ -86,7 +86,7 @@ No new agent: the invariant is a single query, and it will become a check in the
 - [x] T3: Frontend tracker, batching, mark-on-press, and tests (AC1, AC3, AC6)
 - [x] T4: Full suites (backend 37, React 28). Code review round 1: 9 findings, all fixed. Round 2, after the change control: 8 findings; 6 fixed (the database unique index replaces the lock; junk only once corrected; reader presses mark seen; strict date check; skip already-seen cards; dead helper removed), 1 not applicable (keepalive preflight: production API is same-origin `/api`), 1 skipped (minor memory growth in very long sessions). The local browser check was skipped: the local app uses the live database, so verify on the hosted page after release instead (AC1, AC3, AC6)
 - [x] ⏸ T5: User OK → apply 006 → push → the hosted page sends `seen` (AC1, AC3)
-- [ ] T6: After 1–2 days, run the AC5 invariant query (AC5)
+- [x] T6: After 1–2 days, run the AC5 invariant query (AC5)
 
 ---
 
