@@ -54,11 +54,19 @@
 **Diverge complete (15 Oct).**
 
 ## Grill plan (frontier order)
-- **Round 1:** G1 library vs reading history (P7) · G2 how a save unit is chosen (P1, P2)
+- **Round 1 (done 17 Oct):** G1 library vs reading history (P7) · G2 how a save unit is chosen (P1, P2)
+- **Round 1b (follow-ups):** G3 reading history, separate from the library? · G4 several highlights → one note or several; how quotes are told apart
 - **Round 2:** storage, Git notes vs the database (P3; technical, so a recommendation up front) · tags (P5) · the "why" field (P4) · provenance (P6)
 - **Round 3:** duplicates (P8) · how search results show saved parts vs the full source (P9) · is job-ad preparation in v1 or later?
 - **Round 4, Converge:** v1 scope and non-goals, outcome and metric, ACs → spec → lock
 
+
+## Grill round 1 answers (user, 17 Oct)
+- **G1. What goes into the library: explicit Save only.** "Saving every article I marked Useful would be overkill." Save is a deliberate action, possibly a sub-option of Build/Learn; the button arrangement is settled in the parked button discussion after this grill.
+- **G2. Highlight while reading, choose at Save.**
+  - Highlight sentences or paragraphs while reading; you may not know yet what's worth keeping.
+  - The **Save** button sits at the bottom of the article. It asks: **whole article, or only the highlighted paragraphs and sentences?**
+  - **Every saved note links back to the original article.**
 
 ## Parked follow-ups (for the Grill step; not asked yet)
 - P1. Highlighting on a phone: select text in the reader, or tap whole paragraphs?
