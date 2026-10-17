@@ -55,7 +55,7 @@
 
 ## Grill plan (frontier order)
 - **Round 1 (done 17 Oct):** G1 library vs reading history (P7) · G2 how a save unit is chosen (P1, P2)
-- **Round 1b (follow-ups):** G3 reading history, separate from the library? · G4 several highlights → one note or several; how quotes are told apart
+- **Round 1b (done 17 Oct):** G3 reading history, separate from the library? · G4 several highlights → one note or several; how quotes are told apart
 - **Round 2:** storage, Git notes vs the database (P3; technical, so a recommendation up front) · tags (P5) · the "why" field (P4) · provenance (P6)
 - **Round 3:** duplicates (P8) · how search results show saved parts vs the full source (P9) · is job-ad preparation in v1 or later?
 - **Round 4, Converge:** v1 scope and non-goals, outcome and metric, ACs → spec → lock
@@ -70,7 +70,7 @@
 
 ## Grill round 1b answers (user, 17 Oct)
 - **G3. Reading history: searchable on request, kept separate.** "I read a lot, so I won't want everything to come up and dilute the key notes I consciously choose to add." Default search covers saved notes only; reading history (Useful articles) is searched only when asked.
-- **G4. Several highlights become one note per article,** in reading order, with one link back. *The quote-marking part is open: the user's message was cut off.*
+- **G4. Several highlights become one note per article,** in reading order, with one link back. **Quote vs highlight: the user chooses in the flow, when selecting text** (Claude's reading of "choose at that point in time"; the user can correct it). Quotes are labelled as quotes inside the note.
 
 ## Parked follow-ups (for the Grill step; not asked yet)
 - P1. Highlighting on a phone: select text in the reader, or tap whole paragraphs?
