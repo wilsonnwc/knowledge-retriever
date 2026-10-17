@@ -68,6 +68,10 @@
   - The **Save** button sits at the bottom of the article. It asks: **whole article, or only the highlighted paragraphs and sentences?**
   - **Every saved note links back to the original article.**
 
+## Grill round 1b answers (user, 17 Oct)
+- **G3. Reading history: searchable on request, kept separate.** "I read a lot, so I won't want everything to come up and dilute the key notes I consciously choose to add." Default search covers saved notes only; reading history (Useful articles) is searched only when asked.
+- **G4. Several highlights become one note per article,** in reading order, with one link back. *The quote-marking part is open: the user's message was cut off.*
+
 ## Parked follow-ups (for the Grill step; not asked yet)
 - P1. Highlighting on a phone: select text in the reader, or tap whole paragraphs?
 - P2. With nothing highlighted, does "add" save the whole article, or ask?
